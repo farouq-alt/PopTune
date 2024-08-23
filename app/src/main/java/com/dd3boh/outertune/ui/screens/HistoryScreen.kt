@@ -48,9 +48,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.dd3boh.outertune.LocalDatabase
 import com.dd3boh.outertune.LocalDownloadUtil
+import com.dd3boh.outertune.LocalIsInternetConnected
 import com.dd3boh.outertune.LocalPlayerAwareWindowInsets
 import com.dd3boh.outertune.LocalPlayerConnection
-import com.dd3boh.outertune.LocalIsInternetConnected
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.HistorySource
 import com.dd3boh.outertune.constants.InnerTubeCookieKey
@@ -216,10 +216,7 @@ fun HistoryScreen(
                                             } else {
                                                 playerConnection.playQueue(
                                                     if (isNetworkConnected){
-                                                        YouTubeQueue(
-                                                            endpoint = WatchEndpoint(videoId = song.id),
-                                                            preloadItem = song.toMediaMetadata()
-                                                        )
+                                                        YouTubeQueue.radio(song.toMediaMetadata())
                                                     }
                                                     else {
                                                         ListQueue(
