@@ -247,7 +247,8 @@ fun OnlineSearchResult(
                 item {
                     EmptyPlaceholder(
                         icon = Icons.Rounded.Search,
-                        text = stringResource(R.string.no_results_found)
+                        text = stringResource(R.string.no_results_found),
+                        modifier = Modifier.animateItem()
                     )
                 }
             }
@@ -272,7 +273,8 @@ fun OnlineSearchResult(
                 item {
                     EmptyPlaceholder(
                         icon = Icons.Rounded.Search,
-                        text = stringResource(R.string.no_results_found)
+                        text = stringResource(R.string.no_results_found),
+                        modifier = Modifier.animateItem()
                     )
                 }
             }
