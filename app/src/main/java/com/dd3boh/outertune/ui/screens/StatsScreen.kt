@@ -96,7 +96,7 @@ fun StatsScreen(
         item(key = "mostPlayedSongs") {
             NavigationTitle(
                 title = stringResource(R.string.most_played_songs),
-                modifier = Modifier.animateItemPlacement()
+                modifier = Modifier.animateItem()
             )
         }
 
@@ -155,7 +155,7 @@ fun StatsScreen(
                                 }
                             }
                         )
-                        .animateItemPlacement()
+                        .animateItem()
                 )
             }
             SwipeToQueueBox(
@@ -169,11 +169,11 @@ fun StatsScreen(
         item(key = "mostPlayedArtists") {
             NavigationTitle(
                 title = stringResource(R.string.most_played_artists),
-                modifier = Modifier.animateItemPlacement()
+                modifier = Modifier.animateItem()
             )
 
             LazyRow(
-                modifier = Modifier.animateItemPlacement()
+                modifier = Modifier.animateItem()
             ) {
                 items(
                     items = mostPlayedArtists,
@@ -197,7 +197,7 @@ fun StatsScreen(
                                     }
                                 }
                             )
-                            .animateItemPlacement()
+                            .animateItem()
                     )
                 }
             }
@@ -207,11 +207,11 @@ fun StatsScreen(
             item(key = "mostPlayedAlbums") {
                 NavigationTitle(
                     title = stringResource(R.string.most_played_albums),
-                    modifier = Modifier.animateItemPlacement()
+                    modifier = Modifier.animateItem()
                 )
 
                 LazyRow(
-                    modifier = Modifier.animateItemPlacement()
+                    modifier = Modifier.animateItem()
                 ) {
                     items(
                         items = mostPlayedAlbums,
@@ -238,7 +238,7 @@ fun StatsScreen(
                                         }
                                     }
                                 )
-                                .animateItemPlacement()
+                                .animateItem()
                         )
                     }
                 }

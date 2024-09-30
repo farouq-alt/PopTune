@@ -316,7 +316,7 @@ fun LibrarySongsScreen(
                                         }
                                     }
                                 )
-                                .animateItemPlacement()
+                                .animateItem()
                         )
                     },
                     snackbarHostState = snackbarHostState

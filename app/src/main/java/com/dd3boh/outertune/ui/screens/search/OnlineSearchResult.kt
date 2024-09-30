@@ -211,7 +211,7 @@ fun OnlineSearchResult(
                             }
                         }
                     )
-                    .animateItemPlacement()
+                    .animateItem()
             )
         }
 
