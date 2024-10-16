@@ -14,17 +14,60 @@ import com.dd3boh.outertune.constants.PlaylistSortType
 import com.dd3boh.outertune.db.entities.Playlist
 import com.dd3boh.outertune.db.entities.PlaylistEntity
 import com.dd3boh.outertune.db.entities.PlaylistSong
+import com.dd3boh.outertune.db.entities.PlaylistSongMap
 import com.dd3boh.outertune.extensions.reversed
 import com.zionhuang.innertube.models.PlaylistItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
+
+/*
+ * Logic related to playlists entities and their mapping
+ */
+
 @Dao
 interface PlaylistsDao {
 
     // region Gets
-    @Query("SELECT *, (SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = playlist.id) AS songCount FROM playlist WHERE id = :playlistId")
+    @Query("""
+        SELECT 
+            p.*, 
+            COUNT(psm.playlistId) AS songCount,
+            SUM(CASE WHEN s.dateDownload IS NOT NULL THEN 1 ELSE 0 END) AS downloadCount
+        FROM playlist p
+            LEFT JOIN playlist_song_map psm ON p.id = psm.playlistId
+            LEFT JOIN song s ON psm.songId = s.id
+        WHERE p.id = :playlistId
+        GROUP BY p.id
+    """)
     fun playlist(playlistId: String): Flow<Playlist?>
+
+    @Query("""
+        SELECT 
+            p.*, 
+            COUNT(psm.playlistId) AS songCount,
+            SUM(CASE WHEN s.dateDownload IS NOT NULL THEN 1 ELSE 0 END) AS downloadCount
+        FROM playlist p
+            LEFT JOIN playlist_song_map psm ON p.id = psm.playlistId
+            LEFT JOIN song s ON psm.songId = s.id
+        WHERE p.browseId = :browseId
+        GROUP BY p.id
+    """)
+    fun playlistByBrowseId(browseId: String): Flow<Playlist?>
+
+    @Query("""
+        SELECT 
+            p.*, 
+            COUNT(psm.playlistId) AS songCount,
+            SUM(CASE WHEN s.dateDownload IS NOT NULL THEN 1 ELSE 0 END) AS downloadCount
+        FROM playlist p
+            LEFT JOIN playlist_song_map psm ON p.id = psm.playlistId
+            LEFT JOIN song s ON psm.songId = s.id
+        WHERE name LIKE '%' || :query || '%'
+        GROUP BY p.id
+        LIMIT :previewSize
+    """)
+    fun searchPlaylists(query: String, previewSize: Int = Int.MAX_VALUE): Flow<List<Playlist>>
 
     @Query("SELECT * FROM playlist_song_map WHERE playlistId = :playlistId ORDER BY position")
     fun playlistSongs(playlistId: String): Flow<List<PlaylistSong>>
@@ -32,8 +75,11 @@ interface PlaylistsDao {
     @Query("SELECT songId from playlist_song_map WHERE playlistId = :playlistId AND songId IN (:songIds)")
     fun playlistDuplicates(playlistId: String, songIds: List<String>,): List<String>
 
-    @Query("SELECT *, (SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = playlist.id) AS songCount FROM playlist WHERE browseId = :browseId")
-    fun playlistByBrowseId(browseId: String): Flow<Playlist?>
+    @Query("SELECT * FROM playlist_song_map WHERE songId = :songId")
+    fun songMapsToPlaylist(songId: String): List<PlaylistSongMap>
+
+    @Query("SELECT * FROM playlist_song_map WHERE playlistId = :playlistId AND position >= :from ORDER BY position")
+    fun songMapsToPlaylist(playlistId: String, from: Int): List<PlaylistSongMap>
 
     @RawQuery(observedEntities = [PlaylistEntity::class])
     fun _getPlaylists(query: SupportSQLiteQuery): Flow<List<Playlist>>
@@ -41,9 +87,13 @@ interface PlaylistsDao {
     // region Playlist Sort
     private fun queryPlaylists(orderBy: String): SimpleSQLiteQuery {
         return SimpleSQLiteQuery("""
-            SELECT p.*, COUNT(psm.playlistId) AS songCount
+            SELECT 
+                p.*, 
+                COUNT(psm.playlistId) AS songCount,
+                SUM(CASE WHEN s.dateDownload IS NOT NULL THEN 1 ELSE 0 END) AS downloadCount
             FROM playlist p
                 LEFT JOIN playlist_song_map psm ON p.id = psm.playlistId
+                LEFT JOIN song s ON psm.songId = s.id
             WHERE p.bookmarkedAt IS NOT NULL OR p.isLocal = 1
             GROUP BY p.id
             ORDER BY $orderBy
@@ -66,12 +116,16 @@ interface PlaylistsDao {
     // region Playlist Sort with Downloads Sort
     private fun queryPlaylistsWithDownloads(orderBy: String): SimpleSQLiteQuery {
         return SimpleSQLiteQuery("""
-            SELECT p.*, COUNT(psm.playlistId) AS songCount
+            SELECT 
+                p.*, 
+                COUNT(psm.playlistId) AS songCount,
+                SUM(CASE WHEN s.dateDownload IS NOT NULL THEN 1 ELSE 0 END) AS downloadCount
             FROM playlist p
                 LEFT JOIN playlist_song_map psm ON p.id = psm.playlistId
-                INNER JOIN song s ON psm.songId = s.id and s.dateDownload IS NOT NULL
+                LEFT JOIN song s ON psm.songId = s.id
             WHERE p.bookmarkedAt IS NOT NULL OR p.isLocal = 1
             GROUP BY p.id
+            HAVING SUM(CASE WHEN s.dateDownload IS NOT NULL THEN 1 ELSE 0 END) > 0
             ORDER BY $orderBy
         """)
     }
@@ -92,11 +146,17 @@ interface PlaylistsDao {
     // region Inserts
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(playlist: PlaylistEntity)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insert(map: PlaylistSongMap)
     // endregion
 
     // region Updates
     @Update
     fun update(playlist: PlaylistEntity)
+
+    @Update
+    fun update(map: PlaylistSongMap)
 
     @Update
     fun update(playlistEntity: PlaylistEntity, playlistItem: PlaylistItem) {
@@ -110,6 +170,20 @@ interface PlaylistsDao {
             shuffleEndpointParams = playlistItem.shuffleEndpoint?.params,
             radioEndpointParams = playlistItem.radioEndpoint?.params
         ))
+    }
+
+    @Transaction
+    fun addSongToPlaylist(playlist: Playlist, songIds: List<String>) {
+        var position = playlist.songCount
+        songIds.forEach { id ->
+            insert(
+                PlaylistSongMap(
+                    songId = id,
+                    playlistId = playlist.id,
+                    position = position++
+                )
+            )
+        }
     }
 
     @Transaction
@@ -137,5 +211,8 @@ interface PlaylistsDao {
 
     @Query("DELETE FROM playlist_song_map WHERE playlistId = :playlistId")
     fun clearPlaylist(playlistId: String)
+
+    @Delete
+    fun delete(playlistSongMap: PlaylistSongMap)
     // endregion
 }

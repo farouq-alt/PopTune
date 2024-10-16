@@ -7,7 +7,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RawQuery
 import androidx.room.Transaction
-import androidx.room.Update
 import androidx.room.Upsert
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.dd3boh.outertune.db.daos.AlbumsDao
@@ -15,18 +14,14 @@ import com.dd3boh.outertune.db.daos.ArtistsDao
 import com.dd3boh.outertune.db.daos.PlaylistsDao
 import com.dd3boh.outertune.db.daos.QueueDao
 import com.dd3boh.outertune.db.daos.SongsDao
-import com.dd3boh.outertune.db.entities.Album
 import com.dd3boh.outertune.db.entities.AlbumArtistMap
 import com.dd3boh.outertune.db.entities.AlbumEntity
-import com.dd3boh.outertune.db.entities.Artist
 import com.dd3boh.outertune.db.entities.ArtistEntity
 import com.dd3boh.outertune.db.entities.Event
 import com.dd3boh.outertune.db.entities.EventWithSong
 import com.dd3boh.outertune.db.entities.FormatEntity
 import com.dd3boh.outertune.db.entities.GenreEntity
 import com.dd3boh.outertune.db.entities.LyricsEntity
-import com.dd3boh.outertune.db.entities.Playlist
-import com.dd3boh.outertune.db.entities.PlaylistSongMap
 import com.dd3boh.outertune.db.entities.QueueEntity
 import com.dd3boh.outertune.db.entities.QueueSongMap
 import com.dd3boh.outertune.db.entities.RelatedSongMap
@@ -40,7 +35,6 @@ import com.dd3boh.outertune.extensions.toSQLiteQuery
 import com.dd3boh.outertune.models.MediaMetadata
 import com.dd3boh.outertune.models.MultiQueueObject
 import com.dd3boh.outertune.models.toMediaMetadata
-import com.zionhuang.innertube.models.AlbumItem
 import com.zionhuang.innertube.models.SongItem
 import com.zionhuang.innertube.pages.AlbumPage
 import kotlinx.coroutines.flow.Flow
@@ -48,7 +42,6 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface DatabaseDao : SongsDao, AlbumsDao, ArtistsDao, PlaylistsDao, QueueDao {
 
-    @Transaction
     @Query("""
         SELECT song.*
         FROM (SELECT *, COUNT(1) AS referredCount
@@ -85,51 +78,6 @@ interface DatabaseDao : SongsDao, AlbumsDao, ArtistsDao, PlaylistsDao, QueueDao 
     @Query("SELECT * FROM lyrics WHERE id = :id")
     fun lyrics(id: String?): Flow<LyricsEntity?>
 
-    @Transaction
-    fun addSongToPlaylist(playlist: Playlist, songIds: List<String>) {
-        var position = playlist.songCount
-        songIds.forEach { id ->
-            insert(
-                PlaylistSongMap(
-                    songId = id,
-                    playlistId = playlist.id,
-                    position = position++
-                )
-            )
-        }
-    }
-
-    // region Search
-    @Transaction
-    @Query("SELECT * FROM song WHERE title LIKE '%' || :query || '%' AND inLibrary IS NOT NULL LIMIT :previewSize")
-    fun searchSongs(query: String, previewSize: Int = Int.MAX_VALUE): Flow<List<Song>>
-
-    @Transaction
-    @Query("SELECT * FROM song WHERE title LIKE '%' || :query || '%' AND isLocal = 1 LIMIT :previewSize")
-    fun searchSongsAllLocal(query: String, previewSize: Int = Int.MAX_VALUE): Flow<List<Song>>
-
-    @Transaction
-    @Query("SELECT *, (SELECT COUNT(1) FROM song_artist_map JOIN song ON song_artist_map.songId = song.id WHERE artistId = artist.id AND song.inLibrary IS NOT NULL) AS songCount FROM artist WHERE name LIKE '%' || :query || '%' AND songCount > 0 LIMIT :previewSize")
-    fun searchArtists(query: String, previewSize: Int = Int.MAX_VALUE): Flow<List<Artist>>
-
-    @Transaction
-    @Query("SELECT song.* FROM song_artist_map JOIN song ON song_artist_map.songId = song.id WHERE song_artist_map.artistId IN (SELECT id FROM artist WHERE name LIKE '%' || :query || '%') LIMIT :previewSize")
-    fun searchArtistSongs(query: String, previewSize: Int = Int.MAX_VALUE): Flow<List<Song>>
-
-    @Transaction
-    @Query("SELECT * FROM artist WHERE name LIKE '%' || :query || '%' LIMIT :previewSize")
-    fun fuzzySearchArtists(query: String, previewSize: Int = Int.MAX_VALUE): Flow<List<ArtistEntity>>
-
-    @Transaction
-    @Query("SELECT * FROM album WHERE title LIKE '%' || :query || '%' AND EXISTS(SELECT * FROM song WHERE song.albumId = album.id AND song.inLibrary IS NOT NULL) LIMIT :previewSize")
-    fun searchAlbums(query: String, previewSize: Int = Int.MAX_VALUE): Flow<List<Album>>
-
-    @Transaction
-    @Query("SELECT *, (SELECT COUNT(*) FROM playlist_song_map WHERE playlistId = playlist.id) AS songCount FROM playlist WHERE name LIKE '%' || :query || '%' LIMIT :previewSize")
-    fun searchPlaylists(query: String, previewSize: Int = Int.MAX_VALUE): Flow<List<Playlist>>
-    // endregion
-
-    @Transaction
     @Query("SELECT * FROM event ORDER BY rowId DESC")
     fun events(): Flow<List<EventWithSong>>
 
@@ -148,7 +96,6 @@ interface DatabaseDao : SongsDao, AlbumsDao, ArtistsDao, PlaylistsDao, QueueDao 
     @Query("SELECT * FROM genre WHERE title = :name")
     fun genreByName(name: String): GenreEntity?
 
-    @Transaction
     @Query("SELECT * FROM genre WHERE title LIKE '%' || :query || '%' LIMIT :previewSize")
     fun genreByAproxName(query: String, previewSize: Int = Int.MAX_VALUE): Flow<List<GenreEntity>>
 
@@ -156,19 +103,7 @@ interface DatabaseDao : SongsDao, AlbumsDao, ArtistsDao, PlaylistsDao, QueueDao 
     fun insert(genre: GenreEntity)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(map: SongArtistMap)
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(map: SongAlbumMap)
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(map: AlbumArtistMap)
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(map: SongGenreMap)
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(map: PlaylistSongMap)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(searchHistory: SearchHistory)
@@ -259,40 +194,6 @@ interface DatabaseDao : SongsDao, AlbumsDao, ArtistsDao, PlaylistsDao, QueueDao 
     }
 
     @Transaction
-    fun insert(albumItem: AlbumItem) {
-        if (insert(AlbumEntity(
-                id = albumItem.browseId,
-                playlistId = albumItem.playlistId,
-                title = albumItem.title,
-                year = albumItem.year,
-                thumbnailUrl = albumItem.thumbnail,
-                songCount = 0,
-                duration = 0
-            )) == -1L
-        ) return
-        albumItem.artists
-            ?.map { artist ->
-                ArtistEntity(
-                    id = artist.id ?: artistByName(artist.name)?.id ?: ArtistEntity.generateArtistId(),
-                    name = artist.name
-                )
-            }
-            ?.onEach(::insert)
-            ?.mapIndexed { index, artist ->
-                AlbumArtistMap(
-                    albumId = albumItem.browseId,
-                    artistId = artist.id,
-                    order = index
-                )
-            }
-            ?.forEach(::insert)
-    }
-
-    @Update
-    fun update(map: PlaylistSongMap)
-
-
-    @Transaction
     fun update(album: AlbumEntity, albumPage: AlbumPage) {
         update(
             album.copy(
@@ -333,25 +234,11 @@ interface DatabaseDao : SongsDao, AlbumsDao, ArtistsDao, PlaylistsDao, QueueDao 
             ?.forEach(::insert)
     }
 
-    @Transaction
-    @Query("UPDATE song_artist_map SET artistId = :newId WHERE artistId = :oldId")
-    fun updateSongArtistMap(oldId: String, newId: String)
-
-    @Transaction
-    @Query("UPDATE album_artist_map SET artistId = :newId WHERE artistId = :oldId")
-    fun updateAlbumArtistMap(oldId: String, newId: String)
-
-    @Upsert
-    fun upsert(map: SongAlbumMap)
-
     @Upsert
     fun upsert(lyrics: LyricsEntity)
 
     @Upsert
     fun upsert(format: FormatEntity)
-
-    @Delete
-    fun delete(playlistSongMap: PlaylistSongMap)
 
     @Delete
     fun delete(lyrics: LyricsEntity)
@@ -361,10 +248,6 @@ interface DatabaseDao : SongsDao, AlbumsDao, ArtistsDao, PlaylistsDao, QueueDao 
 
     @Delete
     fun delete(event: Event)
-
-    @Transaction
-    @Query("DELETE FROM song_artist_map WHERE songId = :songID")
-    fun unlinkSongArtists(songID: String)
 
     @Transaction
     @Query("DELETE FROM genre WHERE isLocal = 1")
@@ -377,12 +260,6 @@ interface DatabaseDao : SongsDao, AlbumsDao, ArtistsDao, PlaylistsDao, QueueDao 
         nukeLocalAlbums()
         nukeLocalGenre()
     }
-
-    @Query("SELECT * FROM playlist_song_map WHERE songId = :songId")
-    fun playlistSongMaps(songId: String): List<PlaylistSongMap>
-
-    @Query("SELECT * FROM playlist_song_map WHERE playlistId = :playlistId AND position >= :from ORDER BY position")
-    fun playlistSongMaps(playlistId: String, from: Int): List<PlaylistSongMap>
 
     @RawQuery
     fun raw(supportSQLiteQuery: SupportSQLiteQuery): Int
