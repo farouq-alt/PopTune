@@ -849,6 +849,7 @@ class MainActivity : ComponentActivity() {
                                                     )
                                                 }
                                             }
+                                            .background(MaterialTheme.colorScheme.surfaceVariant)
                                     ) {
                                         navigationItems.fastForEach { screen ->
                                             NavigationBarItem(
