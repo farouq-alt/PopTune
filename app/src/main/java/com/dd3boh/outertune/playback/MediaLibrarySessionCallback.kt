@@ -8,7 +8,6 @@ import androidx.annotation.DrawableRes
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
-import androidx.media3.exoplayer.offline.Download
 import androidx.media3.session.LibraryResult
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaLibraryService.MediaLibrarySession
@@ -33,7 +32,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.guava.future
 import kotlinx.coroutines.plus
@@ -114,11 +112,11 @@ class MediaLibrarySessionCallback @Inject constructor(
                 )
 
                 MusicService.SONG -> database.songsByCreateDateAsc().first().map { it.toMediaItem(parentId) }
-                MusicService.ARTIST -> database.artistsByCreateDateAsc().first().map { artist ->
+                MusicService.ARTIST -> database.artistsInLibraryAsc().first().map { artist ->
                     browsableMediaItem("${MusicService.ARTIST}/${artist.id}", artist.artist.name, context.resources.getQuantityString(R.plurals.n_song, artist.songCount, artist.songCount), artist.artist.thumbnailUrl?.toUri(), MediaMetadata.MEDIA_TYPE_ARTIST)
                 }
 
-                MusicService.ALBUM -> database.albumsByCreateDateAsc().first().map { album ->
+                MusicService.ALBUM -> database.albumsInLibraryAsc().first().map { album ->
                     browsableMediaItem("${MusicService.ALBUM}/${album.id}", album.album.title, album.artists.joinToString { it.name }, album.album.thumbnailUrl?.toUri(), MediaMetadata.MEDIA_TYPE_ALBUM)
                 }
 
@@ -128,7 +126,7 @@ class MediaLibrarySessionCallback @Inject constructor(
                     listOf(
                         browsableMediaItem("${MusicService.PLAYLIST}/${PlaylistEntity.LIKED_PLAYLIST_ID}", context.getString(R.string.liked_songs), context.resources.getQuantityString(R.plurals.n_song, likedSongCount, likedSongCount), drawableUri(R.drawable.favorite), MediaMetadata.MEDIA_TYPE_PLAYLIST),
                         browsableMediaItem("${MusicService.PLAYLIST}/${PlaylistEntity.DOWNLOADED_PLAYLIST_ID}", context.getString(R.string.downloaded_songs), context.resources.getQuantityString(R.plurals.n_song, downloadedSongCount, downloadedSongCount), drawableUri(R.drawable.download), MediaMetadata.MEDIA_TYPE_PLAYLIST)
-                    ) + database.playlistsByCreateDateAsc().first().map { playlist ->
+                    ) + database.playlistInLibraryAsc().first().map { playlist ->
                         browsableMediaItem("${MusicService.PLAYLIST}/${playlist.id}", playlist.playlist.name, context.resources.getQuantityString(R.plurals.n_song, playlist.songCount, playlist.songCount), playlist.thumbnails.firstOrNull()?.toUri(), MediaMetadata.MEDIA_TYPE_PLAYLIST)
                     }
                 }
@@ -147,22 +145,7 @@ class MediaLibrarySessionCallback @Inject constructor(
                     parentId.startsWith("${MusicService.PLAYLIST}/") ->
                         when (val playlistId = parentId.removePrefix("${MusicService.PLAYLIST}/")) {
                             PlaylistEntity.LIKED_PLAYLIST_ID -> database.likedSongs(SongSortType.CREATE_DATE, true)
-                            PlaylistEntity.DOWNLOADED_PLAYLIST_ID -> {
-                                val downloads = downloadUtil.downloads.value
-                                database.allSongs()
-                                    .flowOn(Dispatchers.IO)
-                                    .map { songs ->
-                                        songs.filter {
-                                            downloads[it.id]?.state == Download.STATE_COMPLETED
-                                        }
-                                    }
-                                    .map { songs ->
-                                        songs.map { it to downloads[it.id] }
-                                            .sortedBy { it.second?.updateTimeMs ?: 0L }
-                                            .map { it.first }
-                                    }
-                            }
-
+                            PlaylistEntity.DOWNLOADED_PLAYLIST_ID -> database.downloadNoLocalSongs()
                             else -> database.playlistSongs(playlistId).map { list ->
                                 list.map { it.song }
                             }
@@ -236,22 +219,7 @@ class MediaLibrarySessionCallback @Inject constructor(
                 val playlistId = path.getOrNull(1) ?: return@future defaultResult
                 val songs = when (playlistId) {
                     PlaylistEntity.LIKED_PLAYLIST_ID -> database.likedSongs(SongSortType.CREATE_DATE, descending = true)
-                    PlaylistEntity.DOWNLOADED_PLAYLIST_ID -> {
-                        val downloads = downloadUtil.downloads.value
-                        database.allSongs()
-                            .flowOn(Dispatchers.IO)
-                            .map { songs ->
-                                songs.filter {
-                                    downloads[it.id]?.state == Download.STATE_COMPLETED
-                                }
-                            }
-                            .map { songs ->
-                                songs.map { it to downloads[it.id] }
-                                    .sortedBy { it.second?.updateTimeMs ?: 0L }
-                                    .map { it.first }
-                            }
-                    }
-
+                    PlaylistEntity.DOWNLOADED_PLAYLIST_ID -> database.downloadNoLocalSongs()
                     else -> database.playlistSongs(playlistId).map { list ->
                         list.map { it.song }
                     }

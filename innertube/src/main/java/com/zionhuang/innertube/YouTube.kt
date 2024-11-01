@@ -19,7 +19,6 @@ import com.zionhuang.innertube.models.YouTubeClient.Companion.WEB
 import com.zionhuang.innertube.models.YouTubeClient.Companion.WEB_REMIX
 import com.zionhuang.innertube.models.YouTubeLocale
 import com.zionhuang.innertube.models.getContinuation
-import com.zionhuang.innertube.models.oddElements
 import com.zionhuang.innertube.models.response.AccountMenuResponse
 import com.zionhuang.innertube.models.response.BrowseResponse
 import com.zionhuang.innertube.models.response.CreatePlaylistResponse
@@ -30,7 +29,6 @@ import com.zionhuang.innertube.models.response.NextResponse
 import com.zionhuang.innertube.models.response.PipedResponse
 import com.zionhuang.innertube.models.response.PlayerResponse
 import com.zionhuang.innertube.models.response.SearchResponse
-import com.zionhuang.innertube.models.splitBySeparator
 import com.zionhuang.innertube.pages.AlbumPage
 import com.zionhuang.innertube.pages.ArtistItemsContinuationPage
 import com.zionhuang.innertube.pages.ArtistItemsPage
@@ -52,6 +50,7 @@ import com.zionhuang.innertube.pages.SearchResult
 import com.zionhuang.innertube.pages.SearchSuggestionPage
 import com.zionhuang.innertube.pages.SearchSummary
 import com.zionhuang.innertube.pages.SearchSummaryPage
+import com.zionhuang.innertube.utils.isPrivateId
 import io.ktor.client.call.body
 import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.json.Json
@@ -160,58 +159,18 @@ object YouTube {
     }
 
     suspend fun album(browseId: String): Result<AlbumPage> = runCatching {
-        val response = innerTube.browse(WEB_REMIX, browseId).body<BrowseResponse>()
+        val response = innerTube.browse(WEB_REMIX, browseId, setLogin = isPrivateId(browseId)).body<BrowseResponse>()
 
-        if (response.header != null) albumOld(browseId, response)
-        else albumNew(browseId, response)
-    }
-
-    private suspend fun albumOld(browseId: String, response: BrowseResponse): AlbumPage {
-        val playlistId = response.microformat?.microformatDataRenderer?.urlCanonical?.substringAfterLast('=')!!
-
-        val artists = response.header?.musicDetailHeaderRenderer?.subtitle?.runs?.splitBySeparator()?.getOrNull(1)?.oddElements()?.map {
-            Artist(
-                name = it.text,
-                id = it.navigationEndpoint?.browseEndpoint?.browseId
-            )
-        }!!
-
-        return AlbumPage(
-            album = AlbumItem(
-                browseId = browseId,
-                playlistId = playlistId,
-                title = response.header.musicDetailHeaderRenderer.title.runs?.firstOrNull()?.text!!,
-                artists = artists,
-                year = response.header.musicDetailHeaderRenderer.subtitle.runs.lastOrNull()?.text?.toIntOrNull(),
-                thumbnail = response.header.musicDetailHeaderRenderer.thumbnail.croppedSquareThumbnailRenderer?.getThumbnailUrl()!!
-            ),
-            songs = albumSongs(playlistId).getOrNull() ?: emptyList()
+        val album = AlbumItem(
+            browseId = browseId,
+            playlistId = AlbumPage.getPlaylistId(response)!!,
+            title = AlbumPage.getTitle(response)!!,
+            artists = AlbumPage.getArtists(response),
+            year = AlbumPage.getYear(response),
+            thumbnail = AlbumPage.getThumbnail(response)!!
         )
-    }
-
-    private suspend fun albumNew(browseId: String, response: BrowseResponse): AlbumPage {
-        val header = response.contents?.twoColumnBrowseResultsRenderer?.tabs?.firstOrNull()?.tabRenderer
-            ?.content?.sectionListRenderer?.contents?.firstOrNull()?.musicResponsiveHeaderRenderer
-        val playlistId = response.microformat?.microformatDataRenderer?.urlCanonical?.substringAfterLast('=')!!
-
-        val artists = header?.straplineTextOne?.runs?.oddElements()?.map {
-            Artist(
-                name = it.text,
-                id = it.navigationEndpoint?.browseEndpoint?.browseId
-            )
-        }!!
-
-        return AlbumPage(
-            album = AlbumItem(
-                browseId = browseId,
-                playlistId = playlistId,
-                title = header.title.runs?.firstOrNull()?.text!!,
-                artists = artists,
-                year = header.subtitle.runs?.lastOrNull()?.text?.toIntOrNull(),
-                thumbnail = response.background?.musicThumbnailRenderer?.getThumbnailUrl()!!
-            ),
-            songs = albumSongs(playlistId).getOrNull() ?: emptyList()
-        )
+        val songs = AlbumPage.getSongs(response, album)
+        AlbumPage(album, songs)
     }
 
     suspend fun albumSongs(playlistId: String): Result<List<SongItem>> = runCatching {
@@ -224,9 +183,10 @@ object YouTube {
             response.contents?.twoColumnBrowseResultsRenderer?.secondaryContents?.sectionListRenderer
                 ?.contents?.firstOrNull()?.musicPlaylistShelfRenderer?.contents
 
-            contents?.mapNotNull {
-                    AlbumPage.fromMusicResponsiveListItemRenderer(it.musicResponsiveListItemRenderer)
-                }!!
+        val songs = contents?.mapNotNull {
+            AlbumPage.getSong(it.musicResponsiveListItemRenderer)
+        }
+        songs!!
     }
 
     suspend fun artist(browseId: String): Result<ArtistPage> = runCatching {
@@ -465,15 +425,21 @@ object YouTube {
         )
     }
 
-    suspend fun library(browseId: String) = runCatching {
+    suspend fun library(browseId: String, tabIndex: Int = 0) = runCatching {
         val response = innerTube.browse(
             client = WEB_REMIX,
             browseId = browseId,
             setLogin = true
         ).body<BrowseResponse>()
 
-        val contents = response.contents?.singleColumnBrowseResultsRenderer?.tabs?.firstOrNull()?.
-        tabRenderer?.content?.sectionListRenderer?.contents?.firstOrNull()
+        val tabs = response.contents?.singleColumnBrowseResultsRenderer?.tabs
+
+        val contents = if (tabs != null && tabs.size >= tabIndex) {
+                tabs[tabIndex].tabRenderer.content?.sectionListRenderer?.contents?.firstOrNull()
+            }
+            else {
+                null
+            }
 
         when {
             contents?.gridRenderer != null -> {
