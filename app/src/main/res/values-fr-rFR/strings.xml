@@ -21,7 +21,7 @@
     <string name="quick_picks_empty">Écoutez quelques titres pour générer vos sélections rapides</string>
     <string name="new_release_albums">Nouveautés</string>
     <!-- History -->
-    <string name="today">Aujourd\’hui</string>
+    <string name="today">Aujourd\'hui</string>
     <string name="yesterday">Hier</string>
     <string name="this_week">Cette semaine</string>
     <string name="last_week">Semaine dernière</string>
@@ -63,7 +63,9 @@
     <string name="start_radio">Démarrer la radio</string>
     <string name="play">Jouer</string>
     <string name="play_next">Jouer à la suite</string>
-    <string name="add_to_queue">Ajouter à la file d\’attente</string>
+    <string name="add_to_queue">Ajouter à la file d\'attente</string>
+    <string name="add_to_library">Ajouter à la bibliothèque</string>
+    <string name="remove_from_library">Supprimer de la bibliothèque</string>
     <string name="download">Télécharger</string>
     <string name="downloading">Téléchargement</string>
     <string name="remove_download">Supprimer le téléchargement</string>
@@ -124,11 +126,12 @@
         <item quantity="one">%d artiste</item>
         <item quantity="other">%d artistes</item>
         <item quantity="many">%d artistes</item>
+        <item quantity="other">%d artistes</item>
     </plurals>
     <plurals name="n_album">
         <item quantity="one">%d album</item>
-        <item quantity="other">%d albums</item>
         <item quantity="many">%d albums</item>
+        <item quantity="other">%d albums</item>
     </plurals>
     <plurals name="n_playlist">
         <item quantity="one">%d playlist</item>
@@ -207,7 +210,7 @@
     <string name="restart_to_take_effect">Redémarrer pour prendre effet</string>
     <string name="player_and_audio">Lecteur et Audio</string>
     <string name="audio_quality">Qualité audio</string>
-    <string name="audio_quality_auto">Auto</string>
+    <string name="audio_quality_auto">Automatique</string>
     <string name="audio_quality_high">Élevée</string>
     <string name="audio_quality_low">Faible</string>
     <string name="persistent_queue">File d\’attente persistante</string>
@@ -241,8 +244,8 @@
     <string name="backup_create_success">Sauvegarde créée avec succès</string>
     <string name="backup_create_failed">Impossible de créer la sauvegarde</string>
     <string name="restore_failed">Échec de la restauration de la sauvegarde</string>
-    <string name="about">À propos de</string>
-    <string name="app_version">Version de l\’application</string>
+    <string name="about">À propos</string>
+    <string name="app_version">Version de l\'application</string>
     <string name="new_version_available">Nouvelle version disponible</string>
     <string name="not_logged_in">Non connecté</string>
     <string name="remove_from_playlist">Supprimer de la playlist</string>
@@ -253,4 +256,7 @@
     <string name="duplicates_description_multiple">%d titres sont déjà dans votre playlist</string>
     <string name="enable_lrclib">Activer le fournisseur de paroles LrcLib</string>
     <string name="delete_playlist_confirm">Souhaitez-vous vraiment supprimer la playlist « %s » ?</string>
+    <string name="player_text_alignment">Alignement du texte du lecteur</string>
+    <string name="sided">Sur le côté</string>
+    <string name="hide_explicit">Masquer le contenu explicite</string>
 </resources>
