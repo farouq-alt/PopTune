@@ -65,7 +65,7 @@ body:
     attributes:
       label: Logs
       description: |
-        Please use `adb logcat` or other ways to provide logs. This field is strongly recommended to be filled. Without this information, it's likely that the developer is unable to take any meaningful action or provide further assistance.
+        Please use `adb logcat` or other ways to provide logs. This field is strongly recommended to be filled. Without this information, we likely cannot take any meaningful action or provide further assistance.
     validations:
       required: true
 
@@ -74,7 +74,7 @@ body:
     attributes:
       label: OuterTune version
       description: |
-        You can find your OuterTune version in **Settings**.
+        You can find your OuterTune version in **Settings --> About**.
       placeholder: |
         Example: "0.5.3"
     validations:
@@ -83,11 +83,11 @@ body:
   - type: input
     id: android-version
     attributes:
-      label: Android version
+      label: Device & Android version
       description: |
         You can find this somewhere in your Android settings.
       placeholder: |
-        Example: "Android 12"
+        Example: "Asus Zenfone 8, Android 12"
     validations:
       required: true
 
