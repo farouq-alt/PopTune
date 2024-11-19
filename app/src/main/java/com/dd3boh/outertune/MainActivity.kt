@@ -361,6 +361,8 @@ class MainActivity : ComponentActivity() {
             val (lookupYtmArtists) = rememberPreference(LookupYtmArtistsKey, defaultValue = true)
             val (autoScan) = rememberPreference(AutomaticScannerKey, defaultValue = true)
             LaunchedEffect(Unit) {
+                downloadUtil.resumeDownloadsOnStart(this@MainActivity)
+
                 CoroutineScope(Dispatchers.IO).launch {
                     // Check if the permissions for local media access
                     if (autoScan && checkSelfPermission(mediaPermissionLevel) == PackageManager.PERMISSION_GRANTED) {
@@ -1173,8 +1175,6 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-
-        downloadUtil.resumeDownloadsOnStart(this@MainActivity)
     }
 
     private fun setSystemBarAppearance(isDark: Boolean) {
