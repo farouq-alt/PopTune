@@ -75,9 +75,6 @@ interface ArtistsDao {
     @Query("SELECT * FROM artist WHERE isLocal = 1")
     fun allLocalArtists(): Flow<List<ArtistEntity>>
 
-    @Query("SELECT song.* FROM song_artist_map JOIN song ON song_artist_map.songId = song.id WHERE artistId = :artistId AND inLibrary IS NOT NULL LIMIT :previewSize")
-    fun artistSongsPreview(artistId: String, previewSize: Int = 3): Flow<List<Song>>
-
     @Query("""
         SELECT 
             artist.*,

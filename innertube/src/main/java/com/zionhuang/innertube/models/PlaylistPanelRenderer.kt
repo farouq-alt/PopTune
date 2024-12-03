@@ -9,7 +9,7 @@ data class PlaylistPanelRenderer(
     val shortBylineText: Runs?,
     val contents: List<Content>,
     val currentIndex: Int?,
-    val isInfinite: Boolean,
+    val isInfinite: Boolean?,
     val numItemsToShow: Int?,
     val playlistId: String?,
     val continuations: List<Continuation>?,
