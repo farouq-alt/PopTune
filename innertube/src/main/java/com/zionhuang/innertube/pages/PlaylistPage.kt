@@ -34,7 +34,7 @@ data class PlaylistPage(
                 title = renderer.flexColumns.firstOrNull()
                     ?.musicResponsiveListItemFlexColumnRenderer?.text
                     ?.runs?.firstOrNull()?.text ?: return null,
-                artists = (artists.orEmpty() + collaborators.orEmpty()).ifEmpty { return null },
+                artists = (artists.orEmpty() + collaborators.orEmpty()),
                 album = renderer.flexColumns.getOrNull(2)?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.firstOrNull()?.let {
                     Album(
                         name = it.text,
