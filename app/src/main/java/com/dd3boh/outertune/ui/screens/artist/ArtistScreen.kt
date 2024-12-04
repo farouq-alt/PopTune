@@ -54,6 +54,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -129,7 +131,7 @@ fun ArtistScreen(
 
     val lazyListState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
-    val showLocal = remember { mutableStateOf(false) }
+    var showLocal by rememberSaveable { mutableStateOf(false) }
 
     val transparentAppBar by remember {
         derivedStateOf {
@@ -254,7 +256,7 @@ fun ArtistScreen(
                 )
                 .asPaddingValues()
         ) {
-            if (artistPage == null && !showLocal.value) {
+            if (artistPage == null && !showLocal) {
                 item(key = "shimmer") {
                     ArtistPagePlaceholder()
                 }
@@ -264,7 +266,7 @@ fun ArtistScreen(
                     artistHead()
                 }
 
-                if (showLocal.value) {
+                if (showLocal) {
                     if (librarySongs.isNotEmpty()) {
                         item {
                             NavigationTitle(
@@ -536,9 +538,9 @@ fun ArtistScreen(
         HideOnScrollFAB(
             visible = librarySongs.isNotEmpty(),
             lazyListState = lazyListState,
-            icon = if (showLocal.value) Icons.Rounded.LibraryMusic else Icons.Rounded.Language,
+            icon = if (showLocal) Icons.Rounded.LibraryMusic else Icons.Rounded.Language,
             onClick = {
-                showLocal.value = showLocal.value.not()
+                showLocal = showLocal.not()
             }
         )
 
