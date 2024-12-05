@@ -293,7 +293,7 @@ fun AlbumScreen(
                                         IconButton(
                                             onClick = {
                                                 val songs = albumWithSongsLocal.songs.map{ it.toMediaMetadata() }
-                                                downloadUtil.download(songs, context)
+                                                downloadUtil.download(songs)
                                             }
                                         ) {
                                             Icon(
