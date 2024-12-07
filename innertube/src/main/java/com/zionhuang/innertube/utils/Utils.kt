@@ -5,12 +5,13 @@ import com.zionhuang.innertube.pages.LibraryPage
 import com.zionhuang.innertube.pages.PlaylistPage
 import java.security.MessageDigest
 
-suspend fun Result<PlaylistPage>.completed() = runCatching {
+@JvmName("completedLibrary")
+suspend fun Result<PlaylistPage>.completed(): Result<PlaylistPage> = runCatching {
     val page = getOrThrow()
     val songs = page.songs.toMutableList()
     var continuation = page.songsContinuation
     while (continuation != null) {
-        val continuationPage = YouTube.playlistContinuation(continuation).getOrNull() ?: break
+        val continuationPage = YouTube.playlistContinuation(continuation).getOrThrow()
         songs += continuationPage.songs
         continuation = continuationPage.continuation
     }
@@ -22,12 +23,13 @@ suspend fun Result<PlaylistPage>.completed() = runCatching {
     )
 }
 
-suspend fun Result<LibraryPage>.completedLibraryPage(): Result<LibraryPage> = runCatching {
+@JvmName("completedPlaylist")
+suspend fun Result<LibraryPage>.completed(): Result<LibraryPage> = runCatching {
     val page = getOrThrow()
     val items = page.items.toMutableList()
     var continuation = page.continuation
     while (continuation != null) {
-        val continuationPage = YouTube.libraryContinuation(continuation).getOrNull() ?: break
+        val continuationPage = YouTube.libraryContinuation(continuation).getOrThrow()
         items += continuationPage.items
         continuation = continuationPage.continuation
     }
