@@ -121,7 +121,8 @@ fun AddToQueueAction(modifier: Modifier) {
 fun SwipeToQueueBox(
     item: MediaItem,
     content: @Composable BoxScope.() -> Unit,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    enabled: Boolean = true
 ) {
     val context = LocalContext.current
     val playerConnection = LocalPlayerConnection.current
@@ -161,31 +162,37 @@ fun SwipeToQueueBox(
         )
     }
 
-    DraggableItem(
-        state = state,
-        content = {
-            content()
-        },
+    if (!enabled){
+        Box { content() }
+    }
+    else {
+        DraggableItem(
+            state = state,
+            content = {
+                content()
+            },
 
-        startAction = {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .align(Alignment.CenterStart),
-            ) {
-                AddToQueueAction(
-                    Modifier
-                        .width(defaultActionSize)
+            startAction = {
+                Box(
+                    modifier = Modifier
                         .fillMaxHeight()
-                        .offset {
-                            IntOffset(
-                                ((-state
-                                    .requireOffset() - defaultActionSize.toPx()))
-                                    .roundToInt(), 0
-                            )
-                        }
-                )
+                        .align(Alignment.CenterStart),
+                ) {
+                    AddToQueueAction(
+                        Modifier
+                            .width(defaultActionSize)
+                            .fillMaxHeight()
+                            .offset {
+                                IntOffset(
+                                    ((-state
+                                        .requireOffset() - defaultActionSize.toPx()))
+                                        .roundToInt(), 0
+                                )
+                            }
+                    )
+                }
             }
-        },
-    )
+        )
+    }
+
 }
