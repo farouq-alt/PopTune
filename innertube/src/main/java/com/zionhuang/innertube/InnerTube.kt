@@ -1,6 +1,5 @@
 package com.zionhuang.innertube
 
-import com.zionhuang.innertube.encoder.brotli
 import com.zionhuang.innertube.models.Context
 import com.zionhuang.innertube.models.YouTubeClient
 import com.zionhuang.innertube.models.YouTubeLocale
@@ -62,7 +61,6 @@ class InnerTube {
         }
 
         install(ContentEncoding) {
-            brotli(1.0F)
             gzip(0.9F)
             deflate(0.8F)
         }

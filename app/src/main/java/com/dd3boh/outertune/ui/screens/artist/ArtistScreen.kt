@@ -387,7 +387,7 @@ fun ArtistScreen(
                                                     }
                                                 }
                                             )
-                                            .animateItemPlacement()
+                                            .animateItem()
                                     )
                                 }
                             }
@@ -466,7 +466,7 @@ fun ArtistScreen(
                                                     }
                                                 }
                                             )
-                                            .animateItemPlacement()
+                                            .animateItem()
                                     )
                                 },
                                 snackbarHostState = snackbarHostState
@@ -541,7 +541,7 @@ fun ArtistScreen(
                                                     }
                                                 }
                                             )
-                                            .animateItemPlacement()
+                                            .animateItem()
                                     )
                                 }
                             }

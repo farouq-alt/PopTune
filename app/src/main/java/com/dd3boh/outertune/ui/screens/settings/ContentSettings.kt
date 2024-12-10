@@ -1,5 +1,6 @@
 package com.dd3boh.outertune.ui.screens.settings
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -52,6 +53,7 @@ import com.dd3boh.outertune.utils.rememberPreference
 import com.zionhuang.innertube.utils.parseCookieString
 import java.net.Proxy
 
+@SuppressLint("PrivateResource")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContentSettings(
@@ -114,8 +116,8 @@ fun ContentSettings(
             values = listOf(LikedAutodownloadMode.OFF, LikedAutodownloadMode.ON, LikedAutodownloadMode.WIFI_ONLY),
             selectedValue = likedAutoDownload,
             valueText = { when (it){
-                LikedAutodownloadMode.OFF -> stringResource(androidx.compose.ui.R.string.off)
-                LikedAutodownloadMode.ON -> stringResource(androidx.compose.ui.R.string.on)
+                LikedAutodownloadMode.OFF -> stringResource(androidx.compose.ui.R.string.state_off)
+                LikedAutodownloadMode.ON -> stringResource(androidx.compose.ui.R.string.state_on)
                 LikedAutodownloadMode.WIFI_ONLY -> stringResource(R.string.wifi_only)
             } },
             onValueSelected = onLikedAutoDownload
