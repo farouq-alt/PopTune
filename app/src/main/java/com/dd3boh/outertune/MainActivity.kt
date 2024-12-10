@@ -3,7 +3,6 @@ package com.dd3boh.outertune
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
@@ -157,6 +156,7 @@ import com.dd3boh.outertune.ui.screens.NewReleaseScreen
 import com.dd3boh.outertune.ui.screens.Screens
 import com.dd3boh.outertune.ui.screens.StatsScreen
 import com.dd3boh.outertune.ui.screens.YouTubeBrowseScreen
+import com.dd3boh.outertune.ui.screens.artist.ArtistAlbumsScreen
 import com.dd3boh.outertune.ui.screens.artist.ArtistItemsScreen
 import com.dd3boh.outertune.ui.screens.artist.ArtistScreen
 import com.dd3boh.outertune.ui.screens.artist.ArtistSongsScreen
@@ -197,6 +197,7 @@ import com.dd3boh.outertune.ui.utils.appBarScrollBehavior
 import com.dd3boh.outertune.ui.utils.cacheDirectoryTree
 import com.dd3boh.outertune.ui.utils.getLocalThumbnail
 import com.dd3boh.outertune.ui.utils.resetHeightOffset
+import com.dd3boh.outertune.utils.NetworkConnectivityObserver
 import com.dd3boh.outertune.utils.SyncUtils
 import com.dd3boh.outertune.utils.dataStore
 import com.dd3boh.outertune.utils.get
@@ -266,7 +267,7 @@ class MainActivity : ComponentActivity() {
         } else {
             startService(Intent(this, MusicService::class.java))
         }
-        bindService(Intent(this, MusicService::class.java), serviceConnection, Context.BIND_AUTO_CREATE)
+        bindService(Intent(this, MusicService::class.java), serviceConnection, BIND_AUTO_CREATE)
     }
 
     override fun onStop() {
@@ -302,7 +303,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+
         setContent {
+            val connectivityObserver = NetworkConnectivityObserver(this)
+            val isNetworkConnected by connectivityObserver.networkStatus.collectAsState(false)
+
             val enableDynamicTheme by rememberPreference(DynamicThemeKey, defaultValue = true)
             val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
             val pureBlack by rememberPreference(PureBlackKey, defaultValue = false)
@@ -670,7 +675,8 @@ class MainActivity : ComponentActivity() {
                         LocalPlayerAwareWindowInsets provides playerAwareWindowInsets,
                         LocalDownloadUtil provides downloadUtil,
                         LocalShimmerTheme provides ShimmerTheme,
-                        LocalSyncUtils provides syncUtils
+                        LocalSyncUtils provides syncUtils,
+                        LocalNetworkStatus provides isNetworkConnected
                     ) {
                         Scaffold(
                             topBar = {
@@ -808,7 +814,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             },
                             bottomBar = {
-                                Box() {
+                                Box {
                                     BottomSheetPlayer(
                                         state = playerBottomSheetState,
                                         navController = navController
@@ -1013,13 +1019,8 @@ class MainActivity : ComponentActivity() {
                                             type = NavType.StringType
                                         }
                                     )
-                                ) { backStackEntry ->
-                                    val artistId = backStackEntry.arguments?.getString("artistId")!!
-                                    if (artistId.startsWith("LA")) {
-                                        ArtistSongsScreen(navController, scrollBehavior)
-                                    } else {
-                                        ArtistScreen(navController, scrollBehavior)
-                                    }
+                                ) {
+                                    ArtistScreen(navController, scrollBehavior)
                                 }
                                 composable(
                                     route = "artist/{artistId}/songs",
@@ -1030,6 +1031,16 @@ class MainActivity : ComponentActivity() {
                                     )
                                 ) {
                                     ArtistSongsScreen(navController, scrollBehavior)
+                                }
+                                composable(
+                                    route = "artist/{artistId}/albums",
+                                    arguments = listOf(
+                                        navArgument("artistId") {
+                                            type = NavType.StringType
+                                        }
+                                    )
+                                ) {
+                                    ArtistAlbumsScreen(navController, scrollBehavior)
                                 }
                                 composable(
                                     route = "artist/{artistId}/items?browseId={browseId}?params={params}",
@@ -1197,3 +1208,4 @@ val LocalPlayerConnection = staticCompositionLocalOf<PlayerConnection?> { error(
 val LocalPlayerAwareWindowInsets = compositionLocalOf<WindowInsets> { error("No WindowInsets provided") }
 val LocalDownloadUtil = staticCompositionLocalOf<DownloadUtil> { error("No DownloadUtil provided") }
 val LocalSyncUtils = staticCompositionLocalOf<SyncUtils> { error("No SyncUtils provided") }
+val LocalNetworkStatus = staticCompositionLocalOf<Boolean> { error("No Network Status provided") }

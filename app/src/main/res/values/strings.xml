@@ -333,6 +333,7 @@
 <!-- Sort menu -->
     <string name="sort_by_date_modified">Date modified</string>
     <string name="sort_by_date_released">Date released</string>
+    <string name="sort_by_like_date">Date liked</string>
 
 <!-- Dialog -->
     <string name="play_count">Play count</string>
