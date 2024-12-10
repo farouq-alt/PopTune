@@ -126,7 +126,6 @@
         <item quantity="one">%d artiste</item>
         <item quantity="other">%d artistes</item>
         <item quantity="many">%d artistes</item>
-        <item quantity="other">%d artistes</item>
     </plurals>
     <plurals name="n_album">
         <item quantity="one">%d album</item>

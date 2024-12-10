@@ -281,10 +281,7 @@
     <string name="app_version">Verze aplikace</string>
 
     <string name="new_version_available">Je dostupná nová verze</string>
-    <string name="translation_models">Modely překladů</string>
-    <string name="clear_translation_models">Vymazat modely překladů</string>
     <string name="remove_from_playlist">Odstranit z playlistu</string>
-    <string name="discord_integration">Integrace Discordu</string>
     <string name="squiggly">Klikatá</string>
     <string name="duplicates_description_single">Skladba se již nachází ve vašem playlistu</string>
     <string name="keep_listening">Poslouchejte dál</string>
@@ -300,7 +297,6 @@
     <string name="similar_to">Podobné</string>
     <string name="small">Malé</string>
     <string name="search_history">Historie vyhledávání</string>
-    <string name="dismiss">Zavřít</string>
     <string name="tempo_and_pitch">Tempo a výška</string>
     <string name="player">Přehrávač</string>
     <string name="auto_load_more">Automaticky načíst další skladby</string>
@@ -329,16 +325,9 @@
     <string name="disable_screenshot">Zakázat snímky obrazovky</string>
     <string name="enable_lrclib">Povolit poskytovatele textů LrcLib</string>
     <string name="hide_explicit">Skrýt explicitní obsah</string>
-    <string name="options">Možnosti</string>
-    <string name="preview">Náhled</string>
-    <string name="login_failed">Přihlášení selhalo</string>
     <string name="delete_playlist_confirm">Opravdu chcete odstranit playlist „%s“?</string>
     <string name="default_">Výchozí</string>
     <string name="theme">Motiv</string>
     <string name="player_text_alignment">Zarovnání textu přehrávače</string>
-    <string name="discord_information">InnerTune používá knihovnu KizzyRPC, aby mohl nastavit váš stav na Discordu. Tato funkce zahrnuje připojení k bráně Discord, což může být považováno za porušení podmínek společnosti Discord. Neexistují nicméně žádné známé případy uzamčení účtu z tohoto důvodu. Používejte na vlastní nebezpečí.
-\n
-\nInnerTune pouze extrahuje váš token, vše ostatní je uloženo lokálně.</string>
-    <string name="enable_discord_rpc">Povolit stav na Discordu</string>
     <string name="logout">Odhlásit se</string>
 </resources>

@@ -228,8 +228,6 @@
     <string name="about">Tentang</string>
     <string name="app_version">Versi aplikasi</string>
     <string name="new_version_available">Versi baru tersedia</string>
-    <string name="translation_models">Model Terjemahan</string>
-    <string name="clear_translation_models">Model terjemahan yang jelas</string>
     <string name="forgotten_favorites">Favorit yang terlupakan</string>
     <string name="keep_listening">Tetap mendengarkan</string>
     <string name="your_youtube_playlists">Playlist Youtube kamu</string>
@@ -250,8 +248,6 @@
     <string name="hide_explicit">Sembunyikan konten eksplisit</string>
     <string name="auto_skip_next_on_error">Lompat otomatis ke lagu berikutnya ketika terjadi kesalahan</string>
     <string name="sided">Bersisi</string>
-    <string name="options">Pilihan</string>
-    <string name="login_failed">Login gagal</string>
     <string name="add_anyway">Tambahkan saja</string>
     <string name="logout">Keluar</string>
     <string name="misc">Lain-lain</string>
@@ -281,11 +277,4 @@
     <string name="disable_screenshot">Nonaktifkan tangkapan layar</string>
     <string name="disable_screenshot_desc">Jika opsi ini aktif, tangkapan layar dan tampilan aplikasi di Terbaru akan dinonaktifkan.</string>
     <string name="enable_lrclib">Aktifkan penyedia lirik LrcLib</string>
-    <string name="discord_integration">Integrasi Discord</string>
-    <string name="discord_information">InnerTune adalah aplikasi yang bisa mengatur akun Discord kamu. Aplikasi ini menggunakan cara khusus (KizzyRPC) yang mungkin melanggar aturan Discord. Meski begitu, belum ada pengguna yang kena masalah karena hal ini. Tapi, tetap hati-hati ya kalau mau pakai.
-\n
-\nInnerTune cuma akan mengambil data khusus (token) dari akun Discord kamu, data lainnya disimpan di perangkat kamu sendiri.</string>
-    <string name="dismiss">Membubarkan</string>
-    <string name="preview">Pratinjau</string>
-    <string name="enable_discord_rpc">Aktifkan Fitur Discord</string>
 </resources>
