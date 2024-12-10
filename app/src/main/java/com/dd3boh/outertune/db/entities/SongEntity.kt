@@ -101,4 +101,8 @@ data class SongEntity(
     companion object {
         fun generateSongId() = "LA" + RandomStringUtils.random(8, true, false)
     }
+
+    fun isAvailableOffline(): Boolean {
+        return dateDownload != null || isLocal
+    }
 }
