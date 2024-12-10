@@ -250,13 +250,11 @@ fun SelectionMediaMetadataMenu(
             database.query {
                 if (allLiked) {
                     selection.forEach { song ->
-                        update(song.toSongEntity().copy(liked = false))
+                        update(song.toSongEntity().toggleLike())
                     }
                 } else {
-                    selection.forEach { song ->
-                        val likedSong = song.toSongEntity().copy(liked = true)
-                        update(likedSong)
-                        downloadUtil.autoDownloadIfLiked(likedSong)
+                    selection.filter { !it.liked }.forEach { song ->
+                        update(song.toSongEntity().toggleLike())
                     }
                 }
             }
