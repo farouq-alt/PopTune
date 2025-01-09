@@ -478,6 +478,7 @@ fun HomeScreen(
                                 onSelectedChange = {},
                                 inSelectMode = null,
                                 isSelected = false,
+                                enableSwipeToQueue = false,
                                 navController = navController,
                                 modifier = Modifier.width(horizontalLazyGridItemWidth)
                             )
@@ -523,6 +524,7 @@ fun HomeScreen(
                                 onSelectedChange = {},
                                 inSelectMode = null,
                                 isSelected = false,
+                                enableSwipeToQueue = false,
                                 navController = navController,
                                 modifier = Modifier.width(horizontalLazyGridItemWidth)
                             )
