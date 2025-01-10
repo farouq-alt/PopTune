@@ -544,7 +544,7 @@ class MainActivity : ComponentActivity() {
 
                     val playerBottomSheetState = rememberBottomSheetState(
                         dismissedBound = 0.dp,
-                        collapsedBound = bottomInset + getNavPadding() + MiniPlayerHeight + 4.dp,
+                        collapsedBound = bottomInset + getNavPadding() + MiniPlayerHeight,
                         expandedBound = maxHeight,
                     )
 
