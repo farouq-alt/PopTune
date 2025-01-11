@@ -13,10 +13,10 @@ import com.zionhuang.innertube.models.SearchSuggestions
 import com.zionhuang.innertube.models.SongItem
 import com.zionhuang.innertube.models.WatchEndpoint
 import com.zionhuang.innertube.models.WatchEndpoint.WatchEndpointMusicSupportedConfigs.WatchEndpointMusicConfig.Companion.MUSIC_VIDEO_TYPE_ATV
-import com.zionhuang.innertube.models.YouTubeClient.Companion.ANDROID_MUSIC
 import com.zionhuang.innertube.models.YouTubeClient.Companion.IOS
 import com.zionhuang.innertube.models.YouTubeClient.Companion.TVHTML5
 import com.zionhuang.innertube.models.YouTubeClient.Companion.WEB
+import com.zionhuang.innertube.models.YouTubeClient.Companion.WEB_CREATOR
 import com.zionhuang.innertube.models.YouTubeClient.Companion.WEB_REMIX
 import com.zionhuang.innertube.models.YouTubeLocale
 import com.zionhuang.innertube.models.getContinuation
@@ -662,8 +662,8 @@ object YouTube {
 
     suspend fun player(videoId: String, playlistId: String? = null, registerPlayback: Boolean = true): Result<PlayerResponse> = runCatching {
         var playerResponse: PlayerResponse
-        if (this.cookie != null) { // if logged in: try ANDROID_MUSIC client first because IOS client does not play age restricted songs
-            playerResponse = innerTube.player(ANDROID_MUSIC, videoId, playlistId).body<PlayerResponse>()
+        if (this.cookie != null) { // if logged in: try WEB_CREATOR client first because IOS client does not play age restricted songs
+            playerResponse = innerTube.player(WEB_CREATOR, videoId, playlistId).body<PlayerResponse>()
             if (playerResponse.playabilityStatus.status == "OK") {
                 return@runCatching playerResponse
             }

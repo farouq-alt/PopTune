@@ -80,24 +80,21 @@ class InnerTube {
         contentType(ContentType.Application.Json)
         headers {
             append("X-Goog-Api-Format-Version", "1")
-            append("X-YouTube-Client-Name", client.clientName)
+            append("X-YouTube-Client-Name", client.clientId)
             append("X-YouTube-Client-Version", client.clientVersion)
-            append("x-origin", "https://music.youtube.com")
-            if (client.referer != null) {
-                append("Referer", client.referer)
-            }
-            if (setLogin) {
+            append("X-Origin", YouTubeClient.ORIGIN_YOUTUBE_MUSIC)
+            append("Referer", YouTubeClient.REFERER_YOUTUBE_MUSIC)
+            if (setLogin && client.loginSupported) {
                 cookie?.let { cookie ->
                     append("cookie", cookie)
                     if ("SAPISID" !in cookieMap) return@let
                     val currentTime = System.currentTimeMillis() / 1000
-                    val sapisidHash = sha1("$currentTime ${cookieMap["SAPISID"]} https://music.youtube.com")
+                    val sapisidHash = sha1("$currentTime ${cookieMap["SAPISID"]} ${YouTubeClient.ORIGIN_YOUTUBE_MUSIC}")
                     append("Authorization", "SAPISIDHASH ${currentTime}_${sapisidHash}")
                 }
             }
         }
         userAgent(client.userAgent)
-        parameter("key", client.api_key)
         parameter("prettyPrint", false)
     }
 
@@ -142,11 +139,15 @@ class InnerTube {
         )
     }
 
-    suspend fun registerPlayback(url: String, cpn: String, playlistId: String?)
-            = httpClient.get(url) {
-        ytClient(YouTubeClient.ANDROID_MUSIC, true)
+    suspend fun registerPlayback(
+        url: String,
+        cpn: String,
+        playlistId: String?,
+        client: YouTubeClient = YouTubeClient.WEB_REMIX,
+    ) = httpClient.get(url) {
+        ytClient(client, true)
         parameter("ver", "2")
-        parameter("c", "ANDROID_MUSIC")
+        parameter("c", client.clientName)
         parameter("cpn", cpn)
 
         if (playlistId != null) {
