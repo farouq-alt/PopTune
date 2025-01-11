@@ -120,6 +120,7 @@ class InnerTube {
         client: YouTubeClient,
         videoId: String,
         playlistId: String?,
+        signatureTimestamp: Int?,
     ) = httpClient.post("player") {
         ytClient(client, setLogin = true)
         setBody(
@@ -136,9 +137,9 @@ class InnerTube {
                 videoId = videoId,
                 playlistId = playlistId,
                 playbackContext =
-                if (client.useSignatureTimestamp) {
+                if (client.useSignatureTimestamp && signatureTimestamp != null) {
                     PlayerBody.PlaybackContext(PlayerBody.PlaybackContext.ContentPlaybackContext(
-                        signatureTimestamp = NewPipeUtils.getSignatureTimestamp(videoId).getOrThrow()
+                        signatureTimestamp
                     ))
                 } else null
             )
@@ -161,11 +162,6 @@ class InnerTube {
             parameter("referrer", "https://music.youtube.com/playlist?list=$playlistId")
         }
     }
-
-    suspend fun pipedStreams(videoId: String) =
-        httpClient.get("https://pipedapi.kavin.rocks/streams/${videoId}") {
-            contentType(ContentType.Application.Json)
-        }
 
     suspend fun browse(
         client: YouTubeClient,
