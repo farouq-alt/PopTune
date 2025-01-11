@@ -98,6 +98,7 @@ import com.dd3boh.outertune.utils.enumPreference
 import com.dd3boh.outertune.utils.get
 import com.dd3boh.outertune.utils.reportException
 import com.google.common.util.concurrent.MoreExecutors
+import com.zionhuang.innertube.NewPipeUtils
 import com.zionhuang.innertube.YouTube
 import com.zionhuang.innertube.models.SongItem
 import com.zionhuang.innertube.models.WatchEndpoint
@@ -744,8 +745,10 @@ class MusicService : MediaLibraryService(),
             }
             scope.launch(Dispatchers.IO) { recoverSong(mediaId, playerResponse) }
 
-            songUrlCache[mediaId] = format.url!! to playerResponse.streamingData!!.expiresInSeconds * 1000L
-            dataSpec.withUri(format.url!!.toUri()).subrange(dataSpec.uriPositionOffset, CHUNK_LENGTH)
+            val streamUrl = NewPipeUtils.getStreamUrl(format, mediaId).getOrThrow()
+
+            songUrlCache[mediaId] = streamUrl to playerResponse.streamingData!!.expiresInSeconds * 1000L
+            dataSpec.withUri(streamUrl.toUri()).subrange(dataSpec.uriPositionOffset, CHUNK_LENGTH)
         }
     }
 
