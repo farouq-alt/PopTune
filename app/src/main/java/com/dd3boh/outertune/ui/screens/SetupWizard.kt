@@ -80,6 +80,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -192,6 +193,7 @@ fun SetupWizard(
                     if (position > 0) {
                         position -= 1
                     }
+                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                 }
             ) {
                 Text(
@@ -228,6 +230,8 @@ fun SetupWizard(
                     if (position < MAX_POS) {
                         position += 1
                     }
+
+                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                 }
             ) {
                 Text(
@@ -654,7 +658,9 @@ fun SetupWizard(
                                                 overflow = TextOverflow.Ellipsis
                                             )
                                         },
-                                        onClick = {}
+                                        onClick = {
+                                            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                                        }
                                     )
                                 }
                             }
@@ -870,6 +876,7 @@ fun SetupWizard(
                             onFirstSetupPassedChange(true)
                             navController.navigateUp()
                         }
+                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                     }
                 ) {
                     Icon(

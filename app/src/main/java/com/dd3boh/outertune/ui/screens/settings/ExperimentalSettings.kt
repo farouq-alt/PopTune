@@ -20,6 +20,7 @@ import androidx.compose.material.icons.rounded.DeveloperMode
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material.icons.rounded.WarningAmber
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -36,7 +37,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -70,6 +73,7 @@ fun ExperimentalSettings(
 ) {
     val context = LocalContext.current
     val database = LocalDatabase.current
+    val haptic = LocalHapticFeedback.current
     val syncUtils = LocalSyncUtils.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -158,7 +162,7 @@ fun ExperimentalSettings(
             )
 
 
-
+            Spacer(Modifier.height(20.dp))
             Text("Material colours test")
 
 
@@ -201,6 +205,101 @@ fun ExperimentalSettings(
                 }
                 Row(Modifier.padding(10.dp).background(MaterialTheme.colorScheme.errorContainer)) {
                     Text("Error Container", color = MaterialTheme.colorScheme.onErrorContainer)
+                }
+            }
+
+            Spacer(Modifier.height(20.dp))
+            Text("Haptics test")
+
+            Column {
+                Button(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    }
+                ) {
+                    Text("LongPress")
+                }
+                Button(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    }
+                ) {
+                    Text("TextHandleMove")
+                }
+                Button(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                    }
+                ) {
+                    Text("VirtualKey")
+                }
+                Button(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.GestureEnd)
+                    }
+                ) {
+                    Text("GestureEnd")
+                }
+                Button(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
+                    }
+                ) {
+                    Text("GestureThresholdActivate")
+                }
+
+                Spacer(Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                    }
+                ) {
+                    Text("SegmentTick")
+                }
+                Button(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+                    }
+                ) {
+                    Text("SegmentFrequentTick")
+                }
+                Button(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                    }
+                ) {
+                    Text("ContextClick")
+                }
+
+                Spacer(Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                    }
+                ) {
+                    Text("Confirm")
+                }
+                Button(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.Reject)
+                    }
+                ) {
+                    Text("Reject")
+                }
+
+                Button(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
+                    }
+                ) {
+                    Text("ToggleOn")
+                }
+                Button(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.ToggleOff)
+                    }
+                ) {
+                    Text("ToggleOff")
                 }
             }
 
