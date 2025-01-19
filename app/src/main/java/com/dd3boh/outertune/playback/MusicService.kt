@@ -73,7 +73,6 @@ import com.dd3boh.outertune.constants.minPlaybackDurKey
 import com.dd3boh.outertune.db.MusicDatabase
 import com.dd3boh.outertune.db.entities.Event
 import com.dd3boh.outertune.db.entities.FormatEntity
-import com.dd3boh.outertune.db.entities.LyricsEntity
 import com.dd3boh.outertune.db.entities.RelatedSongMap
 import com.dd3boh.outertune.di.DownloadCache
 import com.dd3boh.outertune.extensions.SilentHandler
@@ -351,18 +350,6 @@ class MusicService : MediaLibraryService(),
             dataStore.data.map { it[ShowLyricsKey] ?: false }.distinctUntilChanged()
         ) { mediaMetadata, showLyrics ->
             mediaMetadata to showLyrics
-        }.collectLatest(scope) { (mediaMetadata, showLyrics) ->
-            if (showLyrics && mediaMetadata != null && database.lyrics(mediaMetadata.id).first() == null) {
-                val lyrics = lyricsHelper.getLyrics(mediaMetadata)
-                database.query {
-                    upsert(
-                        LyricsEntity(
-                            id = mediaMetadata.id,
-                            lyrics = lyrics
-                        )
-                    )
-                }
-            }
         }
 
         dataStore.data
