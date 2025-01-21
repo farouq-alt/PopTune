@@ -63,6 +63,7 @@ import com.dd3boh.outertune.constants.MediaSessionConstants.CommandToggleLike
 import com.dd3boh.outertune.constants.MediaSessionConstants.CommandToggleRepeatMode
 import com.dd3boh.outertune.constants.MediaSessionConstants.CommandToggleShuffle
 import com.dd3boh.outertune.constants.PauseListenHistoryKey
+import com.dd3boh.outertune.constants.PauseRemoteListenHistoryKey
 import com.dd3boh.outertune.constants.PersistentQueueKey
 import com.dd3boh.outertune.constants.PlayerVolumeKey
 import com.dd3boh.outertune.constants.RepeatModeKey
@@ -819,7 +820,7 @@ class MusicService : MediaLibraryService(),
             }
 
             // TODO: support playlist id
-            if (mediaItem.metadata?.isLocal != true) {
+            if (mediaItem.metadata?.isLocal != true && dataStore.get(PauseRemoteListenHistoryKey, true)) {
                 CoroutineScope(Dispatchers.IO).launch {
                     val playbackUrl = database.format(mediaItem.mediaId).first()?.playbackUrl
                         ?: YTPlayerUtils.playerResponseForMetadata(mediaItem.mediaId, null).getOrNull()?.playbackTracking?.videostatsPlaybackUrl?.baseUrl

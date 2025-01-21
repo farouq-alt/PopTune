@@ -79,6 +79,7 @@ val MaxImageCacheSizeKey = intPreferencesKey("maxImageCacheSize")
  * Privacy
  */
 val PauseListenHistoryKey = booleanPreferencesKey("pauseListenHistory")
+val PauseRemoteListenHistoryKey = booleanPreferencesKey("pauseRemoteListenHistory")
 val PauseSearchHistoryKey = booleanPreferencesKey("pauseSearchHistory")
 val EnableKugouKey = booleanPreferencesKey("enableKugou")
 val EnableLrcLibKey = booleanPreferencesKey("enableLrcLib")
