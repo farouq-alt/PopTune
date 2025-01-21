@@ -155,7 +155,7 @@ fun PlayerSettings(
             .verticalScroll(rememberScrollState())
     ) {
         PreferenceGroupTitle(
-            title = "Interface"
+            title = stringResource(R.string.grp_layout)
         )
         SwitchPreference(
             title = { Text(stringResource(R.string.persistent_queue)) },
@@ -177,7 +177,7 @@ fun PlayerSettings(
         )
 
         PreferenceGroupTitle(
-            title = "Audio"
+            title = stringResource(R.string.audio)
         )
         EnumListPreference(
             title = { Text(stringResource(R.string.audio_quality)) },
@@ -213,7 +213,7 @@ fun PlayerSettings(
         )
 
         PreferenceGroupTitle(
-            title = "Advanced"
+            title = stringResource(R.string.prefs_advanced)
         )
         SwitchPreference(
             title = { Text(stringResource(R.string.stop_music_on_task_clear)) },

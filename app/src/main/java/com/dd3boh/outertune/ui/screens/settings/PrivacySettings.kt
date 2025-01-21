@@ -154,7 +154,6 @@ fun PrivacySettings(
         PreferenceGroupTitle(
             title = stringResource(R.string.account)
         )
-
         SwitchPreference(
             title = { Text(stringResource(R.string.use_login_for_browse)) },
             description = stringResource(R.string.use_login_for_browse_desc),
