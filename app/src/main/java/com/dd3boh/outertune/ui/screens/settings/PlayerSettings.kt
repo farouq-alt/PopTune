@@ -159,7 +159,7 @@ fun PlayerSettings(
         )
         SwitchPreference(
             title = { Text(stringResource(R.string.persistent_queue)) },
-            description = stringResource(R.string.persistent_queue_desc),
+            description = stringResource(R.string.persistent_queue_desc_ot),
             icon = { Icon(Icons.AutoMirrored.Rounded.QueueMusic, null) },
             checked = persistentQueue,
             onCheckedChange = onPersistentQueueChange
