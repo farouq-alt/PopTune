@@ -85,7 +85,7 @@
     <string name="token_hidden">Tap to show token</string>
     <string name="token_shown">Tap again to copy or edit</string>
     <string name="ytm_sync">Automatically sync with your YouTube Music account</string>
-    <string name="wifi_only">Wifi only</string>
+    <string name="wifi_only">Wi-Fi only</string>
 
     <!-- Player settings -->
     <string name="audio_offload">Enable offload</string>
@@ -104,7 +104,7 @@
     <string name="lyrics_multiline_description">Treat all the lines between sync points as one lyric text</string>
     <string name="lyrics_trim_title">Remove spaces around lyrics</string>
     <string name="lyrics_prefer_local">Prefer local lyric files</string>
-    <string name="lyrics_prefer_local_description">Prioritize resolving local lyric files before using all cloud providers. Turn ths off to prioritize cloud providers</string>
+    <string name="lyrics_prefer_local_description">Prioritize resolving local lyric files before using all cloud providers. Turn this off to prioritize cloud providers</string>
     <string name="lyrics_font_Size">Font size</string>
 
 
@@ -184,7 +184,7 @@
     <string name="oobe_local_scan_tooltip">Click here to scan for songs</string>
     <string name="oobe_complete">Setup complete</string>
     <string name="oobe_ytm_content_description">YouTube Music at your fingertips</string>
-    <string name="oobe_ad_free_description">AD free playback</string>
+    <string name="oobe_ad_free_description">Ad-free playback</string>
     <string name="oobe_ytm_sync_description">Account sync</string>
     <string name="oobe_local_playback_description">Local music playback</string>
     <string name="oobe_use_backup">I have a backup</string>
