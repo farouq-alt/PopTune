@@ -26,7 +26,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
@@ -119,7 +118,7 @@ fun PlayerSettings(
         )
 
         PreferenceGroupTitle(
-            title = stringResource(R.string.audio)
+            title = stringResource(R.string.grp_audio)
         )
         EnumListPreference(
             title = { Text(stringResource(R.string.audio_quality)) },

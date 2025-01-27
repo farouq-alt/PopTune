@@ -30,7 +30,6 @@ import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material.icons.rounded.FolderCopy
 import androidx.compose.material.icons.rounded.MoreHoriz
 import androidx.compose.material.icons.rounded.Palette
-import androidx.compose.material.icons.rounded.PlaylistAdd
 import androidx.compose.material.icons.rounded.Reorder
 import androidx.compose.material.icons.rounded.Tab
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -314,7 +313,7 @@ fun AppearanceSettings(
                                         NavigationTab.ALBUM -> stringResource(R.string.albums)
                                         NavigationTab.PLAYLIST -> stringResource(R.string.playlists)
                                         else -> {
-                                            "--- Drag below here to disable ---"
+                                            stringResource(R.string.tab_arrangement_disable_tip)
                                         }
                                     }
                                 )
@@ -328,7 +327,7 @@ fun AppearanceSettings(
                     }
                 }
 
-                InfoLabel(text = "The Home tab is required.")
+                InfoLabel(stringResource(R.string.tab_arrangement_home_required))
             }
 
         if (newInterfaceStyle) {
