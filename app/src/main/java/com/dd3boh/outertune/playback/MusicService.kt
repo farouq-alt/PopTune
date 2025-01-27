@@ -403,10 +403,11 @@ class MusicService : MediaLibraryService(),
 
     fun deInitQueue() {
         if (dataStore.get(PersistentQueueKey, true)) {
+            val pos = player.currentPosition
             saveQueueToDisk()
             scope.launch {
                 dataStore.edit { settings ->
-                    settings[LastPosKey] = player.currentPosition
+                    settings[LastPosKey] = pos
                 }
             }
         }
@@ -852,9 +853,12 @@ class MusicService : MediaLibraryService(),
 
     @Deprecated("This nukes the entire db and adds everything again. Saving queues is to be done inside QueueBoard, incrementally.")
     private fun saveQueueToDisk() {
+        val data = queueBoard.getAllQueues()
         // TODO: get rid of this. Yeah I'd want to update individual queues instead of nuking the entire db and writing everything but ehhhhh that's for later
         CoroutineScope(Dispatchers.IO).launch {
-            database.rewriteAllQueues(queueBoard.getAllQueues())
+            database.rewriteAllQueues(data)
+        }
+    }
         }
     }
 
