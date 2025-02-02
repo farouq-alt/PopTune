@@ -67,4 +67,14 @@
     <string name="auto_scanner_description">アプリを開いたときに曲を自動的にスキャンします。既存の曲のメタデータは再読み込みされません。</string>
     <string name="library">ライブラリ</string>
     <string name="grp_extra_scanner_settings">追加のスキャナ設定</string>
+    <string name="grp_lyrics_source">歌詞のソース</string>
+    <string name="grp_proxy">プロキシ</string>
+    <string name="tab_arrangement_disable_tip">ここにドラッグして無効化する</string>
+    <string name="like_autodownload">お気に入りの曲を自動でダウンロードする</string>
+    <string name="wifi_only">Wi-Fiのみ</string>
+    <string name="keep_alive_title">タスキル時に確認する</string>
+    <string name="persistent_queue_desc_ot">アプリ起動時に前回のキューを復元する</string>
+    <string name="show_liked_and_downloaded_playlist">ライブラリにお気に入りした曲とダウンロードした曲を表示する</string>
+    <string name="ytm_sync">YouTube musicアカウントと動悸する</string>
+    <string name="token_hidden">タップしてトークンを表示</string>
 </resources>
