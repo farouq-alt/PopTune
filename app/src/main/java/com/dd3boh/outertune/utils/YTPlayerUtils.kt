@@ -19,6 +19,7 @@ import com.zionhuang.innertube.models.YouTubeClient.Companion.IOS
 import com.zionhuang.innertube.models.YouTubeClient.Companion.TVHTML5_SIMPLY_EMBEDDED_PLAYER
 import com.zionhuang.innertube.models.YouTubeClient.Companion.WEB_REMIX
 import com.zionhuang.innertube.models.response.PlayerResponse
+import com.dd3boh.outertune.utils.potoken.PoTokenGenerator
 import okhttp3.OkHttpClient
 
 object YTPlayerUtils {
@@ -26,6 +27,8 @@ object YTPlayerUtils {
     private val httpClient = OkHttpClient.Builder()
         .proxy(YouTube.proxy)
         .build()
+
+    private val poTokenGenerator = PoTokenGenerator()
 
     /**
      * The main client is used for metadata and initial streams.
@@ -75,10 +78,9 @@ object YTPlayerUtils {
          */
         val signatureTimestamp = getSignatureTimestampOrNull(videoId)
 
-        // --- TODO: GET WEB PO TOKENS HERE ---
-        val webPlayerPot = "" // TODO
-        val webStreamingPot = "" // TODO
-        // ---
+        val (webPlayerPot, webStreamingPot) = poTokenGenerator.getWebClientPoToken(videoId)?.let {
+            Pair(it.playerRequestPoToken, it.streamingDataPoToken)
+        } ?: Pair(null, null)
 
         val mainPlayerResponse =
             YouTube.player(videoId, playlistId, MAIN_CLIENT, signatureTimestamp, webPlayerPot)
@@ -135,7 +137,7 @@ object YTPlayerUtils {
                 streamUrl = findUrlOrNull(format, videoId) ?: continue
                 streamExpiresInSeconds = streamPlayerResponse.streamingData?.expiresInSeconds ?: continue
 
-                if (client.useWebPoTokens) {
+                if (client.useWebPoTokens && webStreamingPot != null) {
                     streamUrl += "&pot=$webStreamingPot";
                 }
 

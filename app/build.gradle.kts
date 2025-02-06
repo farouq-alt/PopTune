@@ -184,6 +184,10 @@ dependencies {
 
     implementation(libs.timber)
 
+    implementation(libs.nanojson)
+
+    implementation(libs.androidx.webkit)
+
     /*
     "JitPack builds are broken with the latest CMake version.
     Please download the [aar](https://github.com/Kyant0/taglib/releases) manually but not use maven."
