@@ -91,6 +91,14 @@ class App : Application(), ImageLoaderFactory {
         }
         GlobalScope.launch {
             dataStore.data
+                .map { it[DataSyncIdKey] }
+                .distinctUntilChanged()
+                .collect { dataSyncId ->
+                    YouTube.dataSyncId = dataSyncId
+                }
+        }
+        GlobalScope.launch {
+            dataStore.data
                 .map { it[InnerTubeCookieKey] }
                 .distinctUntilChanged()
                 .collect { cookie ->
@@ -102,6 +110,7 @@ class App : Application(), ImageLoaderFactory {
                         dataStore.edit { settings ->
                             settings.remove(InnerTubeCookieKey)
                             settings.remove(VisitorDataKey)
+                            settings.remove(DataSyncIdKey)
                         }
                     }
                 }
