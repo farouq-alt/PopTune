@@ -55,7 +55,7 @@ import com.dd3boh.outertune.constants.ThumbnailCornerRadius
 import com.dd3boh.outertune.extensions.togglePlayPause
 import com.dd3boh.outertune.models.MediaMetadata
 import com.dd3boh.outertune.ui.component.AsyncLocalImage
-import com.dd3boh.outertune.ui.utils.getLocalThumbnail
+import com.dd3boh.outertune.ui.utils.imageCache
 
 @Composable
 fun MiniPlayer(
@@ -147,7 +147,7 @@ fun MiniMediaInfo(
             if (mediaMetadata.isLocal) {
                 // local thumbnail arts
                 AsyncLocalImage(
-                    image = { getLocalThumbnail(mediaMetadata.localPath, true) },
+                    image = { imageCache.getLocalThumbnail(mediaMetadata.localPath, true) },
                     contentDescription = null,
                     modifier = Modifier
                         .size(48.dp)

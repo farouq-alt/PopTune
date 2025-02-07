@@ -111,8 +111,8 @@ import com.dd3boh.outertune.playback.queues.ListQueue
 import com.dd3boh.outertune.ui.component.Icon.FolderCopy
 import com.dd3boh.outertune.ui.menu.FolderMenu
 import com.dd3boh.outertune.ui.menu.SongMenu
-import com.dd3boh.outertune.ui.utils.getLocalThumbnail
 import com.dd3boh.outertune.ui.utils.getNSongsString
+import com.dd3boh.outertune.ui.utils.imageCache
 import com.dd3boh.outertune.utils.joinByBullet
 import com.dd3boh.outertune.utils.makeTimeString
 import com.dd3boh.outertune.utils.rememberPreference
@@ -633,7 +633,7 @@ fun SongGridItem(
         ) {
             if (song.song.isLocal) {
                 AsyncLocalImage(
-                    image = { getLocalThumbnail(song.song.localPath, true) },
+                    image = { imageCache.getLocalThumbnail(song.song.localPath, true) },
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxSize()
@@ -1440,7 +1440,7 @@ fun ItemThumbnail(
         } else if (thumbnailUrl?.startsWith("/storage") == true) {
             // local thumbnail arts
             AsyncLocalImage(
-                image = { getLocalThumbnail(thumbnailUrl, true) },
+                image = { imageCache.getLocalThumbnail(thumbnailUrl, true) },
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxSize()
@@ -1519,7 +1519,7 @@ fun PlaylistThumbnail(
                 ).fastForEachIndexed { index, alignment ->
                     if (thumbnails.getOrNull(index)?.startsWith("/storage") == true) {
                         AsyncLocalImage(
-                            image = { getLocalThumbnail(thumbnails[index], true) },
+                            image = { imageCache.getLocalThumbnail(thumbnails[index], true) },
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
