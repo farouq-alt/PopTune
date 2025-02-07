@@ -64,6 +64,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
@@ -140,6 +141,7 @@ inline fun ListItem(
     trailingContent: @Composable RowScope.() -> Unit = {},
     isSelected: Boolean? = false,
     isActive: Boolean = false,
+    isAvailable: Boolean = true,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -170,6 +172,27 @@ inline fun ListItem(
             contentAlignment = Alignment.Center
         ) {
             thumbnailContent()
+            if (!isAvailable) {
+                Box(
+                    modifier = Modifier
+                        .size(ListThumbnailSize) // Adjust size as needed
+                        .align(Alignment.Center)
+                        .background(
+                            Color.Black.copy(alpha = 0.25f),
+                            RoundedCornerShape(ThumbnailCornerRadius)
+                        )
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.CloudOff,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier
+                            .size(ListThumbnailSize / 2)
+                            .align(Alignment.Center)
+                            .graphicsLayer { alpha = 1f }
+                    )
+                }
+            }
         }
         Column(
             modifier = Modifier
@@ -212,9 +235,10 @@ fun ListItem(
     subtitle = {
         badges()
 
-        if (isLiked)Icon.Favorite()
-        if (inLibrary) Icon.Library()
-        if (isLocalSong) FolderCopy()
+        // local song indicator
+        if (isLocalSong == true) {
+            FolderCopy()
+        }
 
         if (!subtitle.isNullOrEmpty()) {
             Text(

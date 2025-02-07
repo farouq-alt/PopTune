@@ -101,6 +101,7 @@ import com.dd3boh.outertune.playback.queues.ListQueue
 import com.dd3boh.outertune.playback.queues.Queue
 import com.dd3boh.outertune.playback.queues.YouTubeQueue
 import com.dd3boh.outertune.utils.CoilBitmapLoader
+import com.dd3boh.outertune.utils.NetworkConnectivityObserver
 import com.dd3boh.outertune.utils.YTPlayerUtils
 import com.dd3boh.outertune.utils.dataStore
 import com.dd3boh.outertune.utils.enumPreference
@@ -166,6 +167,10 @@ class MusicService : MediaLibraryService(),
 
     private lateinit var connectivityManager: ConnectivityManager
 
+    lateinit var connectivityObserver: NetworkConnectivityObserver
+    val waitingForNetworkConnection = MutableStateFlow(false)
+    private val isNetworkConnected = MutableStateFlow(true)
+
     private val audioQuality by enumPreference(this, AudioQualityKey, AudioQuality.AUTO)
 
     var queueTitle: String? = null
@@ -203,6 +208,26 @@ class MusicService : MediaLibraryService(),
     override fun onCreate() {
         super.onCreate()
 
+        // network connectivity
+        try {
+            connectivityObserver.unregister()
+        } catch (e: UninitializedPropertyAccessException) {
+            // lol
+        }
+        connectivityObserver = NetworkConnectivityObserver(this)
+
+        scope.launch {
+            connectivityObserver.networkStatus.collect { isConnected ->
+                isNetworkConnected.value = isConnected
+
+                if (isConnected && waitingForNetworkConnection.value) {
+                    waitingForNetworkConnection.value = false
+                    player.prepare()
+                    player.play()
+                }
+            }
+        }
+
         player = ExoPlayer.Builder(this)
             .setMediaSourceFactory(DefaultMediaSourceFactory(createDataSourceFactory()))
             .setRenderersFactory(createRenderersFactory())
@@ -226,38 +251,27 @@ class MusicService : MediaLibraryService(),
                 addListener(object : Player.Listener {
                     override fun onPlayerError(error: PlaybackException) {
                         super.onPlayerError(error)
-                        if (!dataStore.get(SkipOnErrorKey, true)) {
+
+                        // wait for reconnection
+                        val isConnectionError = (error.cause?.cause is PlaybackException)
+                                && (error.cause?.cause as PlaybackException).errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED
+                        if (!isNetworkConnected.value || isConnectionError) {
+                            waitOnNetworkError()
                             return
                         }
 
-                        consecutivePlaybackErr += 2
+                        if (dataStore.get(SkipOnErrorKey, true)) {
+                            skipOnError()
+                        }
+                        else {
+                            stopOnError()
+                        }
 
                         Toast.makeText(
                             this@MusicService,
-                            "Playback error: ${error.message} (${error.errorCode}): ${error.cause?.message?: "No further errors."} ",
-                            Toast.LENGTH_SHORT
+                            "Error: ${error.message} (${error.errorCode}): ${error.cause?.message?: "No further errors."} ",
+                            Toast.LENGTH_LONG
                         ).show()
-
-                        /**
-                         * Auto skip to the next media item on error.
-                         *
-                         * To prevent a "runaway diesel engine" scenario, force the user to take action after
-                         * too many errors come up too quickly. Pause to show player "stopped" state
-                         */
-                        val nextWindowIndex = player.nextMediaItemIndex
-                        if (consecutivePlaybackErr <= MAX_CONSECUTIVE_ERR && nextWindowIndex != C.INDEX_UNSET) {
-                            player.seekTo(nextWindowIndex, C.TIME_UNSET)
-                            player.prepare()
-                            player.play()
-                        } else {
-                            player.pause()
-                            Toast.makeText(
-                                this@MusicService,
-                                "Playback stopped due to too many errors",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            consecutivePlaybackErr = 0
-                        }
                     }
 
                     // start playback again on seek
@@ -433,6 +447,40 @@ class MusicService : MediaLibraryService(),
         playerNotificationManager.setPlayer(player)
         playerNotificationManager.setSmallIcon(R.drawable.small_icon)
         playerNotificationManager.setMediaSessionToken(mediaSession.platformToken)
+    }
+
+    fun waitOnNetworkError() {
+        waitingForNetworkConnection.value = true
+        Toast.makeText(this@MusicService, getString(R.string.wait_to_reconnect), Toast.LENGTH_LONG).show()
+    }
+
+    fun skipOnError() {
+        /**
+         * Auto skip to the next media item on error.
+         *
+         * To prevent a "runaway diesel engine" scenario, force the user to take action after
+         * too many errors come up too quickly. Pause to show player "stopped" state
+         */
+        consecutivePlaybackErr += 2
+        val nextWindowIndex = player.nextMediaItemIndex
+
+        if (consecutivePlaybackErr <= MAX_CONSECUTIVE_ERR && nextWindowIndex != C.INDEX_UNSET) {
+            player.seekTo(nextWindowIndex, C.TIME_UNSET)
+            player.prepare()
+            player.play()
+
+            Toast.makeText(this@MusicService, getString(R.string.err_play_next_on_error), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        player.pause()
+        Toast.makeText(this@MusicService, getString(R.string.err_stop_on_too_many_errors), Toast.LENGTH_LONG).show()
+        consecutivePlaybackErr = 0
+    }
+
+    fun stopOnError() {
+        player.pause()
+        Toast.makeText(this@MusicService, getString(R.string.err_stop_on_error), Toast.LENGTH_LONG).show()
     }
 
     fun initQueue() {
@@ -684,6 +732,9 @@ class MusicService : MediaLibraryService(),
                 openAudioEffectSession()
             } else {
                 closeAudioEffectSession()
+                if (!player.playWhenReady) {
+                    waitingForNetworkConnection.value = false
+                }
             }
         }
         if (events.containsAny(EVENT_TIMELINE_CHANGED, EVENT_POSITION_DISCONTINUITY)) {
