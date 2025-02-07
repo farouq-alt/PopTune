@@ -53,6 +53,7 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.session.CommandButton
 import androidx.media3.session.MediaController
 import androidx.media3.session.MediaLibraryService
+import androidx.media3.session.MediaLibraryService.MediaLibrarySession
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionToken
 import androidx.media3.ui.PlayerNotificationManager
@@ -133,6 +134,7 @@ import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
+import timber.log.Timber
 import java.io.File
 import java.net.ConnectException
 import java.net.SocketTimeoutException
@@ -419,6 +421,7 @@ class MusicService : MediaLibraryService(),
             }.build()
         )
 
+
         playerNotificationManager = PlayerNotificationManager.Builder(this, NOTIFICATION_ID, CHANNEL_ID)
             .setNotificationListener(object : PlayerNotificationManager.NotificationListener {
                 override fun onNotificationPosted(notificationId: Int, notification: Notification, ongoing: Boolean) {
@@ -444,6 +447,7 @@ class MusicService : MediaLibraryService(),
                 }
             })
             .build()
+
         playerNotificationManager.setPlayer(player)
         playerNotificationManager.setSmallIcon(R.drawable.small_icon)
         playerNotificationManager.setMediaSessionToken(mediaSession.platformToken)
@@ -495,13 +499,7 @@ class MusicService : MediaLibraryService(),
 
     fun deInitQueue() {
         if (dataStore.get(PersistentQueueKey, true)) {
-            val pos = player.currentPosition
             saveQueueToDisk()
-            scope.launch {
-                dataStore.edit { settings ->
-                    settings[LastPosKey] = pos
-                }
-            }
         }
         // do not replace the object. Can lead to entire queue being deleted even though it is supposed to be saved already
         queueBoard.initialized = false
@@ -946,12 +944,20 @@ class MusicService : MediaLibraryService(),
         }
     }
 
-    @Deprecated("This nukes the entire db and adds everything again. Saving queues is to be done inside QueueBoard, incrementally.")
-    private fun saveQueueToDisk() {
+    fun saveQueueToDisk() {
         val data = queueBoard.getAllQueues()
-        // TODO: get rid of this. Yeah I'd want to update individual queues instead of nuking the entire db and writing everything but ehhhhh that's for later
         CoroutineScope(Dispatchers.IO).launch {
+            // db on main thread crash, use Dispatchers.IO
             database.rewriteAllQueues(data)
+        }
+
+        val pos = player.currentPosition
+
+       runBlocking {
+           // async issues, run blocking
+            dataStore.edit { settings ->
+                settings[LastPosKey] = pos
+            }
         }
     }
 
@@ -959,20 +965,29 @@ class MusicService : MediaLibraryService(),
         // we handle notification manually
     }
 
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        return START_NOT_STICKY
+    }
+
     override fun onDestroy() {
+        super.onDestroy()
+        if (player.isReleased) {
+            Timber.tag("MusicService").e("Trying to stop an already dead service. Aborting.")
+            return
+        }
         deInitQueue()
+        stopForeground(STOP_FOREGROUND_DETACH)
+
         mediaSession.release()
         player.removeListener(this)
         player.removeListener(sleepTimer)
         player.release()
-        super.onDestroy()
+        stopSelf()
     }
 
     override fun onBind(intent: Intent?) = super.onBind(intent) ?: binder
 
     override fun onTaskRemoved(rootIntent: Intent?) {
-        deInitQueue()
-
         super.onTaskRemoved(rootIntent)
     }
 

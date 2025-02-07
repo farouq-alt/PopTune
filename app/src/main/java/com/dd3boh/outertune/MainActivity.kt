@@ -95,7 +95,6 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
 import androidx.core.util.Consumer
 import androidx.core.view.WindowCompat
-import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -117,7 +116,6 @@ import com.dd3boh.outertune.constants.DynamicThemeKey
 import com.dd3boh.outertune.constants.EnabledTabsKey
 import com.dd3boh.outertune.constants.ExcludedScanPathsKey
 import com.dd3boh.outertune.constants.FirstSetupPassed
-import com.dd3boh.outertune.constants.LastPosKey
 import com.dd3boh.outertune.constants.LibraryFilter
 import com.dd3boh.outertune.constants.LibraryFilterKey
 import com.dd3boh.outertune.constants.LocalLibraryEnableKey
@@ -127,6 +125,7 @@ import com.dd3boh.outertune.constants.NavigationBarAnimationSpec
 import com.dd3boh.outertune.constants.NavigationBarHeight
 import com.dd3boh.outertune.constants.NewInterfaceKey
 import com.dd3boh.outertune.constants.PauseSearchHistoryKey
+import com.dd3boh.outertune.constants.PersistentQueueKey
 import com.dd3boh.outertune.constants.PlayerBackgroundStyleKey
 import com.dd3boh.outertune.constants.PureBlackKey
 import com.dd3boh.outertune.constants.ScanPathsKey
@@ -228,7 +227,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.net.URLDecoder
 import javax.inject.Inject
@@ -281,26 +279,19 @@ class MainActivity : ComponentActivity() {
         bindService(Intent(this, MusicService::class.java), serviceConnection, BIND_AUTO_CREATE)
     }
 
-    override fun onStop() {
-        unbindService(serviceConnection)
-        super.onStop()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
-        runBlocking {
-            // save last position
-            dataStore.edit { settings ->
-                settings[LastPosKey] = playerConnection!!.player.currentPosition
-            }
-        }
-
         if (dataStore.get(StopMusicOnTaskClearKey, false) && playerConnection?.isPlaying?.value == true
             && isFinishing
         ) {
-            stopService(Intent(this, MusicService::class.java))
-            unbindService(serviceConnection)
-            playerConnection = null
+            if (dataStore.get(PersistentQueueKey, true)) {
+                unbindService(serviceConnection)
+
+//                stopService(Intent(this, MusicService::class.java)) // Believe me, this doesn't actually stop
+                playerConnection?.service?.onDestroy()
+
+                playerConnection = null
+            }
         }
     }
 
@@ -653,7 +644,8 @@ class MainActivity : ComponentActivity() {
                     DisposableEffect(Unit) {
                         val listener = Consumer<Intent> { intent ->
                             val uri =
-                                intent.data ?: intent.extras?.getString(Intent.EXTRA_TEXT)?.toUri() ?: return@Consumer
+                                intent.data ?: intent.extras?.getString(Intent.EXTRA_TEXT)?.toUri()
+                                ?: return@Consumer
                             when (val path = uri.pathSegments.firstOrNull()) {
                                 "playlist" -> uri.getQueryParameter("list")?.let { playlistId ->
                                     if (playlistId.startsWith("OLAK5uy_")) {
@@ -738,7 +730,9 @@ class MainActivity : ComponentActivity() {
                                                     when {
                                                         active -> onActiveChange(false)
 
-                                                        !active && navBackStackEntry?.destination?.route?.startsWith("search") == true -> {
+                                                        !active && navBackStackEntry?.destination?.route?.startsWith(
+                                                            "search"
+                                                        ) == true -> {
                                                             navController.navigateUp()
                                                         }
 
@@ -748,7 +742,10 @@ class MainActivity : ComponentActivity() {
                                             ) {
                                                 Icon(
                                                     imageVector =
-                                                    if (active || navBackStackEntry?.destination?.route?.startsWith("search") == true) {
+                                                    if (active || navBackStackEntry?.destination?.route?.startsWith(
+                                                            "search"
+                                                        ) == true
+                                                    ) {
                                                         Icons.AutoMirrored.Rounded.ArrowBack
                                                     } else {
                                                         Icons.Rounded.Search
@@ -933,7 +930,10 @@ class MainActivity : ComponentActivity() {
                                                 },
                                                 onClick = {
                                                     if (navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true) {
-                                                        navBackStackEntry?.savedStateHandle?.set("scrollToTop", true)
+                                                        navBackStackEntry?.savedStateHandle?.set(
+                                                            "scrollToTop",
+                                                            true
+                                                        )
                                                         coroutineScope.launch {
                                                             searchBarScrollBehavior.state.resetHeightOffset()
                                                         }
