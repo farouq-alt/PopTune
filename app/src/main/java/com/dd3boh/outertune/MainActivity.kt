@@ -315,12 +315,9 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         activityLauncher = ActivityLauncherHelper(this)
-        connectivityObserver = NetworkConnectivityObserver(this)
 
         setContent {
             val haptic = LocalHapticFeedback.current
-
-            val isNetworkConnected by connectivityObserver.networkStatus.collectAsState(false)
 
             val enableDynamicTheme by rememberPreference(DynamicThemeKey, defaultValue = true)
             val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
@@ -341,6 +338,14 @@ class MainActivity : ComponentActivity() {
                 key = PlayerBackgroundStyleKey,
                 defaultValue = PlayerBackgroundStyle.DEFAULT
             )
+
+            try {
+                connectivityObserver.unregister()
+            } catch (e: UninitializedPropertyAccessException) {
+                // lol
+            }
+            connectivityObserver = NetworkConnectivityObserver(this@MainActivity)
+            val isNetworkConnected by connectivityObserver.networkStatus.collectAsState(true)
 
             LaunchedEffect(playerConnection, enableDynamicTheme, isSystemInDarkTheme) {
                 val playerConnection = playerConnection
@@ -392,7 +397,8 @@ class MainActivity : ComponentActivity() {
                 CoroutineScope(Dispatchers.IO).launch {
                     // Check if the permissions for local media access
                     if (!scannerActive.value && autoScan && firstSetupPassed && localLibEnable
-                        && checkSelfPermission(MEDIA_PERMISSION_LEVEL) == PackageManager.PERMISSION_GRANTED) {
+                        && checkSelfPermission(MEDIA_PERMISSION_LEVEL) == PackageManager.PERMISSION_GRANTED
+                    ) {
 
                         // equivalent to (quick scan)
                         try {
@@ -457,7 +463,8 @@ class MainActivity : ComponentActivity() {
 
                     val navController = rememberNavController()
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
-                    val inSelectMode = navBackStackEntry?.savedStateHandle?.getStateFlow("inSelectMode", false)?.collectAsState()
+                    val inSelectMode =
+                        navBackStackEntry?.savedStateHandle?.getStateFlow("inSelectMode", false)?.collectAsState()
                     val (previousTab, setPreviousTab) = rememberSaveable { mutableStateOf("home") }
 
                     val (slimNav) = rememberPreference(SlimNavBarKey, defaultValue = false)
@@ -698,7 +705,7 @@ class MainActivity : ComponentActivity() {
                         LocalDownloadUtil provides downloadUtil,
                         LocalShimmerTheme provides ShimmerTheme,
                         LocalSyncUtils provides syncUtils,
-                        LocalIsNetworkConnected provides isNetworkConnected
+                        LocalNetworkConnected provides isNetworkConnected
                     ) {
                         Scaffold(
                             topBar = {
@@ -1200,7 +1207,7 @@ class MainActivity : ComponentActivity() {
                                     LoginScreen(navController)
                                 }
 
-                                composable("setup_wizard",) {
+                                composable("setup_wizard") {
                                     SetupWizard(navController)
                                 }
                             }
@@ -1277,4 +1284,4 @@ val LocalPlayerConnection = staticCompositionLocalOf<PlayerConnection?> { error(
 val LocalPlayerAwareWindowInsets = compositionLocalOf<WindowInsets> { error("No WindowInsets provided") }
 val LocalDownloadUtil = staticCompositionLocalOf<DownloadUtil> { error("No DownloadUtil provided") }
 val LocalSyncUtils = staticCompositionLocalOf<SyncUtils> { error("No SyncUtils provided") }
-val LocalIsNetworkConnected = staticCompositionLocalOf<Boolean> { error("No Network Status provided") }
+val LocalNetworkConnected = staticCompositionLocalOf<Boolean> { error("No Network Status provided") }

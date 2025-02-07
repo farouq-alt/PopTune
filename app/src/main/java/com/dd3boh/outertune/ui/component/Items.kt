@@ -64,7 +64,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
@@ -88,7 +87,6 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.dd3boh.outertune.LocalDatabase
 import com.dd3boh.outertune.LocalDownloadUtil
-import com.dd3boh.outertune.LocalIsNetworkConnected
 import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.GridThumbnailHeight
@@ -102,7 +100,6 @@ import com.dd3boh.outertune.db.entities.Playlist
 import com.dd3boh.outertune.db.entities.PlaylistEntity
 import com.dd3boh.outertune.db.entities.PlaylistSong
 import com.dd3boh.outertune.db.entities.Song
-import com.dd3boh.outertune.extensions.isAvailableOffline
 import com.dd3boh.outertune.extensions.toMediaItem
 import com.dd3boh.outertune.extensions.togglePlayPause
 import com.dd3boh.outertune.models.DirectoryTree
@@ -143,36 +140,29 @@ inline fun ListItem(
     trailingContent: @Composable RowScope.() -> Unit = {},
     isSelected: Boolean? = false,
     isActive: Boolean = false,
-    available: Boolean = true,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = if(!available) {
-                modifier
-                    .height(ListItemHeight)
-                    .padding(horizontal = 8.dp)
-                    .graphicsLayer { alpha = 0.5f }
-            } else if (isActive) {
-                modifier // playing highlight
-                    .height(ListItemHeight)
-                    .padding(horizontal = 8.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(
-                        color = // selected active
-                        if (isSelected == true) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
-                        else MaterialTheme.colorScheme.secondaryContainer
-                    )
-            } else if (isSelected == true) {
-                modifier // inactive selected
-                    .height(ListItemHeight)
-                    .padding(horizontal = 8.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.4f))
-            }
-            else {
-                modifier // default
-                    .height(ListItemHeight)
-                    .padding(horizontal = 8.dp)
+        modifier = if (isActive) {
+            modifier // playing highlight
+                .height(ListItemHeight)
+                .padding(horizontal = 8.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(
+                    color = // selected active
+                    if (isSelected == true) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                    else MaterialTheme.colorScheme.secondaryContainer
+                )
+        } else if (isSelected == true) {
+            modifier // inactive selected
+                .height(ListItemHeight)
+                .padding(horizontal = 8.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = 0.4f))
+        } else {
+            modifier // default
+                .height(ListItemHeight)
+                .padding(horizontal = 8.dp)
         }
     ) {
         Box(
@@ -180,27 +170,6 @@ inline fun ListItem(
             contentAlignment = Alignment.Center
         ) {
             thumbnailContent()
-            if (!available) {
-                Box(
-                    modifier = Modifier
-                        .size(ListThumbnailSize) // Adjust size as needed
-                        .align(Alignment.Center)
-                        .background(
-                            Color.Black.copy(alpha = 0.25f),
-                            RoundedCornerShape(ThumbnailCornerRadius)
-                        )
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.CloudOff,
-                        contentDescription = "Offline",
-                        tint = Color.White,
-                        modifier = Modifier
-                            .size(ListThumbnailSize / 2)
-                            .align(Alignment.Center)
-                            .graphicsLayer { alpha = 1f }
-                    )
-                }
-            }
         }
         Column(
             modifier = Modifier
@@ -237,10 +206,7 @@ fun ListItem(
     trailingContent: @Composable RowScope.() -> Unit = {},
     isSelected: Boolean? = false,
     isActive: Boolean = false,
-    isLocalSong: Boolean = false,
-    isLiked: Boolean = false,
-    inLibrary: Boolean = false,
-    available: Boolean = true,
+    isLocalSong: Boolean? = null,
 ) = ListItem(
     title = title,
     subtitle = {
@@ -264,8 +230,7 @@ fun ListItem(
     trailingContent = trailingContent,
     modifier = modifier,
     isSelected = isSelected,
-    isActive = isActive,
-    available = available
+    isActive = isActive
 )
 
 @Composable
@@ -335,7 +300,7 @@ fun GridItem(
         )
     },
     subtitle = {
-        Row{
+        Row {
             badges()
         }
 
@@ -376,8 +341,6 @@ fun SongListItem(
 ) {
     val menuState = LocalMenuState.current
     val haptic = LocalHapticFeedback.current
-    val isNetworkConnected = LocalIsNetworkConnected.current
-    val available = song.song.isAvailableOffline() || isNetworkConnected
 
     val playerConnection = LocalPlayerConnection.current ?: return
     val isPlaying by playerConnection.isPlaying.collectAsState()
@@ -397,10 +360,19 @@ fun SongListItem(
                 makeTimeString(song.song.duration * 1000L)
             ),
             badges = {
+                if (showLikedIcon && song.song.liked) {
+                    Icon.Favorite()
+                }
+                if (showInLibraryIcon && song.song.inLibrary != null) {
+                    Icon.Library()
+                }
                 if (showDownloadIcon) {
                     val download by LocalDownloadUtil.current.getDownload(song.id)
                         .collectAsState(initial = null)
                     Icon.Download(download?.state)
+                }
+                if (showLocalIcon && song.song.isLocal) {
+                    FolderCopy()
                 }
             },
             thumbnailContent = {
@@ -414,35 +386,33 @@ fun SongListItem(
                 )
             },
             trailingContent = {
-                if (available) {
-                    if (inSelectMode == true) {
-                        Checkbox(
-                            checked = isSelected,
-                            onCheckedChange = onSelectedChange
-                        )
-                    } else {
-                        IconButton(
-                            onClick = {
-                                if (!disableShowMenu) {
-                                    menuState.show {
-                                        SongMenu(
-                                            originalSong = song,
-                                            playlistSong = playlistSong,
-                                            playlistBrowseId = playlistBrowseId,
-                                            navController = navController,
-                                            onDismiss = menuState::dismiss
-                                        )
-                                    }
+                if (inSelectMode == true) {
+                    Checkbox(
+                        checked = isSelected,
+                        onCheckedChange = onSelectedChange
+                    )
+                } else {
+                    IconButton(
+                        onClick = {
+                            if (!disableShowMenu) {
+                                menuState.show {
+                                    SongMenu(
+                                        originalSong = song,
+                                        playlistSong = playlistSong,
+                                        playlistBrowseId = playlistBrowseId,
+                                        navController = navController,
+                                        onDismiss = menuState::dismiss
+                                    )
                                 }
-
-                                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                             }
-                        ) {
-                            Icon(
-                                Icons.Rounded.MoreVert,
-                                contentDescription = null
-                            )
+
+                            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                         }
+                    ) {
+                        Icon(
+                            Icons.Rounded.MoreVert,
+                            contentDescription = null
+                        )
                     }
                 }
 
@@ -460,51 +430,41 @@ fun SongListItem(
             },
             isSelected = inSelectMode == true && isSelected,
             isActive = isActive,
-            isLocalSong = showLocalIcon && song.song.isLocal,
-            isLiked = showLikedIcon && song.song.liked,
-            inLibrary = showInLibraryIcon && song.song.inLibrary != null,
-            available = available,
             modifier = modifier.combinedClickable(
                 onClick = {
-                    if (available) {
-                        if (inSelectMode == true) {
-                            onSelectedChange(!isSelected)
-                        } else if (song.id == mediaMetadata?.id) {
-                            playerConnection.player.togglePlayPause()
-                        } else {
-                            onPlay()
-                        }
+                    if (inSelectMode == true) {
+                        onSelectedChange(!isSelected)
+                    } else if (song.id == mediaMetadata?.id) {
+                        playerConnection.player.togglePlayPause()
+                    } else {
+                        onPlay()
                     }
                 },
                 onLongClick = {
-                    if (available) {
-                        if (inSelectMode == null){
-                            menuState.show {
-                                SongMenu(
-                                    originalSong = song,
-                                    navController = navController,
-                                    onDismiss = menuState::dismiss
-                                )
-                            }
+                    if (inSelectMode == null) {
+                        menuState.show {
+                            SongMenu(
+                                originalSong = song,
+                                navController = navController,
+                                onDismiss = menuState::dismiss
+                            )
                         }
-                        else if (!inSelectMode) {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onSelectedChange(true)
-                        }
+                    } else if (!inSelectMode) {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onSelectedChange(true)
                     }
                 }
             )
         )
     }
 
-    if (swipeToQueueEnabled && enableSwipeToQueue && available) {
+    if (swipeToQueueEnabled && enableSwipeToQueue) {
         SwipeToQueueBox(
             item = song.toMediaItem(),
             content = { listItem() },
             snackbarHostState = snackbarHostState
         )
-    }
-    else {
+    } else {
         listItem()
     }
 }
@@ -513,7 +473,8 @@ fun SongListItem(
 fun SongFolderItem(
     folderTitle: String,
     modifier: Modifier = Modifier,
-) = ListItem(title = folderTitle, thumbnailContent = {
+) = ListItem(
+    title = folderTitle, thumbnailContent = {
         Icon(
             Icons.Rounded.Folder,
             contentDescription = null,
@@ -528,7 +489,8 @@ fun SongFolderItem(
     folderTitle: String,
     subtitle: String?,
     modifier: Modifier = Modifier,
-) = ListItem(title = folderTitle,
+) = ListItem(
+    title = folderTitle,
     subtitle = subtitle,
     thumbnailContent = {
         Icon(
@@ -548,15 +510,16 @@ fun SongFolderItem(
     menuState: MenuState,
     navController: NavController,
     subtitle: String,
-) = ListItem(title = folderTitle ?: folder.currentDir,
+) = ListItem(
+    title = folderTitle ?: folder.currentDir,
     subtitle = subtitle,
     thumbnailContent = {
-    Icon(
-        Icons.Rounded.Folder,
-        contentDescription = null,
-        modifier = modifier.size(48.dp)
-    )
-},
+        Icon(
+            Icons.Rounded.Folder,
+            contentDescription = null,
+            modifier = modifier.size(48.dp)
+        )
+    },
     trailingContent = {
         val haptic = LocalHapticFeedback.current
         IconButton(
@@ -617,12 +580,14 @@ fun SongGridItem(
                         .size(18.dp)
                         .padding(end = 2.dp)
                 )
+
                 STATE_QUEUED, STATE_DOWNLOADING -> CircularProgressIndicator(
                     strokeWidth = 2.dp,
                     modifier = Modifier
                         .size(16.dp)
                         .padding(end = 2.dp)
                 )
+
                 else -> {}
             }
         }
@@ -802,7 +767,14 @@ fun AlbumListItem(
             downloadUtil.downloads.collect { downloads ->
                 downloadState = when {
                     songs.all { downloads[it.id]?.state == STATE_COMPLETED } -> STATE_COMPLETED
-                    songs.all { downloads[it.id]?.state in listOf(STATE_QUEUED, STATE_DOWNLOADING, STATE_COMPLETED) } -> STATE_DOWNLOADING
+                    songs.all {
+                        downloads[it.id]?.state in listOf(
+                            STATE_QUEUED,
+                            STATE_DOWNLOADING,
+                            STATE_COMPLETED
+                        )
+                    } -> STATE_DOWNLOADING
+
                     else -> Download.STATE_STOPPED
                 }
             }
@@ -867,7 +839,14 @@ fun AlbumGridItem(
             downloadUtil.downloads.collect { downloads ->
                 downloadState = when {
                     songs.all { downloads[it.id]?.state == STATE_COMPLETED } -> STATE_COMPLETED
-                    songs.all { downloads[it.id]?.state in listOf(STATE_QUEUED, STATE_DOWNLOADING, STATE_COMPLETED) } -> STATE_DOWNLOADING
+                    songs.all {
+                        downloads[it.id]?.state in listOf(
+                            STATE_QUEUED,
+                            STATE_DOWNLOADING,
+                            STATE_COMPLETED
+                        )
+                    } -> STATE_DOWNLOADING
+
                     else -> Download.STATE_STOPPED
                 }
             }
@@ -992,18 +971,18 @@ fun PlaylistListItem(
 ) = ListItem(
     title = playlist.playlist.name,
     subtitle =
-        if (playlist.songCount == 0 && playlist.playlist.remoteSongCount != null)
-            getNSongsString(playlist.playlist.remoteSongCount)
-        else
-            getNSongsString(playlist.songCount, playlist.downloadCount),
+    if (playlist.songCount == 0 && playlist.playlist.remoteSongCount != null)
+        getNSongsString(playlist.playlist.remoteSongCount)
+    else
+        getNSongsString(playlist.songCount, playlist.downloadCount),
     badges = {
-         Icon(
-             imageVector = if (playlist.playlist.isEditable) Icons.Rounded.Edit else Icons.Rounded.EditOff,
-             contentDescription = null,
-             modifier = Modifier
-                 .size(18.dp)
-                 .padding(end = 2.dp)
-         )
+        Icon(
+            imageVector = if (playlist.playlist.isEditable) Icons.Rounded.Edit else Icons.Rounded.EditOff,
+            contentDescription = null,
+            modifier = Modifier
+                .size(18.dp)
+                .padding(end = 2.dp)
+        )
 
         if (playlist.playlist.isLocal) {
             Icon(
@@ -1051,10 +1030,10 @@ fun PlaylistGridItem(
 ) = GridItem(
     title = playlist.playlist.name,
     subtitle =
-        if (playlist.songCount == 0 && playlist.playlist.remoteSongCount != null)
-            getNSongsString(playlist.playlist.remoteSongCount)
-        else
-            getNSongsString(playlist.songCount, playlist.downloadCount),
+    if (playlist.songCount == 0 && playlist.playlist.remoteSongCount != null)
+        getNSongsString(playlist.playlist.remoteSongCount)
+    else
+        getNSongsString(playlist.songCount, playlist.downloadCount),
     badges = {
         if (playlist.downloadCount > 0) {
             Icon(
@@ -1115,9 +1094,7 @@ fun MediaMetadataListItem(
     modifier = modifier,
     isSelected = isSelected,
     isActive = isActive,
-    isLocalSong = mediaMetadata.isLocal,
-    isLiked = mediaMetadata.liked,
-    inLibrary = mediaMetadata.inLibrary != null
+    isLocalSong = mediaMetadata.isLocal
 )
 
 @Composable
@@ -1128,7 +1105,11 @@ fun QueueListItem(
 ) = ListItem(
     title = (if (number != null) "$number. " else "") + (queue.title ?: "Queue"),
     subtitle = joinByBullet(
-        pluralStringResource(R.plurals.n_song, queue.getCurrentQueueShuffled().size, queue.getCurrentQueueShuffled().size),
+        pluralStringResource(
+            R.plurals.n_song,
+            queue.getCurrentQueueShuffled().size,
+            queue.getCurrentQueueShuffled().size
+        ),
         makeTimeString(queue.getDuration() * 1000L)
     ),
     thumbnailContent = {
@@ -1172,12 +1153,6 @@ fun YouTubeListItem(
     isPlaying: Boolean = false,
     trailingContent: @Composable RowScope.() -> Unit = {},
 ) {
-    val isNetworkConnected = LocalIsNetworkConnected.current
-    val downloads by LocalDownloadUtil.current.downloads.collectAsState()
-
-    var available = true
-    if (item is SongItem) { available = downloads[item.id]?.isAvailableOffline() ?: false || isNetworkConnected }
-
     ListItem(
         title = item.title,
         subtitle = when (item) {
@@ -1211,7 +1186,6 @@ fun YouTubeListItem(
         modifier = modifier,
         isSelected = isSelected,
         isActive = isActive,
-        available = available
     )
 }
 
@@ -1259,7 +1233,11 @@ fun YouTubeGridItem(
     },
     subtitle = {
         val subtitle = when (item) {
-            is SongItem -> joinByBullet(item.artists.joinToString { it.name }, makeTimeString(item.duration?.times(1000L)))
+            is SongItem -> joinByBullet(
+                item.artists.joinToString { it.name },
+                makeTimeString(item.duration?.times(1000L))
+            )
+
             is AlbumItem -> joinByBullet(item.artists?.joinToString { it.name }, item.year?.toString())
             is ArtistItem -> null
             is PlaylistItem -> joinByBullet(item.author?.name, item.songCountText)
