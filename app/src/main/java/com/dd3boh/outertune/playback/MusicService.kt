@@ -1,3 +1,12 @@
+/*
+ * Copyright (C) 2024 z-huang/InnerTune
+ * Copyright (C) 2025 OuterTune Project
+ *
+ * SPDX-License-Identifier: GPL-3.0
+ *
+ * For any other attributions, refer to the git commit history
+ */
+
 package com.dd3boh.outertune.playback
 
 import android.app.Notification
@@ -56,6 +65,7 @@ import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaLibraryService.MediaLibrarySession
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionToken
+import androidx.media3.ui.DefaultMediaDescriptionAdapter
 import androidx.media3.ui.PlayerNotificationManager
 import com.dd3boh.outertune.MainActivity
 import com.dd3boh.outertune.R
@@ -264,14 +274,13 @@ class MusicService : MediaLibraryService(),
 
                         if (dataStore.get(SkipOnErrorKey, true)) {
                             skipOnError()
-                        }
-                        else {
+                        } else {
                             stopOnError()
                         }
 
                         Toast.makeText(
                             this@MusicService,
-                            "Error: ${error.message} (${error.errorCode}): ${error.cause?.message?: "No further errors."} ",
+                            "Error: ${error.message} (${error.errorCode}): ${error.cause?.message ?: "No further errors."} ",
                             Toast.LENGTH_LONG
                         ).show()
                     }
@@ -281,7 +290,7 @@ class MusicService : MediaLibraryService(),
                         super.onMediaItemTransition(mediaItem, reason)
                         // +2 when and error happens, and -1 when transition. Thus when error, number increments by 1, else doesn't change
                         if (consecutivePlaybackErr > 0) {
-                            consecutivePlaybackErr --
+                            consecutivePlaybackErr--
                         }
 
                         if (player.isPlaying && reason == MEDIA_ITEM_TRANSITION_REASON_SEEK) {
@@ -309,7 +318,8 @@ class MusicService : MediaLibraryService(),
                         // no, when repeat mode is on, player does not "STATE_ENDED"
                         if (player.currentMediaItemIndex == 0 && lastMediaItemIndex == player.mediaItemCount - 1 &&
                             (reason == MEDIA_ITEM_TRANSITION_REASON_AUTO || reason == MEDIA_ITEM_TRANSITION_REASON_SEEK) &&
-                            isShuffleEnabled.value && player.repeatMode == REPEAT_MODE_ALL) {
+                            isShuffleEnabled.value && player.repeatMode == REPEAT_MODE_ALL
+                        ) {
                             queueBoard.shuffleCurrent(this@MusicService, false) // reshuffle queue
                             queueBoard.setCurrQueue(this@MusicService)
                         }
@@ -435,17 +445,18 @@ class MusicService : MediaLibraryService(),
 
                     // FG keep alive
                     if (dataStore.get(KeepAliveKey, false)) {
-                      startFg()
+                        startFg()
                     } else {
                         // mimic media3 default behaviour
                         if (player.isPlaying) {
-                          startFg()
+                            startFg()
                         } else {
                             stopForeground(notificationId)
                         }
                     }
                 }
             })
+            .setMediaDescriptionAdapter(DefaultMediaDescriptionAdapter(mediaSession.sessionActivity))
             .build()
 
         playerNotificationManager.setPlayer(player)
@@ -557,7 +568,8 @@ class MusicService : MediaLibraryService(),
         } ?: return
         val duration = song?.song?.duration?.takeIf { it != -1 }
             ?: mediaMetadata.duration.takeIf { it != -1 }
-            ?: (playbackData?.videoDetails ?: YTPlayerUtils.playerResponseForMetadata(mediaId).getOrNull()?.videoDetails)?.lengthSeconds?.toInt()
+            ?: (playbackData?.videoDetails ?: YTPlayerUtils.playerResponseForMetadata(mediaId)
+                .getOrNull()?.videoDetails)?.lengthSeconds?.toInt()
             ?: -1
         database.query {
             if (song == null) insert(mediaMetadata.copy(duration = duration))
@@ -623,7 +635,7 @@ class MusicService : MediaLibraryService(),
                 items.addAll(initialStatus.items)
             }
             queueBoard.addQueue(
-                queueTitle?: "Queue",
+                queueTitle ?: "Queue",
                 items,
                 player = this@MusicService,
                 startIndex = if (initialStatus.mediaItemIndex > 0) initialStatus.mediaItemIndex else 0,
@@ -725,7 +737,8 @@ class MusicService : MediaLibraryService(),
 
     override fun onEvents(player: Player, events: Player.Events) {
         if (events.containsAny(Player.EVENT_PLAYBACK_STATE_CHANGED, Player.EVENT_PLAY_WHEN_READY_CHANGED)) {
-            val isBufferingOrReady = player.playbackState == Player.STATE_BUFFERING || player.playbackState == Player.STATE_READY
+            val isBufferingOrReady =
+                player.playbackState == Player.STATE_BUFFERING || player.playbackState == Player.STATE_READY
             if (isBufferingOrReady && player.playWhenReady) {
                 openAudioEffectSession()
             } else {
@@ -776,7 +789,11 @@ class MusicService : MediaLibraryService(),
                     database.song(mediaId).firstOrNull()?.song?.localPath
                 }
                 if (songPath == null) {
-                    throw PlaybackException(getString(R.string.file_size), Throwable(), PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND)
+                    throw PlaybackException(
+                        getString(R.string.file_size),
+                        Throwable(),
+                        PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND
+                    )
                 }
 
                 return@Factory dataSpec.withUri(Uri.fromFile(File(songPath)))
@@ -807,14 +824,26 @@ class MusicService : MediaLibraryService(),
                     is PlaybackException -> throw throwable
 
                     is ConnectException, is UnknownHostException -> {
-                        throw PlaybackException(getString(R.string.error_no_internet), throwable, PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED)
+                        throw PlaybackException(
+                            getString(R.string.error_no_internet),
+                            throwable,
+                            PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED
+                        )
                     }
 
                     is SocketTimeoutException -> {
-                        throw PlaybackException(getString(R.string.error_timeout), throwable, PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT)
+                        throw PlaybackException(
+                            getString(R.string.error_timeout),
+                            throwable,
+                            PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT
+                        )
                     }
 
-                    else -> throw PlaybackException(getString(R.string.error_unknown), throwable, PlaybackException.ERROR_CODE_REMOTE_ERROR)
+                    else -> throw PlaybackException(
+                        getString(R.string.error_unknown),
+                        throwable,
+                        PlaybackException.ERROR_CODE_REMOTE_ERROR
+                    )
                 }
             }
             val format = playbackData.format
@@ -838,7 +867,8 @@ class MusicService : MediaLibraryService(),
 
             val streamUrl = playbackData.streamUrl
 
-            songUrlCache[mediaId] = streamUrl to System.currentTimeMillis() + (playbackData.streamExpiresInSeconds * 1000L)
+            songUrlCache[mediaId] =
+                streamUrl to System.currentTimeMillis() + (playbackData.streamExpiresInSeconds * 1000L)
             dataSpec.withUri(streamUrl.toUri()).subrange(dataSpec.uriPositionOffset, CHUNK_LENGTH)
         }
     }
@@ -866,7 +896,7 @@ class MusicService : MediaLibraryService(),
     override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
         if (player.shuffleModeEnabled) {
             triggerShuffle()
-        player.shuffleModeEnabled = false
+            player.shuffleModeEnabled = false
         }
     }
 
@@ -910,8 +940,10 @@ class MusicService : MediaLibraryService(),
         }
 
 //        println("Playback ratio: ${playbackStats.totalPlayTimeMs.toFloat() / ((mediaItem.metadata?.duration?.times(1000)) ?: -1)} Min threshold: $minPlaybackDur")
-        if (playbackStats.totalPlayTimeMs.toFloat() / ((mediaItem.metadata?.duration?.times(1000)) ?: -1) >= minPlaybackDur
-            && !dataStore.get(PauseListenHistoryKey, false)) {
+        if (playbackStats.totalPlayTimeMs.toFloat() / ((mediaItem.metadata?.duration?.times(1000))
+                ?: -1) >= minPlaybackDur
+            && !dataStore.get(PauseListenHistoryKey, false)
+        ) {
             database.query {
                 incrementPlayCount(mediaItem.mediaId)
                 incrementTotalPlayTime(mediaItem.mediaId, playbackStats.totalPlayTimeMs)
@@ -928,10 +960,11 @@ class MusicService : MediaLibraryService(),
             }
 
             // TODO: support playlist id
-            if (mediaItem.metadata?.isLocal != true && dataStore.get(PauseRemoteListenHistoryKey, true)) {
+            if (mediaItem.metadata?.isLocal != true && !dataStore.get(PauseRemoteListenHistoryKey, false)) {
                 CoroutineScope(Dispatchers.IO).launch {
                     val playbackUrl = database.format(mediaItem.mediaId).first()?.playbackUrl
-                        ?: YTPlayerUtils.playerResponseForMetadata(mediaItem.mediaId, null).getOrNull()?.playbackTracking?.videostatsPlaybackUrl?.baseUrl
+                        ?: YTPlayerUtils.playerResponseForMetadata(mediaItem.mediaId, null)
+                            .getOrNull()?.playbackTracking?.videostatsPlaybackUrl?.baseUrl
 
                     playbackUrl?.let {
                         YouTube.registerPlayback(null, playbackUrl)
@@ -966,6 +999,7 @@ class MusicService : MediaLibraryService(),
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        super.onStartCommand(intent, flags, startId)
         return START_NOT_STICKY
     }
 
@@ -975,6 +1009,8 @@ class MusicService : MediaLibraryService(),
             Timber.tag("MusicService").e("Trying to stop an already dead service. Aborting.")
             return
         }
+
+        Timber.tag("MusicService").e("Terminating MusicService.")
         deInitQueue()
         stopForeground(STOP_FOREGROUND_DETACH)
 
