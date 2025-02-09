@@ -50,6 +50,7 @@ import com.dd3boh.outertune.constants.AccountNameKey
 import com.dd3boh.outertune.constants.ContentCountryKey
 import com.dd3boh.outertune.constants.ContentLanguageKey
 import com.dd3boh.outertune.constants.CountryCodeToName
+import com.dd3boh.outertune.constants.DataSyncIdKey
 import com.dd3boh.outertune.constants.InnerTubeCookieKey
 import com.dd3boh.outertune.constants.LanguageCodeToName
 import com.dd3boh.outertune.constants.LikedAutoDownloadKey
@@ -85,13 +86,16 @@ fun ContentSettings(
 ) {
     val context = LocalContext.current
 
-    val accountName by rememberPreference(AccountNameKey, "")
-    val accountEmail by rememberPreference(AccountEmailKey, "")
-    val accountChannelHandle by rememberPreference(AccountChannelHandleKey, "")
+    val (accountName, onAccountNameChange) = rememberPreference(AccountNameKey, "")
+    val (accountEmail, onAccountEmailChange) = rememberPreference(AccountEmailKey, "")
+    val (accountChannelHandle, onAccountChannelHandleChange) = rememberPreference(AccountChannelHandleKey, "")
     val (innerTubeCookie, onInnerTubeCookieChange) = rememberPreference(InnerTubeCookieKey, "")
+    val (visitorData, onVisitorDataChange) = rememberPreference(VisitorDataKey, "")
+    val (dataSyncId, onDataSyncIdChange) = rememberPreference(DataSyncIdKey, "")
     val isLoggedIn = remember(innerTubeCookie) {
         "SAPISID" in parseCookieString(innerTubeCookie)
     }
+
     val (ytmSync, onYtmSyncChange) = rememberPreference(YtmSyncKey, defaultValue = true)
     val (likedAutoDownload, onLikedAutoDownload) = rememberEnumPreference(LikedAutoDownloadKey, LikedAutodownloadMode.OFF)
     val (contentLanguage, onContentLanguageChange) = rememberPreference(key = ContentLanguageKey, defaultValue = "system")
@@ -138,6 +142,10 @@ fun ContentSettings(
                         context.dataStore.edit { settings ->
                             settings.remove(InnerTubeCookieKey)
                             settings.remove(VisitorDataKey)
+                            settings.remove(DataSyncIdKey)
+                            settings.remove(AccountNameKey)
+                            settings.remove(AccountEmailKey)
+                            settings.remove(AccountChannelHandleKey)
                         }
                     }
                 }
@@ -145,10 +153,28 @@ fun ContentSettings(
         }
 
         if (showTokenEditor) {
+            val text =
+                "***INNERTUBE COOKIE*** =${innerTubeCookie}\n\n***VISITOR DATA*** =${visitorData}\n\n***DATASYNC ID*** =${dataSyncId}\n\n***ACCOUNT NAME*** =${accountName}\n\n***ACCOUNT EMAIL*** =${accountEmail}\n\n***ACCOUNT CHANNEL HANDLE*** =${accountChannelHandle}"
             TextFieldDialog(
                 modifier = Modifier,
-                initialTextFieldValue = TextFieldValue(innerTubeCookie),
-                onDone = { onInnerTubeCookieChange(it) },
+                initialTextFieldValue = TextFieldValue(text),
+                onDone = { data ->
+                   data.split("\n").forEach {
+                        if (it.startsWith("***INNERTUBE COOKIE*** =")) {
+                            onInnerTubeCookieChange(it.substringAfter("***INNERTUBE COOKIE*** ="))
+                        } else if (it.startsWith("***VISITOR DATA*** =")) {
+                            onVisitorDataChange(it.substringAfter("***VISITOR DATA*** ="))
+                        } else if (it.startsWith("***DATASYNC ID*** =")) {
+                            onDataSyncIdChange(it.substringAfter("***DATASYNC ID*** ="))
+                        } else if (it.startsWith("***ACCOUNT NAME*** =")) {
+                            onAccountNameChange(it.substringAfter("***ACCOUNT NAME*** ="))
+                        } else if (it.startsWith("***ACCOUNT EMAIL*** =")) {
+                            onAccountEmailChange(it.substringAfter("***ACCOUNT EMAIL*** ="))
+                        } else if (it.startsWith("***ACCOUNT CHANNEL HANDLE*** =")) {
+                            onAccountChannelHandleChange(it.substringAfter("***ACCOUNT CHANNEL HANDLE*** ="))
+                        }
+                    }
+                },
                 onDismiss = { showTokenEditor = false },
                 singleLine = false,
                 maxLines = 20,

@@ -41,6 +41,7 @@ class App : Application(), ImageLoaderFactory {
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate() {
         super.onCreate()
+        instance = this;
         Timber.plant(Timber.DebugTree())
 
         val locale = Locale.getDefault()
@@ -90,6 +91,14 @@ class App : Application(), ImageLoaderFactory {
         }
         GlobalScope.launch {
             dataStore.data
+                .map { it[DataSyncIdKey] }
+                .distinctUntilChanged()
+                .collect { dataSyncId ->
+                    YouTube.dataSyncId = dataSyncId
+                }
+        }
+        GlobalScope.launch {
+            dataStore.data
                 .map { it[InnerTubeCookieKey] }
                 .distinctUntilChanged()
                 .collect { cookie ->
@@ -101,6 +110,10 @@ class App : Application(), ImageLoaderFactory {
                         dataStore.edit { settings ->
                             settings.remove(InnerTubeCookieKey)
                             settings.remove(VisitorDataKey)
+                            settings.remove(DataSyncIdKey)
+                            settings.remove(AccountNameKey)
+                            settings.remove(AccountEmailKey)
+                            settings.remove(AccountChannelHandleKey)
                         }
                     }
                 }
@@ -131,5 +144,10 @@ class App : Application(), ImageLoaderFactory {
                 .build()
         )
         .build()
+    }
+
+    companion object {
+        lateinit var instance: App
+            private set
     }
 }

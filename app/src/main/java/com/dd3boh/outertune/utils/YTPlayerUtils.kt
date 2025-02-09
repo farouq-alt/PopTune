@@ -19,6 +19,8 @@ import com.zionhuang.innertube.models.YouTubeClient.Companion.IOS
 import com.zionhuang.innertube.models.YouTubeClient.Companion.TVHTML5_SIMPLY_EMBEDDED_PLAYER
 import com.zionhuang.innertube.models.YouTubeClient.Companion.WEB_REMIX
 import com.zionhuang.innertube.models.response.PlayerResponse
+import com.dd3boh.outertune.utils.potoken.PoTokenGenerator
+import com.dd3boh.outertune.utils.potoken.PoTokenResult
 import okhttp3.OkHttpClient
 
 object YTPlayerUtils {
@@ -26,6 +28,8 @@ object YTPlayerUtils {
     private val httpClient = OkHttpClient.Builder()
         .proxy(YouTube.proxy)
         .build()
+
+    private val poTokenGenerator = PoTokenGenerator()
 
     /**
      * The main client is used for metadata and initial streams.
@@ -75,8 +79,13 @@ object YTPlayerUtils {
          */
         val signatureTimestamp = getSignatureTimestampOrNull(videoId)
 
+        val (webPlayerPot, webStreamingPot) = getWebClientPoTokenOrNull(videoId)?.let {
+            Pair(it.playerRequestPoToken, it.streamingDataPoToken)
+        } ?: Pair(null, null)
+
         val mainPlayerResponse =
-            YouTube.player(videoId, playlistId, MAIN_CLIENT, signatureTimestamp).getOrThrow()
+            YouTube.player(videoId, playlistId, MAIN_CLIENT, signatureTimestamp, webPlayerPot)
+                .getOrThrow()
 
         val audioConfig = mainPlayerResponse.playerConfig?.audioConfig
         val videoDetails = mainPlayerResponse.videoDetails
@@ -94,19 +103,27 @@ object YTPlayerUtils {
             streamExpiresInSeconds = null
 
             // decide which client to use
-            if (clientIndex == -1) {
-                // try with streams from main client first
+            val client =
+                if (clientIndex == -1) {
+                    // try with streams from main client first
+                    MAIN_CLIENT
+                } else {
+                    // after main client use fallback clients
+                    STREAM_FALLBACK_CLIENTS[clientIndex]
+                }
+
+            // get player response for streams
+            if (client == MAIN_CLIENT) {
                 streamPlayerResponse = mainPlayerResponse
             } else {
-                // after main client use fallback clients
-                val client = STREAM_FALLBACK_CLIENTS[clientIndex]
                 if (client.loginRequired && YouTube.cookie == null) {
                     // skip client if it requires login but user is not logged in
                     continue
                 }
 
                 streamPlayerResponse =
-                    YouTube.player(videoId, playlistId, client, signatureTimestamp).getOrNull()
+                    YouTube.player(videoId, playlistId, client, signatureTimestamp, webPlayerPot)
+                        .getOrNull()
             }
 
             // process current client response
@@ -119,7 +136,12 @@ object YTPlayerUtils {
                         connectivityManager,
                     ) ?: continue
                 streamUrl = findUrlOrNull(format, videoId) ?: continue
-                streamExpiresInSeconds = streamPlayerResponse.streamingData?.expiresInSeconds ?: continue
+                streamExpiresInSeconds =
+                    streamPlayerResponse.streamingData?.expiresInSeconds ?: continue
+
+                if (client.useWebPoTokens && webStreamingPot != null) {
+                    streamUrl += "&pot=$webStreamingPot";
+                }
 
                 if (clientIndex == STREAM_FALLBACK_CLIENTS.size - 1) {
                     /** skip [validateStatus] for last client */
@@ -235,5 +257,17 @@ object YTPlayerUtils {
                 reportException(it)
             }
             .getOrNull()
+    }
+
+    /**
+     * Wrapper around the [PoTokenGenerator.getWebClientPoToken] function which reports exceptions
+     */
+    private fun getWebClientPoTokenOrNull(videoId: String): PoTokenResult? {
+        try {
+            return poTokenGenerator.getWebClientPoToken(videoId)
+        } catch (e: Exception) {
+            reportException(e)
+        }
+        return null
     }
 }
