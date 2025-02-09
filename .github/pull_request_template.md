@@ -43,7 +43,7 @@ Delete this if it doesn't apply to your PR. -->
 - [ ] I read the [contribution guidelines](https://github.com/DD3Boh/OuterTune/blob/dev/CONTRIBUTING.md).
 
 ### Merge conflict resolution
-Select only ONE. If you select both, the first selection will used as your final choice
+Select only ONE. If you select none, or both, the first selection will used as your final choice
 
 - [ ] In the event of merge conflicts, I give permission for the developers to rebase or squash my code or apply merge
   conflict amendments as needed

@@ -88,7 +88,7 @@ including bug fixes and new features.
 
 ## Attribution
 
-Thanks to all our contributors! Check them out [here](https://github.com/DD3Boh/OuterTune/graphs/contributors)
+Thanks to all our contributors! Check them out [here](https://github.com/OuterTune/OuterTune/graphs/contributors)
 
 [z-huang/InnerTune](https://github.com/z-huang/InnerTune) for providing an awesome base for this fork, none of this
 would have been possible without it.
