@@ -160,20 +160,17 @@ fun OnlineSearchResult(
                         onClick = {
                             when (item) {
                                 is SongItem -> {
-
-                                        if (item.id == mediaMetadata?.id) {
-                                            playerConnection.player.togglePlayPause()
-                                        } else {
-                                            playerConnection.playQueue(
-
-                                                ListQueue(
-                                                    title = "${context.getString(R.string.queue_searched_songs_ot)} $viewModel.query",
-                                                    items = listOf(item.toMediaMetadata())
-                                                ),
-                                                replace = true,
-                                            )
-
-                                        }
+                                    if (item.id == mediaMetadata?.id) {
+                                        playerConnection.player.togglePlayPause()
+                                    } else {
+                                        playerConnection.playQueue(
+                                            ListQueue(
+                                                title = "${context.getString(R.string.queue_searched_songs_ot)} ${viewModel.query}",
+                                                items = listOf(item.toMediaMetadata())
+                                            ),
+                                            replace = true,
+                                        )
+                                    }
                                 }
 
                                 is AlbumItem -> navController.navigate("album/${item.id}")

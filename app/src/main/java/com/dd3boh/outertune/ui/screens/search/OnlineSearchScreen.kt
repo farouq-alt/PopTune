@@ -221,24 +221,13 @@ fun OnlineSearchScreen(
                                 is SongItem -> {
                                     if (item.id == mediaMetadata?.id) {
                                         playerConnection.player.togglePlayPause()
-                                    } else if (item.id.startsWith("LA")) {
-                                        playerConnection.playQueue(
-                                            ListQueue(
-                                                title = "Search: $query",
-                                                items = viewState.items.map { it as SongItem }
-                                                    .map { it.toMediaMetadata() }
-                                            ),
-                                            replace = true,
-                                            title = "Search: $query",
-                                        )
                                     } else {
                                         playerConnection.playQueue(
                                             ListQueue(
-                                                title = "${context.getString(R.string.queue_searched_songs_ot)} $viewModel.query",
+                                                title = "${context.getString(R.string.queue_searched_songs_ot)} ${viewModel.query}",
                                                 items = listOf(item.toMediaMetadata())
                                             ),
                                             replace = true,
-                                            title = "Search: $query",
                                         )
                                         onDismiss()
                                     }

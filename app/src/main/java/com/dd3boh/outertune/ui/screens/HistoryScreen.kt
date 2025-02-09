@@ -302,22 +302,13 @@ fun HistoryScreen(
                                         onClick = {
                                             if (song.id == mediaMetadata?.id) {
                                                 playerConnection.player.togglePlayPause()
-                                            } else if (song.id.startsWith("LA")) {
-                                                playerConnection.playQueue(
-                                                    ListQueue(
-                                                        title = "History",
-                                                        items = section.songs.map { it.toMediaMetadata() }
-                                                    )
-                                                )
                                             } else {
                                                 playerConnection.playQueue(
                                                     ListQueue(
-                                                        title = "${context.getString(R.string.queue_searched_songs_ot)} $viewModel.query",
-                                                        items = listOf(song.toMediaMetadata())
+                                                        title = context.getString(R.string.queue_remote_history),
+                                                        items = section.songs.map { it.toMediaMetadata() }
                                                     )
-
                                                 )
-
                                             }
                                         },
                                         onLongClick = {
@@ -401,13 +392,21 @@ fun HistoryScreen(
                         SongListItem(
                             song = event.song,
                             onPlay = {
-                                playerConnection.playQueue(
-                                    ListQueue(
-                                        title = dateAgoToString(dateAgo),
-                                        items = eventsGroup.map { it.song.toMediaMetadata() },
-                                        startIndex = index
+                                if (event.song.id == mediaMetadata?.id) {
+                                    playerConnection.player.togglePlayPause()
+                                } else {
+                                    playerConnection.playQueue(
+                                        ListQueue(
+                                            title = "${context.getString(R.string.queue_local_history)}: ${
+                                                dateAgoToString(
+                                                    dateAgo
+                                                )
+                                            }",
+                                            items = eventsGroup.map { it.song.toMediaMetadata() },
+                                            startIndex = index
+                                        )
                                     )
-                                )
+                                }
                             },
                             onSelectedChange = {
                                 inSelectMode = true
