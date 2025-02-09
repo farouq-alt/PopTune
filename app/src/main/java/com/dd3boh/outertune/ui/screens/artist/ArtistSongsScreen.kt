@@ -219,7 +219,8 @@ fun ArtistSongsScreen(
                 playerConnection.playQueue(
                     ListQueue(
                         title = artist?.artist?.name,
-                        items = songs.map { it.toMediaMetadata() }.shuffled(),
+                        items = songs.map { it.toMediaMetadata() },
+                        startShuffled = true,
                         playlistId = null,
                     )
                 )

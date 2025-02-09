@@ -207,7 +207,8 @@ fun ArtistScreen(
                                 if (!showLocal && watchEndpoint != null) YouTubeQueue(watchEndpoint)
                                 else ListQueue(
                                     title = artistName,
-                                    items = librarySongs.map { it.toMediaMetadata() }.shuffled(),
+                                    items = librarySongs.map { it.toMediaMetadata() },
+                                    startShuffled = true,
                                 ),
                                 isRadio = true,
                                 title = artistName
@@ -299,7 +300,7 @@ fun ArtistScreen(
                                     playerConnection.playQueue(
                                         ListQueue(
                                             title = "Library: ${libraryArtist?.artist?.name}",
-                                            items = librarySongs.map { it.toMediaMetadata() }.shuffled(),
+                                            items = librarySongs.map { it.toMediaMetadata() },
                                             startIndex = index
                                         )
                                     )

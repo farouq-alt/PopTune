@@ -315,7 +315,8 @@ fun PlaylistMenu(
             playerConnection.playQueue(
                 ListQueue(
                     title = playlist.playlist.name,
-                    items = songs.map { it.toMediaMetadata() }.shuffled(),
+                    items = songs.map { it.toMediaMetadata() },
+                    startShuffled = true,
                     playlistId = playlist.playlist.browseId
                 )
             )
