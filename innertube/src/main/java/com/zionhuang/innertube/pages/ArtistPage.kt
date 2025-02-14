@@ -39,7 +39,9 @@ data class ArtistPage(
             return ArtistSection(
                 title = renderer.title?.runs?.firstOrNull()?.text ?: "",
                 items = renderer.contents?.mapNotNull {
-                    fromMusicResponsiveListItemRenderer(it.musicResponsiveListItemRenderer)
+                    it.musicResponsiveListItemRenderer?.let { renderer ->
+                        fromMusicResponsiveListItemRenderer(renderer)
+                    }
                 }?.ifEmpty { null } ?: return null,
                 moreEndpoint = renderer.title?.runs?.firstOrNull()?.navigationEndpoint?.browseEndpoint
             )
