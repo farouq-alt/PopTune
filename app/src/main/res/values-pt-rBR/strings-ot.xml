@@ -142,4 +142,7 @@
     <string name="grp_general">Geral</string>
     <string name="queue_local_history">Histórico (local)</string>
     <string name="queue_remote_history">Histórico (remoto)</string>
+    <string name="scanner_btn_idle">Buscar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="scanner_progress_complete">Busca completa</string>
 </resources>
