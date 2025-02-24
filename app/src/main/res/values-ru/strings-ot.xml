@@ -2,7 +2,7 @@
 <resources>
     <string name="library">Библиотека</string>
     <string name="recent_activity">Недавняя активность</string>
-    <string name="local_history">Локальные</string>
+    <string name="local_history">Локальная</string>
     <string name="create_queue">Новая очередь</string>
     <string name="queue_searched_songs_ot">Поиск:</string>
     <string name="song_added_to_queue">\"%s\" добавлено в очередь</string>
@@ -16,10 +16,10 @@
     <string name="sort_by_like_date">Дата добавления в понравившиеся</string>
     <string name="create_sync_playlist">Синхронизировать плейлист</string>
     <string name="play_count">Количество воспроизведений</string>
-    <string name="sync_progress_active">Синхронизация YouTube с аккаунтом…</string>
+    <string name="sync_progress_active">Синхронизация с аккаунтом YouTube …</string>
     <string name="sync_progress_success">Синхронизация завершена</string>
     <string name="prefs_advanced">Расширенные</string>
-    <string name="remote_history">Удаленные</string>
+    <string name="remote_history">Удаленная</string>
     <string name="err_stop_on_error">Произошла ошибка. Воспроизведение остановлено</string>
     <string name="sort_by_date_released">Дата выпуска</string>
     <string name="create_sync_playlist_description">Примечание: Это позволит синхронизировать плейлист с YouTube Music. Этот параметр НЕЛЬЗЯ изменить позже. Вы не сможете добавлять локальные песни в синхронизированные плейлисты.</string>
@@ -70,7 +70,7 @@
     <string name="player_background_default">Следовать теме</string>
     <string name="player_background_gradient">Градиент</string>
     <string name="player_background_style">Стиль фона плеера</string>
-    <string name="slim_navbar_description">Убрать подписи с панели навигации, чтобы уменьшить высоту панели навигации</string>
+    <string name="slim_navbar_description">Убрать подписи с панели навигации чтобы уменьшить её высоту</string>
     <string name="tab_arrangement">Расположение вкладок</string>
     <string name="show_liked_and_downloaded_playlist">Показывать понравившиеся треки и загруженную музыку в библиотеке</string>
     <string name="slim_navbar_title">Тонкая панель навигации</string>
