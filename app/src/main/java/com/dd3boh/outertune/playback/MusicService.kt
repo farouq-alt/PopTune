@@ -861,7 +861,7 @@ class MusicService : MediaLibraryService(),
                         sampleRate = format.audioSampleRate,
                         contentLength = format.contentLength!!,
                         loudnessDb = playbackData.audioConfig?.loudnessDb,
-                        playbackUrl = playbackData.playbackTracking?.videostatsPlaybackUrl?.baseUrl
+                        playbackTrackingUrl = playbackData.playbackTracking?.videostatsPlaybackUrl?.baseUrl
                     )
                 )
             }
@@ -954,7 +954,7 @@ class MusicService : MediaLibraryService(),
             // TODO: support playlist id
             if (mediaItem.metadata?.isLocal != true && !dataStore.get(PauseRemoteListenHistoryKey, false)) {
                 CoroutineScope(Dispatchers.IO).launch {
-                    val playbackUrl = database.format(mediaItem.mediaId).first()?.playbackUrl
+                    val playbackUrl = database.format(mediaItem.mediaId).first()?.playbackTrackingUrl
                         ?: YTPlayerUtils.playerResponseForMetadata(mediaItem.mediaId, null)
                             .getOrNull()?.playbackTracking?.videostatsPlaybackUrl?.baseUrl
 
