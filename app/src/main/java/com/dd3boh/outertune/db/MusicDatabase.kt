@@ -334,13 +334,14 @@ val MIGRATION_15_16 = object : Migration(15, 16) {
 }
 
 /**
- * Merge shuffled and unshuffled queue
+ * Merge shuffled and un-shuffled queue
  */
 val MIGRATION_16_17 = object : Migration(16, 17) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE format RENAME playbackUrl to playbackTrackingUrl")
 
         data class TempQueueSong(val queue: String, val song: String, val index: Long, var shuffleIndex: Long)
+
         val shuffled = ArrayList<TempQueueSong>()
         val unShuffled = ArrayList<TempQueueSong>()
         val result = ArrayList<TempQueueSong>()
@@ -387,17 +388,28 @@ val MIGRATION_16_17 = object : Migration(16, 17) {
             val songs = unShuffled.filter { it.queue == queue }.toMutableList()
             val shuffled = shuffled.filter { it.queue == queue }.toMutableList()
 
+            var tempResult = ArrayList<TempQueueSong>()
             // assign indexes
             for (s in songs) {
                 val match = shuffled.find { it.song == s.song }
 
                 match.let {
                     s.shuffleIndex = it?.index!!
-                    result.add(s)
+                    tempResult.add(s)
                     shuffled.remove(match) // remove from shuffled, so duplicates are handled
                 }
             }
+            // queues could be malformed, so only take pairs of songs
+            tempResult.removeAll { it.shuffleIndex <= -1L }
+
+            // regenerate shuffle indexes
+            val reIndexShuffle = ArrayList<TempQueueSong>()
+            reIndexShuffle.addAll(tempResult)
+            reIndexShuffle.sortBy { it.shuffleIndex }
+            reIndexShuffle.forEachIndexed { index, s -> s.shuffleIndex = index.toLong() }
+
             unShuffled.removeAll(songs)
+            result.addAll(tempResult)
         }
 
         // rewrite db
@@ -407,21 +419,16 @@ val MIGRATION_16_17 = object : Migration(16, 17) {
         db.execSQL("ALTER TABLE queue_song_map DROP COLUMN shuffled")
         var i = 0L
         result.forEach {
-//            println("4")
-            if (it.shuffleIndex != -1L) { // queues could be malformed, so only take pairs of songs
-                db.insert(
-                    "queue_song_map", SQLiteDatabase.CONFLICT_IGNORE, contentValuesOf(
-                        "id" to i++,
-                        "queueId" to it.queue,
-                        "songId" to it.song,
-                        "`index`" to it.index,
-                        "shuffledIndex" to it.shuffleIndex
-                    )
+            db.insert(
+                "queue_song_map", SQLiteDatabase.CONFLICT_IGNORE, contentValuesOf(
+                    "id" to i++,
+                    "queueId" to it.queue,
+                    "songId" to it.song,
+                    "`index`" to it.index,
+                    "shuffledIndex" to it.shuffleIndex
                 )
-            }
+            )
         }
-
-
     }
 }
 
