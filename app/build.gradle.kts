@@ -184,6 +184,7 @@ dependencies {
 
     implementation(libs.timber)
 
+    implementation(libs.ktor.client.core)
     implementation(libs.ktor.serialization.json)
 
     /*
