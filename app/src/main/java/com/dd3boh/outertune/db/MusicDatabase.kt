@@ -414,10 +414,20 @@ val MIGRATION_16_17 = object : Migration(16, 17) {
         }
 
         // rewrite db
-        db.execSQL("DELETE FROM queue_song_map")
-        db.execSQL("ALTER TABLE queue_song_map ADD COLUMN `index` INTEGER NOT NULL")
-        db.execSQL("ALTER TABLE queue_song_map ADD COLUMN shuffledIndex INTEGER NOT NULL")
-        db.execSQL("ALTER TABLE queue_song_map DROP COLUMN shuffled")
+        db.execSQL("DROP TABLE queue_song_map")
+        db.execSQL("""
+            CREATE TABLE `queue_song_map` (
+                `queueId` INTEGER NOT NULL,
+                `index` INTEGER NOT NULL,
+                `shuffledIndex` INTEGER NOT NULL,
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `songId` TEXT NOT NULL,
+                FOREIGN KEY(`queueId`) REFERENCES `queue`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE,
+                FOREIGN KEY(`songId`) REFERENCES `song`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+            )
+        """)
+        db.execSQL("CREATE INDEX `index_queue_song_map_queueId` ON `queue_song_map` (`queueId` ASC)")
+        db.execSQL("CREATE INDEX `index_queue_song_map_songId` ON `queue_song_map` (`songId` ASC)")
         var i = 0L
         result.forEach {
             db.insert(
