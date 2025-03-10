@@ -333,7 +333,7 @@ fun LibraryScreen(
                                     item {
                                         EmptyPlaceholder(
                                             icon = Icons.AutoMirrored.Rounded.List,
-                                            text = stringResource(R.string.library_album_empty),
+                                            text = stringResource(R.string.library_empty),
                                             modifier = Modifier.animateItem()
                                         )
                                     }
@@ -446,7 +446,7 @@ fun LibraryScreen(
                                     item {
                                         EmptyPlaceholder(
                                             icon = Icons.AutoMirrored.Rounded.List,
-                                            text = stringResource(R.string.library_album_empty),
+                                            text = stringResource(R.string.library_empty),
                                             modifier = Modifier.animateItem()
                                         )
                                     }
