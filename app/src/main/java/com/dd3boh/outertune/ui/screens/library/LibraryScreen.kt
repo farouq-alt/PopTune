@@ -328,8 +328,8 @@ fun LibraryScreen(
                                 }
                             }
 
-                            allItems?.let { allItems ->
-                                if (allItems.isEmpty()) {
+                            allItems.let { allItems ->
+                                if (allItems.isEmpty() && !showLikedAndDownloadedPlaylist) {
                                     item {
                                         EmptyPlaceholder(
                                             icon = Icons.AutoMirrored.Rounded.List,
@@ -442,7 +442,7 @@ fun LibraryScreen(
                             }
 
                             allItems.let { allItems ->
-                                if (allItems.isEmpty()) {
+                                if (allItems.isEmpty() && !showLikedAndDownloadedPlaylist) {
                                     item {
                                         EmptyPlaceholder(
                                             icon = Icons.AutoMirrored.Rounded.List,
