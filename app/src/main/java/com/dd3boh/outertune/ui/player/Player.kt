@@ -22,7 +22,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.animation.with
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -118,6 +117,7 @@ import com.dd3boh.outertune.constants.PlayerBackgroundStyleKey
 import com.dd3boh.outertune.constants.PlayerHorizontalPadding
 import com.dd3boh.outertune.constants.QueuePeekHeight
 import com.dd3boh.outertune.constants.ShowLyricsKey
+import com.dd3boh.outertune.constants.SwipeToSkip
 import com.dd3boh.outertune.extensions.metadata
 import com.dd3boh.outertune.extensions.togglePlayPause
 import com.dd3boh.outertune.extensions.toggleRepeatMode
@@ -198,6 +198,7 @@ fun BottomSheetPlayer(
         thumbnailLazyGridState.animateScrollToItem(maxOf(0, mediaItems.indexOf(mediaMetadata)))
     }
 
+    val swipeToSkip by rememberPreference(SwipeToSkip, defaultValue = true)
     val horizontalLazyGridItemWidthFactor = 1f
     val thumbnailSnapLayoutInfoProvider = remember(thumbnailLazyGridState) {
         SnapLayoutInfoProvider(
@@ -670,7 +671,7 @@ fun BottomSheetPlayer(
                             state = thumbnailLazyGridState,
                             rows = GridCells.Fixed(1),
                             flingBehavior = rememberSnapFlingBehavior(thumbnailSnapLayoutInfoProvider),
-                            userScrollEnabled = state.isExpanded
+                            userScrollEnabled = state.isExpanded && swipeToSkip
                         ) {
                             items(
                                 items = mediaItems,
@@ -725,7 +726,7 @@ fun BottomSheetPlayer(
                             state = thumbnailLazyGridState,
                             rows = GridCells.Fixed(1),
                             flingBehavior = rememberSnapFlingBehavior(thumbnailSnapLayoutInfoProvider),
-                            userScrollEnabled = state.isExpanded
+                            userScrollEnabled = state.isExpanded && swipeToSkip
                         ) {
                             items(
                                 items = mediaItems,
