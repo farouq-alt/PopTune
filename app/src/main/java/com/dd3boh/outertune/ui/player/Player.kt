@@ -650,7 +650,9 @@ fun BottomSheetPlayer(
                 ) {
                     BoxWithConstraints(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .nestedScroll(state.preUpPostDownNestedScrollConnection)
                     ) {
                         val horizontalLazyGridItemWidth = maxWidth * horizontalLazyGridItemWidthFactor
 
@@ -663,19 +665,14 @@ fun BottomSheetPlayer(
                                 items = mediaItems,
                                 key = { it.id }
                             ) {
-                                Box(
+                                Thumbnail(
+                                    sliderPositionProvider = { sliderPosition },
                                     modifier = Modifier
                                         .width(horizontalLazyGridItemWidth)
-                                        .animateContentSize()
-                                ) {
-                                    Thumbnail(
-                                        sliderPositionProvider = { sliderPosition },
-                                        modifier = Modifier
-                                            .nestedScroll(state.preUpPostDownNestedScrollConnection),
-                                        showLyricsOnClick = true,
-                                        customMediaMetadata = it
-                                    )
-                                }
+                                        .animateContentSize(),
+                                    showLyricsOnClick = true,
+                                    customMediaMetadata = it
+                                )
                             }
                         }
                     }
@@ -707,7 +704,9 @@ fun BottomSheetPlayer(
                 ) {
                     BoxWithConstraints(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .nestedScroll(state.preUpPostDownNestedScrollConnection)
                     ) {
                         val horizontalLazyGridItemWidth = maxWidth * horizontalLazyGridItemWidthFactor
 
@@ -720,19 +719,14 @@ fun BottomSheetPlayer(
                                 items = mediaItems,
                                 key = { it.id }
                             ) {
-                                Box(
+                                Thumbnail(
                                     modifier = Modifier
                                         .width(horizontalLazyGridItemWidth)
-                                        .animateContentSize()
-                                ) {
-                                    Thumbnail(
-                                        sliderPositionProvider = { sliderPosition },
-                                        modifier = Modifier
-                                            .nestedScroll(state.preUpPostDownNestedScrollConnection),
-                                        showLyricsOnClick = true,
-                                        customMediaMetadata = it
-                                    )
-                                }
+                                        .animateContentSize(),
+                                    sliderPositionProvider = { sliderPosition },
+                                    showLyricsOnClick = true,
+                                    customMediaMetadata = it
+                                )
                             }
                         }
                     }
