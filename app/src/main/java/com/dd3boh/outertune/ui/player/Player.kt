@@ -669,7 +669,8 @@ fun BottomSheetPlayer(
                         LazyHorizontalGrid(
                             state = thumbnailLazyGridState,
                             rows = GridCells.Fixed(1),
-                            flingBehavior = rememberSnapFlingBehavior(thumbnailSnapLayoutInfoProvider)
+                            flingBehavior = rememberSnapFlingBehavior(thumbnailSnapLayoutInfoProvider),
+                            userScrollEnabled = state.isExpanded
                         ) {
                             items(
                                 items = mediaItems,
@@ -723,7 +724,8 @@ fun BottomSheetPlayer(
                         LazyHorizontalGrid(
                             state = thumbnailLazyGridState,
                             rows = GridCells.Fixed(1),
-                            flingBehavior = rememberSnapFlingBehavior(thumbnailSnapLayoutInfoProvider)
+                            flingBehavior = rememberSnapFlingBehavior(thumbnailSnapLayoutInfoProvider),
+                            userScrollEnabled = state.isExpanded
                         ) {
                             items(
                                 items = mediaItems,
