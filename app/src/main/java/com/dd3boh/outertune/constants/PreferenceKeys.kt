@@ -128,6 +128,7 @@ enum class ScannerMatchCriteria {
  */
 val DevSettingsKey = booleanPreferencesKey("devSettings")
 val FirstSetupPassed = booleanPreferencesKey("firstSetupPassed")
+val SwipeToSkip = booleanPreferencesKey("swipeToSkip")
 
 
 /**

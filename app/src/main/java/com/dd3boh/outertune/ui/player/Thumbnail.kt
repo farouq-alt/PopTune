@@ -13,7 +13,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
@@ -40,6 +38,7 @@ import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.constants.PlayerHorizontalPadding
 import com.dd3boh.outertune.constants.ShowLyricsKey
 import com.dd3boh.outertune.constants.ThumbnailCornerRadius
+import com.dd3boh.outertune.models.MediaMetadata
 import com.dd3boh.outertune.ui.component.AsyncImageLocal
 import com.dd3boh.outertune.ui.component.Lyrics
 import com.dd3boh.outertune.ui.utils.imageCache
@@ -50,16 +49,17 @@ fun Thumbnail(
     sliderPositionProvider: () -> Long?,
     modifier: Modifier = Modifier,
     showLyricsOnClick: Boolean = false,
+    customMediaMetadata: MediaMetadata? = null
 ) {
     val haptic = LocalHapticFeedback.current
     val playerConnection = LocalPlayerConnection.current ?: return
     val currentView = LocalView.current
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val playerMediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val error by playerConnection.error.collectAsState()
 
-    var showLyrics by rememberPreference(ShowLyricsKey, defaultValue = false)
+    val mediaMetadata = customMediaMetadata ?: playerMediaMetadata
 
-    var dragDirection = 0f
+    var showLyrics by rememberPreference(ShowLyricsKey, defaultValue = false)
 
     DisposableEffect(showLyrics) {
         currentView.keepScreenOn = showLyrics
@@ -110,23 +110,6 @@ fun Thumbnail(
                             .aspectRatio(1f)
                             .clip(RoundedCornerShape(ThumbnailCornerRadius * 2))
                             .clickable(enabled = showLyricsOnClick) { showLyrics = !showLyrics }
-                            .pointerInput(Unit) {
-                                detectHorizontalDragGestures(
-                                    onDragEnd = {
-                                        if (dragDirection < 0) { // swipe left
-                                            playerConnection.player.seekToNext()
-                                        } else if (dragDirection > 0) { // swipe right
-                                            playerConnection.player.seekToPrevious()
-                                        }
-                                        haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
-                                    },
-                                    onDragStart = {},
-                                    onDragCancel = {},
-                                    onHorizontalDrag = { _, dragAmount ->
-                                        dragDirection = dragAmount
-                                    }
-                                )
-                            }
                     )
                 }
             }

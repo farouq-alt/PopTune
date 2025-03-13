@@ -13,6 +13,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.graphics.drawable.BitmapDrawable
 import android.os.PowerManager
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearEasing
@@ -20,13 +21,17 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -45,6 +50,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreVert
@@ -66,6 +75,7 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -107,6 +117,8 @@ import com.dd3boh.outertune.constants.PlayerBackgroundStyleKey
 import com.dd3boh.outertune.constants.PlayerHorizontalPadding
 import com.dd3boh.outertune.constants.QueuePeekHeight
 import com.dd3boh.outertune.constants.ShowLyricsKey
+import com.dd3boh.outertune.constants.SwipeToSkip
+import com.dd3boh.outertune.extensions.metadata
 import com.dd3boh.outertune.extensions.togglePlayPause
 import com.dd3boh.outertune.extensions.toggleRepeatMode
 import com.dd3boh.outertune.models.MediaMetadata
@@ -123,6 +135,7 @@ import com.dd3boh.outertune.ui.menu.PlayerMenu
 import com.dd3boh.outertune.ui.screens.settings.DarkMode
 import com.dd3boh.outertune.ui.screens.settings.PlayerBackgroundStyle
 import com.dd3boh.outertune.ui.theme.extractGradientColors
+import com.dd3boh.outertune.ui.utils.SnapLayoutInfoProvider
 import com.dd3boh.outertune.ui.utils.imageCache
 import com.dd3boh.outertune.utils.makeTimeString
 import com.dd3boh.outertune.utils.rememberEnumPreference
@@ -132,7 +145,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun BottomSheetPlayer(
     state: BottomSheetState,
@@ -152,6 +165,49 @@ fun BottomSheetPlayer(
 
     val canSkipPrevious by playerConnection.canSkipPrevious.collectAsState()
     val canSkipNext by playerConnection.canSkipNext.collectAsState()
+
+    val thumbnailLazyGridState = rememberLazyGridState()
+
+    val previousMediaMetadata = if (playerConnection.player.hasPreviousMediaItem()) {
+        val previousIndex = playerConnection.player.previousMediaItemIndex
+        playerConnection.player.getMediaItemAt(previousIndex).metadata
+    } else null
+
+    val nextMediaMetadata = if (playerConnection.player.hasNextMediaItem()) {
+        val nextIndex = playerConnection.player.nextMediaItemIndex
+        playerConnection.player.getMediaItemAt(nextIndex).metadata
+    } else null
+
+    val mediaItems = listOfNotNull(previousMediaMetadata, mediaMetadata, nextMediaMetadata)
+    val currentMediaIndex = mediaItems.indexOf(mediaMetadata)
+
+    val currentItem by remember { derivedStateOf { thumbnailLazyGridState.firstVisibleItemIndex } }
+    val itemScrollOffset by remember { derivedStateOf { thumbnailLazyGridState.firstVisibleItemScrollOffset } }
+
+    LaunchedEffect(itemScrollOffset) {
+        if (itemScrollOffset != 0) return@LaunchedEffect
+
+        if (currentItem > currentMediaIndex)
+            playerConnection.player.seekToNext()
+        else if (currentItem < currentMediaIndex)
+            playerConnection.player.seekToPrevious()
+    }
+
+    LaunchedEffect(mediaMetadata) {
+        // When the current media changes, scroll to it
+        thumbnailLazyGridState.animateScrollToItem(maxOf(0, mediaItems.indexOf(mediaMetadata)))
+    }
+
+    val swipeToSkip by rememberPreference(SwipeToSkip, defaultValue = true)
+    val horizontalLazyGridItemWidthFactor = 1f
+    val thumbnailSnapLayoutInfoProvider = remember(thumbnailLazyGridState) {
+        SnapLayoutInfoProvider(
+            lazyGridState = thumbnailLazyGridState,
+            positionInLayout = { layoutSize, itemSize ->
+                (layoutSize * horizontalLazyGridItemWidthFactor / 2f - itemSize / 2f)
+            }
+        )
+    }
 
     val playerBackground by rememberEnumPreference(key = PlayerBackgroundStyleKey, defaultValue = PlayerBackgroundStyle.DEFAULT)
 
@@ -543,11 +599,27 @@ fun BottomSheetPlayer(
             enter = fadeIn(tween(1000)),
             exit = fadeOut()
         ) {
-            if (playerBackground == PlayerBackgroundStyle.BLUR) {
-                if (mediaMetadata?.isLocal == true) {
-                    mediaMetadata?.let {
-                        AsyncImageLocal(
-                            image = { imageCache.getLocalThumbnail(it.localPath) },
+            AnimatedContent(
+                targetState = mediaMetadata,
+                transitionSpec = {
+                    fadeIn(tween(1000)).togetherWith(fadeOut(tween(1000)))
+                }
+            ) { metadata ->
+                if (playerBackground == PlayerBackgroundStyle.BLUR) {
+                    if (metadata?.isLocal == true) {
+                        metadata.let {
+                            AsyncImageLocal(
+                                image = { imageCache.getLocalThumbnail(it.localPath) },
+                                contentDescription = null,
+                                contentScale = ContentScale.FillBounds,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .blur(200.dp)
+                            )
+                        }
+                    } else {
+                        AsyncImage(
+                            model = metadata?.thumbnailUrl,
                             contentDescription = null,
                             contentScale = ContentScale.FillBounds,
                             modifier = Modifier
@@ -555,28 +627,28 @@ fun BottomSheetPlayer(
                                 .blur(200.dp)
                         )
                     }
-                } else {
-                    AsyncImage(
-                        model = mediaMetadata?.thumbnailUrl,
-                        contentDescription = null,
-                        contentScale = ContentScale.FillBounds,
+
+                    Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .blur(200.dp)
+                            .background(Color.Black.copy(alpha = 0.3f))
                     )
                 }
+            }
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.3f))
-                )
-            } else if (playerBackground == PlayerBackgroundStyle.GRADIENT && gradientColors.size >= 2) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Brush.verticalGradient(gradientColors), alpha = 0.8f)
-                )
+            AnimatedContent(
+                targetState = gradientColors,
+                transitionSpec = {
+                    fadeIn(tween(1000)).togetherWith(fadeOut(tween(1000)))
+                }
+            ) { colors ->
+                if (playerBackground == PlayerBackgroundStyle.GRADIENT && colors.size >= 2) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Brush.verticalGradient(colors), alpha = 0.8f)
+                    )
+                }
             }
 
             if (playerBackground != PlayerBackgroundStyle.DEFAULT && showLyrics) {
@@ -596,18 +668,34 @@ fun BottomSheetPlayer(
                         .padding(bottom = queueSheetState.collapsedBound)
                         .fillMaxSize()
                 ) {
-                    Box(
+                    BoxWithConstraints(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
-                            .weight(if (showLyrics) 0.6f else 1f, false)
-                            .animateContentSize()
+                            .weight(1f)
+                            .nestedScroll(state.preUpPostDownNestedScrollConnection)
                     ) {
-                        Thumbnail(
-                            sliderPositionProvider = { sliderPosition },
-                            modifier = Modifier
-                                .nestedScroll(state.preUpPostDownNestedScrollConnection),
-                            showLyricsOnClick = true
-                        )
+                        val horizontalLazyGridItemWidth = maxWidth * horizontalLazyGridItemWidthFactor
+
+                        LazyHorizontalGrid(
+                            state = thumbnailLazyGridState,
+                            rows = GridCells.Fixed(1),
+                            flingBehavior = rememberSnapFlingBehavior(thumbnailSnapLayoutInfoProvider),
+                            userScrollEnabled = state.isExpanded && swipeToSkip
+                        ) {
+                            items(
+                                items = mediaItems,
+                                key = { it.id }
+                            ) {
+                                Thumbnail(
+                                    sliderPositionProvider = { sliderPosition },
+                                    modifier = Modifier
+                                        .width(horizontalLazyGridItemWidth)
+                                        .animateContentSize(),
+                                    showLyricsOnClick = true,
+                                    customMediaMetadata = it
+                                )
+                            }
+                        }
                     }
 
                     Column(
@@ -635,16 +723,34 @@ fun BottomSheetPlayer(
                         .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Horizontal))
                         .padding(bottom = queueSheetState.collapsedBound)
                 ) {
-                    Box(
+                    BoxWithConstraints(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .nestedScroll(state.preUpPostDownNestedScrollConnection)
                     ) {
-                        Thumbnail(
-                            sliderPositionProvider = { sliderPosition },
-                            modifier = Modifier
-                                .nestedScroll(state.preUpPostDownNestedScrollConnection),
-                            showLyricsOnClick = true
-                        )
+                        val horizontalLazyGridItemWidth = maxWidth * horizontalLazyGridItemWidthFactor
+
+                        LazyHorizontalGrid(
+                            state = thumbnailLazyGridState,
+                            rows = GridCells.Fixed(1),
+                            flingBehavior = rememberSnapFlingBehavior(thumbnailSnapLayoutInfoProvider),
+                            userScrollEnabled = state.isExpanded && swipeToSkip
+                        ) {
+                            items(
+                                items = mediaItems,
+                                key = { it.id }
+                            ) {
+                                Thumbnail(
+                                    modifier = Modifier
+                                        .width(horizontalLazyGridItemWidth)
+                                        .animateContentSize(),
+                                    sliderPositionProvider = { sliderPosition },
+                                    showLyricsOnClick = true,
+                                    customMediaMetadata = it
+                                )
+                            }
+                        }
                     }
 
                     Spacer(Modifier.height(8.dp))
