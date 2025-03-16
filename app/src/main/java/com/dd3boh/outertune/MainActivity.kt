@@ -238,7 +238,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.net.URLDecoder
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -586,12 +585,7 @@ class MainActivity : ComponentActivity() {
                             if (youtubeNavigator(it.toUri())) {
                                 // don't do anything
                             } else {
-                                val query = if (it[it.lastIndex] == '%') {
-                                    it.substring(0, it.lastIndex)
-                                } else {
-                                    it
-                                }
-                                navController.navigate("search/${query.urlEncode()}")
+                                navController.navigate("search/${it.urlEncode()}")
                                 if (dataStore[PauseSearchHistoryKey] != true) {
                                     database.query {
                                         insert(SearchHistory(query = it))
@@ -663,7 +657,7 @@ class MainActivity : ComponentActivity() {
                     LaunchedEffect(navBackStackEntry) {
                         if (navBackStackEntry?.destination?.route?.startsWith("search/") == true) {
                             val searchQuery = withContext(Dispatchers.IO) {
-                                URLDecoder.decode(navBackStackEntry?.arguments?.getString("query")!!, "UTF-8")
+                                navBackStackEntry?.arguments?.getString("query")!!
                             }
                             onQueryChange(TextFieldValue(searchQuery, TextRange(searchQuery.length)))
                         } else if (navigationItems.fastAny { it.route == navBackStackEntry?.destination?.route }) {
@@ -871,12 +865,7 @@ class MainActivity : ComponentActivity() {
                                                         if (youtubeNavigator(it.toUri())) {
                                                             return@OnlineSearchScreen
                                                         } else {
-                                                            val query = if (it[it.lastIndex] == '%') {
-                                                                it.substring(0, it.lastIndex)
-                                                            } else {
-                                                                it
-                                                            }
-                                                            navController.navigate("search/${query.urlEncode()}")
+                                                            navController.navigate("search/${it.urlEncode()}")
                                                             if (dataStore[PauseSearchHistoryKey] != true) {
                                                                 database.query {
                                                                     insert(SearchHistory(query = it))
