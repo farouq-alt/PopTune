@@ -1,6 +1,5 @@
 package com.dd3boh.outertune.ui.screens.library
 
-import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -46,9 +45,8 @@ import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.CONTENT_TYPE_HEADER
 import com.dd3boh.outertune.constants.CONTENT_TYPE_LIST
 import com.dd3boh.outertune.constants.CONTENT_TYPE_PLAYLIST
-import com.dd3boh.outertune.constants.EnabledTabsKey
+import com.dd3boh.outertune.constants.EnabledFiltersKey
 import com.dd3boh.outertune.constants.GridThumbnailHeight
-import com.dd3boh.outertune.constants.LibraryFilter
 import com.dd3boh.outertune.constants.LibraryFilterKey
 import com.dd3boh.outertune.constants.LibrarySortDescendingKey
 import com.dd3boh.outertune.constants.LibrarySortType
@@ -72,9 +70,10 @@ import com.dd3boh.outertune.ui.component.LibraryPlaylistGridItem
 import com.dd3boh.outertune.ui.component.LibraryPlaylistListItem
 import com.dd3boh.outertune.ui.component.LocalMenuState
 import com.dd3boh.outertune.ui.component.SortHeader
+import com.dd3boh.outertune.ui.screens.settings.DEFAULT_ENABLED_FILTERS
 import com.dd3boh.outertune.ui.screens.settings.DEFAULT_ENABLED_TABS
-import com.dd3boh.outertune.ui.screens.settings.NavigationTab
-import com.dd3boh.outertune.utils.decodeTabString
+import com.dd3boh.outertune.ui.screens.settings.LibraryFilter
+import com.dd3boh.outertune.utils.decodeFilterString
 import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.viewmodels.LibraryViewModel
@@ -94,7 +93,7 @@ fun LibraryScreen(
     val coroutineScope = rememberCoroutineScope()
 
     var viewType by rememberEnumPreference(LibraryViewTypeKey, LibraryViewType.GRID)
-    val enabledTabs by rememberPreference(EnabledTabsKey, defaultValue = DEFAULT_ENABLED_TABS)
+    val enabledFilters by rememberPreference(EnabledFiltersKey, defaultValue = DEFAULT_ENABLED_FILTERS)
     var filter by rememberEnumPreference(LibraryFilterKey, LibraryFilter.ALL)
 
     val (sortType, onSortTypeChange) = rememberEnumPreference(LibrarySortTypeKey, LibrarySortType.CREATE_DATE)
@@ -124,15 +123,16 @@ fun LibraryScreen(
         LibraryFilter.SONGS -> stringResource(R.string.songs)
         LibraryFilter.FOLDERS -> stringResource(R.string.folders)
         LibraryFilter.ALL -> ""
+        else -> ""
     }
 
-    val defaultFilter: Collection<Pair<LibraryFilter, String>> = decodeTabString(enabledTabs).map {
+    val defaultFilter: Collection<Pair<LibraryFilter, String>> = decodeFilterString(enabledFilters).map {
         when(it) {
-            NavigationTab.ALBUM -> LibraryFilter.ALBUMS to stringResource(R.string.albums)
-            NavigationTab.ARTIST -> LibraryFilter.ARTISTS to stringResource(R.string.artists)
-            NavigationTab.PLAYLIST -> LibraryFilter.PLAYLISTS to stringResource(R.string.playlists)
-            NavigationTab.SONG -> LibraryFilter.SONGS to stringResource(R.string.songs)
-            NavigationTab.FOLDERS -> LibraryFilter.FOLDERS to stringResource(R.string.folders)
+            LibraryFilter.ALBUMS -> LibraryFilter.ALBUMS to stringResource(R.string.albums)
+            LibraryFilter.ARTISTS -> LibraryFilter.ARTISTS to stringResource(R.string.artists)
+            LibraryFilter.PLAYLISTS -> LibraryFilter.PLAYLISTS to stringResource(R.string.playlists)
+            LibraryFilter.SONGS -> LibraryFilter.SONGS to stringResource(R.string.songs)
+            LibraryFilter.FOLDERS -> LibraryFilter.FOLDERS to stringResource(R.string.folders)
             else -> LibraryFilter.ALL to stringResource(R.string.home) // there is no all filter, use as null value
         }
     }.filterNot { it.first == LibraryFilter.ALL }
@@ -497,6 +497,7 @@ fun LibraryScreen(
                         }
                     }
                 }
+            else -> {}
         }
     }
 }

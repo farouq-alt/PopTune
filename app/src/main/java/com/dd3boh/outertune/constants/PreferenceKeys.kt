@@ -18,6 +18,7 @@ val SwipeToQueueKey = booleanPreferencesKey("swipeToQueue")
 val FlatSubfoldersKey = booleanPreferencesKey("flatSubfolders")
 
 val EnabledTabsKey = stringPreferencesKey("enabledTabs")
+val EnabledFiltersKey = stringPreferencesKey("enabledFilters")
 val DefaultOpenTabKey = stringPreferencesKey("defaultOpenTab")
 val SlimNavBarKey = booleanPreferencesKey("slimNavBar")
 
@@ -210,10 +211,6 @@ enum class AlbumFilter {
 
 enum class PlaylistFilter {
     LIBRARY, DOWNLOADED
-}
-
-enum class LibraryFilter {
-    ALL, ALBUMS, ARTISTS, PLAYLISTS, SONGS, FOLDERS
 }
 
 val SearchSourceKey = stringPreferencesKey("searchSource")
