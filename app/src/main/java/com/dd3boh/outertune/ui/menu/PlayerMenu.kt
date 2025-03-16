@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
@@ -24,6 +26,7 @@ import androidx.compose.material.icons.rounded.AddCircleOutline
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LibraryAdd
 import androidx.compose.material.icons.rounded.LibraryAddCheck
+import androidx.compose.material.icons.rounded.MoreTime
 import androidx.compose.material.icons.rounded.Radio
 import androidx.compose.material.icons.rounded.RemoveCircleOutline
 import androidx.compose.material.icons.rounded.Share
@@ -35,9 +38,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -52,12 +57,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -89,7 +100,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.time.LocalDateTime
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import kotlin.math.log2
 import kotlin.math.pow
 import kotlin.math.round
@@ -204,7 +219,10 @@ fun PlayerMenu(
         )
     }
 
-    val sleepTimerEnabled = remember(playerConnection.service.sleepTimer.triggerTime, playerConnection.service.sleepTimer.pauseWhenSongEnd) {
+    val sleepTimerEnabled = remember(
+        playerConnection.service.sleepTimer.triggerTime,
+        playerConnection.service.sleepTimer.pauseWhenSongEnd
+    ) {
         playerConnection.service.sleepTimer.isActive
     }
 
@@ -257,21 +275,98 @@ fun PlayerMenu(
                 }
             },
             text = {
+                val focusRequester = remember {
+                    FocusRequester()
+                }
+
+                var showDialog by remember {
+                    mutableStateOf(false)
+                }
+
+                LaunchedEffect(showDialog) {
+                    if (showDialog) {
+                        delay(300)
+                        focusRequester.requestFocus()
+                    }
+                }
+
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = pluralStringResource(
-                            R.plurals.minute,
-                            sleepTimerValue.roundToInt(),
-                            sleepTimerValue.roundToInt()
-                        ),
-                        style = MaterialTheme.typography.bodyLarge
+                    val pluralString = pluralStringResource(
+                        R.plurals.minute,
+                        sleepTimerValue.roundToInt(),
+                        sleepTimerValue.roundToInt()
                     )
+
+                    val endTime = System.currentTimeMillis() + (sleepTimerValue.roundToInt() * 60 * 1000).toLong()
+                    val calendarNow = Calendar.getInstance()
+                    val calendarEnd = Calendar.getInstance().apply { timeInMillis = endTime }
+
+                    // show date if it will span to next day
+                    val endTimeString =
+                        if (calendarNow.get(Calendar.DAY_OF_YEAR) == calendarEnd.get(Calendar.DAY_OF_YEAR) &&
+                            calendarNow.get(Calendar.YEAR) == calendarEnd.get(Calendar.YEAR)
+                        ) {
+                            SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT, Locale.getDefault())
+                                .format(Date(endTime))
+                        } else {
+                            SimpleDateFormat.getDateTimeInstance(
+                                SimpleDateFormat.SHORT,
+                                SimpleDateFormat.SHORT,
+                                Locale.getDefault()
+                            ).format(Date(endTime))
+                        }
+
+                    Text(
+                        text = "$pluralString\n$endTimeString",
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .clickable {
+                                showDialog = true
+                            }
+                    )
+
+                    // manual input
+                    if (showDialog) {
+                        val initialText = TextFieldValue(
+                            text = sleepTimerValue.roundToInt().toString(),
+                            selection = TextRange(0, sleepTimerValue.roundToInt().toString().length),
+                        )
+
+                        val (textFieldValue, onTextFieldValueChange) = remember {
+                            mutableStateOf(initialText)
+                        }
+
+                        TextField(
+                            value = textFieldValue,
+                            onValueChange = onTextFieldValueChange,
+                            placeholder = { pluralString },
+                            singleLine = true,
+                            leadingIcon = { Icon(Icons.Rounded.MoreTime, null) },
+                            colors = OutlinedTextFieldDefaults.colors(),
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Done,
+                                keyboardType = KeyboardType.Number
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    val text = textFieldValue.text.toFloatOrNull()
+                                    if (text != null) {
+                                        sleepTimerValue = textFieldValue.text.toFloatOrNull() ?: sleepTimerValue
+                                    }
+                                }
+                            ),
+                            modifier = Modifier
+                                .weight(weight = 1f, fill = false)
+                                .focusRequester(focusRequester)
+                        )
+                    }
 
                     Slider(
                         value = sleepTimerValue,
                         onValueChange = { sleepTimerValue = it },
-                        valueRange = 5f..120f,
-                        steps = (120 - 5) / 5 - 1,
+                        valueRange = 5f..120f
                     )
 
                     OutlinedButton(
@@ -295,10 +390,10 @@ fun PlayerMenu(
         DetailsDialog(
             mediaMetadata = mediaMetadata,
             currentFormat = currentFormat,
-            currentPlayCount = librarySong?.playCount?.fastSumBy { it.count }?: 0,
+            currentPlayCount = librarySong?.playCount?.fastSumBy { it.count } ?: 0,
             volume = playerConnection.player.volume,
             clipboardManager = clipboardManager,
-            setVisibility = {showDetailsDialog = it }
+            setVisibility = { showDetailsDialog = it }
         )
     }
 
