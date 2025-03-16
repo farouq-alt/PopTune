@@ -79,6 +79,7 @@ import com.zionhuang.innertube.YouTube
 import com.zionhuang.innertube.utils.parseCookieString
 import kotlinx.coroutines.runBlocking
 import java.net.Proxy
+import java.util.Locale
 
 @SuppressLint("PrivateResource")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -254,7 +255,19 @@ fun ContentSettings(
                     stringResource(R.string.system_default)
                 }
             },
-            onValueSelected = onContentLanguageChange
+            onValueSelected = { newValue ->
+                val locale = Locale.getDefault()
+                val languageTag = locale.toLanguageTag().replace("-Hant", "")
+
+                YouTube.locale = YouTube.locale.copy(
+                    hl = newValue.takeIf { it != SYSTEM_DEFAULT }
+                        ?: locale.language.takeIf { it in LanguageCodeToName }
+                        ?: languageTag.takeIf { it in LanguageCodeToName }
+                        ?: "en"
+                )
+
+                onContentLanguageChange(newValue)
+            }
         )
         ListPreference(
             title = { Text(stringResource(R.string.content_country)) },
@@ -266,7 +279,17 @@ fun ContentSettings(
                     stringResource(R.string.system_default)
                 }
             },
-            onValueSelected = onContentCountryChange
+            onValueSelected = { newValue ->
+                val locale = Locale.getDefault()
+
+                YouTube.locale = YouTube.locale.copy(
+                    gl = newValue.takeIf { it != SYSTEM_DEFAULT }
+                        ?: locale.country.takeIf { it in CountryCodeToName }
+                        ?: "US"
+                )
+
+                onContentCountryChange(newValue)
+            }
         )
 
         PreferenceGroupTitle(
