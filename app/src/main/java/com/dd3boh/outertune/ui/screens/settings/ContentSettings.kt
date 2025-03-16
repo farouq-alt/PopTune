@@ -60,6 +60,7 @@ import com.dd3boh.outertune.constants.ProxyEnabledKey
 import com.dd3boh.outertune.constants.ProxyTypeKey
 import com.dd3boh.outertune.constants.ProxyUrlKey
 import com.dd3boh.outertune.constants.SYSTEM_DEFAULT
+import com.dd3boh.outertune.constants.UseLoginForBrowse
 import com.dd3boh.outertune.constants.VisitorDataKey
 import com.dd3boh.outertune.constants.YtmSyncKey
 import com.dd3boh.outertune.ui.component.EditTextPreference
@@ -74,6 +75,7 @@ import com.dd3boh.outertune.ui.utils.backToMain
 import com.dd3boh.outertune.utils.dataStore
 import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
+import com.zionhuang.innertube.YouTube
 import com.zionhuang.innertube.utils.parseCookieString
 import kotlinx.coroutines.runBlocking
 import java.net.Proxy
@@ -106,6 +108,7 @@ fun ContentSettings(
     val (proxyType, onProxyTypeChange) = rememberEnumPreference(key = ProxyTypeKey, defaultValue = Proxy.Type.HTTP)
     val (proxyUrl, onProxyUrlChange) = rememberPreference(key = ProxyUrlKey, defaultValue = "host:port")
 
+    val (useLoginForBrowse, onUseLoginForBrowseChange) = rememberPreference(UseLoginForBrowse, false)
 
     // temp vars
     var showToken: Boolean by remember {
@@ -226,6 +229,16 @@ fun ContentSettings(
                 LikedAutodownloadMode.WIFI_ONLY -> stringResource(R.string.wifi_only)
             } },
             onValueSelected = onLikedAutoDownload
+        )
+        SwitchPreference(
+            title = { Text(stringResource(R.string.use_login_for_browse)) },
+            description = stringResource(R.string.use_login_for_browse_desc),
+            icon = { Icon(Icons.Rounded.Person, null) },
+            checked = useLoginForBrowse,
+            onCheckedChange = {
+                YouTube.useLoginForBrowse = it
+                onUseLoginForBrowseChange(it)
+            }
         )
 
         PreferenceGroupTitle(
