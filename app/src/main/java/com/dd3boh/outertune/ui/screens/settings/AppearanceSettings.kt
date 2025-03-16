@@ -64,12 +64,10 @@ import com.dd3boh.outertune.LocalPlayerAwareWindowInsets
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.DarkModeKey
 import com.dd3boh.outertune.constants.DefaultOpenTabKey
-import com.dd3boh.outertune.constants.DefaultOpenTabNewKey
 import com.dd3boh.outertune.constants.DynamicThemeKey
 import com.dd3boh.outertune.constants.EnabledTabsKey
 import com.dd3boh.outertune.constants.FlatSubfoldersKey
 import com.dd3boh.outertune.constants.ListItemHeight
-import com.dd3boh.outertune.constants.NewInterfaceKey
 import com.dd3boh.outertune.constants.PlayerBackgroundStyleKey
 import com.dd3boh.outertune.constants.PureBlackKey
 import com.dd3boh.outertune.constants.ShowLikedAndDownloadedPlaylist
@@ -99,13 +97,14 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
  * A: Artists
  * B: Albums
  * L: Playlists
+ * M: Library
  *
  * Not/won't implement
  * P: Player
  * Q: Queue
  * E: Search
  */
-const val DEFAULT_ENABLED_TABS = "HSABLF"
+const val DEFAULT_ENABLED_TABS = "HM"
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -119,8 +118,6 @@ fun AppearanceSettings(
     val (pureBlack, onPureBlackChange) = rememberPreference(PureBlackKey, defaultValue = false)
     val (enabledTabs, onEnabledTabsChange) = rememberPreference(EnabledTabsKey, defaultValue = DEFAULT_ENABLED_TABS)
     val (defaultOpenTab, onDefaultOpenTabChange) = rememberEnumPreference(DefaultOpenTabKey, defaultValue = NavigationTab.HOME)
-    val (defaultOpenTabNew, onDefaultOpenTabNewChange) = rememberEnumPreference(DefaultOpenTabNewKey, defaultValue = NavigationTabNew.HOME)
-    val (newInterfaceStyle, onNewInterfaceStyleChange) = rememberPreference(key = NewInterfaceKey, defaultValue = true)
     val (showLikedAndDownloadedPlaylist, onShowLikedAndDownloadedPlaylistChange) = rememberPreference(key = ShowLikedAndDownloadedPlaylist, defaultValue = true)
     val (swipe2Queue, onSwipe2QueueChange) = rememberPreference(SwipeToQueueKey, defaultValue = true)
     val (slimNav, onSlimNavChange) = rememberPreference(SlimNavBarKey, defaultValue = false)
@@ -226,12 +223,6 @@ fun AppearanceSettings(
             title = stringResource(R.string.grp_interface)
         )
         SwitchPreference(
-            title = { Text(stringResource(R.string.new_interface)) },
-            icon = { Icon(Icons.Rounded.Palette, null) },
-            checked = newInterfaceStyle,
-            onCheckedChange = onNewInterfaceStyleChange
-        )
-        SwitchPreference(
             title = { Text(stringResource(R.string.show_liked_and_downloaded_playlist)) },
             icon = { Icon(Icons.AutoMirrored.Rounded.PlaylistPlay, null) },
             checked = showLikedAndDownloadedPlaylist,
@@ -321,6 +312,7 @@ fun AppearanceSettings(
                                         NavigationTab.ARTIST -> stringResource(R.string.artists)
                                         NavigationTab.ALBUM -> stringResource(R.string.albums)
                                         NavigationTab.PLAYLIST -> stringResource(R.string.playlists)
+                                        NavigationTab.LIBRARY -> stringResource(R.string.library)
                                         else -> {
                                             stringResource(R.string.tab_arrangement_disable_tip)
                                         }
@@ -339,39 +331,25 @@ fun AppearanceSettings(
                 InfoLabel(stringResource(R.string.tab_arrangement_home_required))
             }
 
-        if (newInterfaceStyle) {
-            EnumListPreference(
-                title = { Text(stringResource(R.string.default_open_tab)) },
-                icon = { Icon(Icons.Rounded.Tab, null) },
-                selectedValue = defaultOpenTabNew,
-                onValueSelected = onDefaultOpenTabNewChange,
-                valueText = {
-                    when (it) {
-                        NavigationTabNew.HOME -> stringResource(R.string.home)
-                        NavigationTabNew.LIBRARY -> stringResource(R.string.library)
-                    }
+        EnumListPreference(
+            title = { Text(stringResource(R.string.default_open_tab)) },
+            icon = { Icon(Icons.Rounded.Tab, null) },
+            selectedValue = defaultOpenTab,
+            onValueSelected = onDefaultOpenTabChange,
+            values = NavigationTab.entries.filter { it != NavigationTab.NULL },
+            valueText = {
+                when (it) {
+                    NavigationTab.HOME -> stringResource(R.string.home)
+                    NavigationTab.SONG -> stringResource(R.string.songs)
+                    NavigationTab.FOLDERS -> stringResource(R.string.folders)
+                    NavigationTab.ARTIST -> stringResource(R.string.artists)
+                    NavigationTab.ALBUM -> stringResource(R.string.albums)
+                    NavigationTab.PLAYLIST -> stringResource(R.string.playlists)
+                    NavigationTab.LIBRARY -> stringResource(R.string.library)
+                    else -> ""
                 }
-            )
-        } else {
-            EnumListPreference(
-                title = { Text(stringResource(R.string.default_open_tab)) },
-                icon = { Icon(Icons.Rounded.Tab, null) },
-                selectedValue = defaultOpenTab,
-                onValueSelected = onDefaultOpenTabChange,
-                values = NavigationTab.entries.filter { it != NavigationTab.NULL },
-                valueText = {
-                    when (it) {
-                        NavigationTab.HOME -> stringResource(R.string.home)
-                        NavigationTab.SONG -> stringResource(R.string.songs)
-                        NavigationTab.FOLDERS -> stringResource(R.string.folders)
-                        NavigationTab.ARTIST -> stringResource(R.string.artists)
-                        NavigationTab.ALBUM -> stringResource(R.string.albums)
-                        NavigationTab.PLAYLIST -> stringResource(R.string.playlists)
-                        else -> ""
-                    }
-                }
-            )
-        }
+            }
+        )
 
         // flatten subfolders
         SwitchPreference(
@@ -412,10 +390,7 @@ enum class PlayerBackgroundStyle {
  * NULL is used to separate enabled and disabled tabs. It should be ignored in regular use
  */
 enum class NavigationTab {
-    HOME, SONG, FOLDERS, ARTIST, ALBUM, PLAYLIST, NULL
-}
-enum class NavigationTabNew {
-    HOME, LIBRARY
+    HOME, SONG, FOLDERS, ARTIST, ALBUM, PLAYLIST, LIBRARY, NULL
 }
 
 enum class LyricsPosition {

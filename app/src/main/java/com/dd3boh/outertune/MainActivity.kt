@@ -123,7 +123,6 @@ import com.dd3boh.outertune.constants.AppBarHeight
 import com.dd3boh.outertune.constants.AutomaticScannerKey
 import com.dd3boh.outertune.constants.DarkModeKey
 import com.dd3boh.outertune.constants.DefaultOpenTabKey
-import com.dd3boh.outertune.constants.DefaultOpenTabNewKey
 import com.dd3boh.outertune.constants.DynamicThemeKey
 import com.dd3boh.outertune.constants.EnabledTabsKey
 import com.dd3boh.outertune.constants.ExcludedScanPathsKey
@@ -135,7 +134,6 @@ import com.dd3boh.outertune.constants.LookupYtmArtistsKey
 import com.dd3boh.outertune.constants.MiniPlayerHeight
 import com.dd3boh.outertune.constants.NavigationBarAnimationSpec
 import com.dd3boh.outertune.constants.NavigationBarHeight
-import com.dd3boh.outertune.constants.NewInterfaceKey
 import com.dd3boh.outertune.constants.PauseSearchHistoryKey
 import com.dd3boh.outertune.constants.PersistentQueueKey
 import com.dd3boh.outertune.constants.PlayerBackgroundStyleKey
@@ -201,7 +199,6 @@ import com.dd3boh.outertune.ui.screens.settings.ExperimentalSettings
 import com.dd3boh.outertune.ui.screens.settings.LocalPlayerSettings
 import com.dd3boh.outertune.ui.screens.settings.LyricsSettings
 import com.dd3boh.outertune.ui.screens.settings.NavigationTab
-import com.dd3boh.outertune.ui.screens.settings.NavigationTabNew
 import com.dd3boh.outertune.ui.screens.settings.PlayerBackgroundStyle
 import com.dd3boh.outertune.ui.screens.settings.PlayerSettings
 import com.dd3boh.outertune.ui.screens.settings.PrivacySettings
@@ -329,7 +326,6 @@ class MainActivity : ComponentActivity() {
             val enableDynamicTheme by rememberPreference(DynamicThemeKey, defaultValue = true)
             val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
             val pureBlack by rememberPreference(PureBlackKey, defaultValue = false)
-            val newInterfaceStyle by rememberPreference(NewInterfaceKey, defaultValue = true)
             val isSystemInDarkTheme = isSystemInDarkTheme()
             val useDarkTheme = remember(darkTheme, isSystemInDarkTheme) {
                 if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
@@ -481,23 +477,21 @@ class MainActivity : ComponentActivity() {
 
                     val (slimNav) = rememberPreference(SlimNavBarKey, defaultValue = false)
                     val (enabledTabs) = rememberPreference(EnabledTabsKey, defaultValue = DEFAULT_ENABLED_TABS)
-                    val navigationItems =
-                        if (!newInterfaceStyle) Screens.getScreens(enabledTabs) else Screens.MainScreensNew
+                    val navigationItems = Screens.getScreens(enabledTabs)
                     val defaultOpenTab = remember {
-                        if (newInterfaceStyle) dataStore[DefaultOpenTabNewKey].toEnum(defaultValue = NavigationTabNew.HOME)
-                        else dataStore[DefaultOpenTabKey].toEnum(defaultValue = NavigationTab.HOME)
+                        dataStore[DefaultOpenTabKey].toEnum(defaultValue = NavigationTab.HOME)
                     }
                     val tabOpenedFromShortcut = remember {
                         // reroute to library page for new layout is handled in NavHost section
                         when (intent?.action) {
-                            ACTION_SONGS -> if (newInterfaceStyle) NavigationTabNew.LIBRARY else NavigationTab.SONG
-                            ACTION_ALBUMS -> if (newInterfaceStyle) NavigationTabNew.LIBRARY else NavigationTab.ALBUM
-                            ACTION_PLAYLISTS -> if (newInterfaceStyle) NavigationTabNew.LIBRARY else NavigationTab.PLAYLIST
+                            ACTION_SONGS -> if (navigationItems.contains(Screens.Songs)) NavigationTab.SONG else NavigationTab.LIBRARY
+                            ACTION_ALBUMS -> if (navigationItems.contains(Screens.Albums)) NavigationTab.ALBUM else NavigationTab.LIBRARY
+                            ACTION_PLAYLISTS -> if (navigationItems.contains(Screens.Playlists)) NavigationTab.PLAYLIST else NavigationTab.LIBRARY
                             else -> null
                         }
                     }
                     // setup filters for new layout
-                    if (tabOpenedFromShortcut != null && newInterfaceStyle) {
+                    if (tabOpenedFromShortcut != null && navigationItems.contains(Screens.Library)) {
                         var filter by rememberEnumPreference(LibraryFilterKey, LibraryFilter.ALL)
                         filter = when (intent?.action) {
                             ACTION_SONGS -> LibraryFilter.SONGS
@@ -507,7 +501,6 @@ class MainActivity : ComponentActivity() {
                             else -> LibraryFilter.ALL
                         }
                     }
-
 
                     val coroutineScope = rememberCoroutineScope()
                     var sharedSong: SongItem? by remember {
@@ -678,7 +671,7 @@ class MainActivity : ComponentActivity() {
                          * to avoid entering a "ghost" screen.
                          */
                         if (Screens.MainScreens.fastAny { it.route == navBackStackEntry?.destination?.route } ||
-                            Screens.MainScreensNew.fastAny { it.route == navBackStackEntry?.destination?.route }) {
+                            Screens.getScreens(enabledTabs).fastAny { it.route == navBackStackEntry?.destination?.route }) {
                             if (!navigationItems.fastAny { it.route == navBackStackEntry?.destination?.route }) {
                                 navController.popBackStack()
                                 navController.navigate(Screens.Home.route)
@@ -1031,8 +1024,7 @@ class MainActivity : ComponentActivity() {
                                     NavigationTab.ARTIST -> Screens.Artists
                                     NavigationTab.ALBUM -> Screens.Albums
                                     NavigationTab.PLAYLIST -> Screens.Playlists
-                                    NavigationTabNew.HOME -> Screens.Home
-                                    NavigationTabNew.LIBRARY -> Screens.Library
+                                    NavigationTab.LIBRARY -> Screens.Library
                                     else -> Screens.Home
                                 }.route,
                                 enterTransition = {

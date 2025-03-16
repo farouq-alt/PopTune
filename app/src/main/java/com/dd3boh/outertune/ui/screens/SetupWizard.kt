@@ -8,7 +8,6 @@
 
 package com.dd3boh.outertune.ui.screens
 
-import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -39,7 +38,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
-import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.automirrored.rounded.NavigateBefore
 import androidx.compose.material.icons.automirrored.rounded.NavigateNext
@@ -52,7 +50,6 @@ import androidx.compose.material.icons.rounded.DarkMode
 import androidx.compose.material.icons.rounded.Lyrics
 import androidx.compose.material.icons.rounded.MusicVideo
 import androidx.compose.material.icons.rounded.NotInterested
-import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.RadioButtonChecked
 import androidx.compose.material.icons.rounded.RadioButtonUnchecked
@@ -65,22 +62,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ripple
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -94,15 +87,12 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.util.fastForEach
-import androidx.compose.ui.util.fastForEachIndexed
 import androidx.navigation.NavController
 import com.dd3boh.outertune.BuildConfig
 import com.dd3boh.outertune.R
@@ -118,29 +108,21 @@ import com.dd3boh.outertune.constants.LibraryFilter
 import com.dd3boh.outertune.constants.LibraryFilterKey
 import com.dd3boh.outertune.constants.LocalLibraryEnableKey
 import com.dd3boh.outertune.constants.LyricTrimKey
-import com.dd3boh.outertune.constants.NavigationBarHeight
-import com.dd3boh.outertune.constants.NewInterfaceKey
 import com.dd3boh.outertune.constants.PureBlackKey
 import com.dd3boh.outertune.constants.VisitorDataKey
 import com.dd3boh.outertune.db.entities.ArtistEntity
 import com.dd3boh.outertune.db.entities.Song
 import com.dd3boh.outertune.db.entities.SongEntity
-import com.dd3boh.outertune.extensions.move
-import com.dd3boh.outertune.ui.component.ChipsLazyRow
 import com.dd3boh.outertune.ui.component.EnumListPreference
 import com.dd3boh.outertune.ui.component.InfoLabel
 import com.dd3boh.outertune.ui.component.PreferenceEntry
 import com.dd3boh.outertune.ui.component.ResizableIconButton
-import com.dd3boh.outertune.ui.component.SongListItem
 import com.dd3boh.outertune.ui.component.SwitchPreference
 import com.dd3boh.outertune.ui.component.TextFieldDialog
 import com.dd3boh.outertune.ui.screens.settings.DarkMode
-import com.dd3boh.outertune.ui.screens.settings.NavigationTab
-import com.dd3boh.outertune.utils.decodeTabString
 import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
 import com.zionhuang.innertube.utils.parseCookieString
-import kotlinx.coroutines.delay
 import java.time.LocalDateTime
 
 @Composable
@@ -157,7 +139,6 @@ fun SetupWizard(
     // content prefs
     val (darkMode, onDarkModeChange) = rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
     val (pureBlack, onPureBlackChange) = rememberPreference(PureBlackKey, defaultValue = false)
-    val (newInterfaceStyle, onNewInterfaceStyleChange) = rememberPreference(key = NewInterfaceKey, defaultValue = true)
     var filter by rememberEnumPreference(LibraryFilterKey, LibraryFilter.ALL)
 
 
@@ -471,14 +452,6 @@ fun SetupWizard(
                                 .padding(horizontal = 24.dp, vertical = 8.dp)
                         )
 
-                        // interface style
-                        SwitchPreference(
-                            title = { Text(stringResource(R.string.new_interface)) },
-                            icon = { Icon(Icons.Rounded.Palette, null) },
-                            checked = newInterfaceStyle,
-                            onCheckedChange = onNewInterfaceStyleChange
-                        )
-
                         // light/dark theme
                         EnumListPreference(
                             title = { Text(stringResource(R.string.dark_theme)) },
@@ -499,186 +472,6 @@ fun SetupWizard(
                             checked = pureBlack,
                             onCheckedChange = onPureBlackChange
                         )
-
-                        Column(
-                            Modifier.background(MaterialTheme.colorScheme.secondary.copy(0.2f))
-                        ) {
-                            Spacer(Modifier.height(16.dp))
-
-                            if (newInterfaceStyle) {
-                                // for new layout
-                                val filterString = when (filter) {
-                                    LibraryFilter.ALBUMS -> stringResource(R.string.albums)
-                                    LibraryFilter.ARTISTS -> stringResource(R.string.artists)
-                                    LibraryFilter.PLAYLISTS -> stringResource(R.string.playlists)
-                                    LibraryFilter.SONGS -> stringResource(R.string.songs)
-                                    LibraryFilter.FOLDERS -> stringResource(R.string.folders)
-                                    LibraryFilter.ALL -> ""
-                                }
-
-                                val defaultFilter: Collection<Pair<LibraryFilter, String>> =
-                                    decodeTabString("HSABL").map {
-                                        when (it) {
-                                            NavigationTab.ALBUM -> LibraryFilter.ALBUMS to stringResource(R.string.albums)
-                                            NavigationTab.ARTIST -> LibraryFilter.ARTISTS to stringResource(R.string.artists)
-                                            NavigationTab.PLAYLIST -> LibraryFilter.PLAYLISTS to stringResource(R.string.playlists)
-                                            NavigationTab.SONG -> LibraryFilter.SONGS to stringResource(R.string.songs)
-                                            NavigationTab.FOLDERS -> LibraryFilter.FOLDERS to stringResource(R.string.folders)
-                                            else -> LibraryFilter.ALL to stringResource(R.string.home) // there is no all filter, use as null value
-                                        }
-                                    }.filterNot { it.first == LibraryFilter.ALL }
-
-                                val chips = remember { SnapshotStateList<Pair<LibraryFilter, String>>() }
-
-                                var filterSelected by remember {
-                                    mutableStateOf(filter)
-                                }
-
-                                LaunchedEffect(Unit) {
-                                    if (filter == LibraryFilter.ALL)
-                                        chips.addAll(defaultFilter)
-                                    else
-                                        chips.add(filter to filterString)
-                                }
-
-                                val animatorDurationScale = Settings.Global.getFloat(
-                                    context.contentResolver,
-                                    Settings.Global.ANIMATOR_DURATION_SCALE, 1.0f
-                                ).toLong()
-
-                                suspend fun animationBasedDelay(value: Long) {
-                                    delay(value * animatorDurationScale)
-                                }
-
-                                // Update the filters list in a proper way so that the animations of the LazyRow can work.
-                                LaunchedEffect(filter) {
-                                    val filterIndex = defaultFilter.indexOf(defaultFilter.find { it.first == filter })
-                                    val currentPairIndex = if (chips.size > 0) defaultFilter.indexOf(chips[0]) else -1
-                                    val currentPair = if (chips.size > 0) chips[0] else null
-
-                                    if (filter == LibraryFilter.ALL) {
-                                        defaultFilter.reversed().fastForEachIndexed { index, it ->
-                                            val curFilterIndex = defaultFilter.indexOf(it)
-                                            if (!chips.contains(it)) {
-                                                chips.add(0, it)
-                                                if (currentPairIndex > curFilterIndex) animationBasedDelay(100)
-                                                else {
-                                                    currentPair?.let {
-                                                        animationBasedDelay(2)
-                                                        chips.move(chips.indexOf(it), 0)
-                                                    }
-                                                    animationBasedDelay(80 + (index * 30).toLong())
-                                                }
-                                            }
-                                        }
-                                        animationBasedDelay(100)
-                                        filterSelected = LibraryFilter.ALL
-                                    } else {
-                                        filterSelected = filter
-                                        chips.filter { it.first != filter }
-                                            .onEachIndexed { index, it ->
-                                                if (chips.contains(it)) {
-                                                    chips.remove(it)
-                                                    if (index > filterIndex) animationBasedDelay(150 + 30 * index.toLong())
-                                                    else animationBasedDelay(80)
-                                                }
-                                            }
-                                    }
-                                }
-
-                                // filter chips
-                                Row {
-                                    ChipsLazyRow(
-                                        chips = chips,
-                                        currentValue = filter,
-                                        onValueUpdate = {
-                                            filter = if (filter == LibraryFilter.ALL)
-                                                it
-                                            else
-                                                LibraryFilter.ALL
-                                        },
-                                        modifier = Modifier.weight(1f),
-                                        selected = { it == filterSelected }
-                                    )
-
-                                    if (filter != LibraryFilter.SONGS) {
-                                        IconButton(
-                                            onClick = {},
-                                            modifier = Modifier.padding(end = 6.dp)
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.AutoMirrored.Rounded.List,
-                                                contentDescription = null
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-
-                            // sort header
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(horizontal = 16.dp)
-                            ) {
-                                SortHeaderDummy()
-
-                                Spacer(Modifier.weight(1f))
-
-                                Text(
-                                    text = pluralStringResource(R.plurals.n_song, dummySongs.size, dummySongs.size),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = MaterialTheme.colorScheme.secondary
-                                )
-                            }
-
-
-                            // sample UI
-                            Column {
-                                dummySongs.forEach { song ->
-                                    SongListItem(
-                                        song = song,
-                                        onPlay = {},
-                                        onSelectedChange = {},
-                                        inSelectMode = null,
-                                        isSelected = false,
-                                        navController = navController,
-                                        enableSwipeToQueue = false,
-                                        disableShowMenu = true
-                                    )
-                                }
-                            }
-
-
-                            val navigationItems =
-                                if (!newInterfaceStyle) Screens.getScreens("HSABL") else Screens.MainScreensNew
-                            NavigationBar(
-                                windowInsets = WindowInsets(0, 0, 0, 0),
-                                modifier = Modifier.height(NavigationBarHeight)
-                            ) {
-                                navigationItems.fastForEach { screen ->
-                                    NavigationBarItem(
-                                        selected = false,
-                                        icon = {
-                                            Icon(
-                                                screen.icon,
-                                                contentDescription = null
-                                            )
-                                        },
-                                        label = {
-                                            Text(
-                                                text = stringResource(screen.titleId),
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                        },
-                                        onClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                                        }
-                                    )
-                                }
-                            }
-                        }
-
                     }
 
                     // account
