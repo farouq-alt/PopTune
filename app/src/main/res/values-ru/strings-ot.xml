@@ -10,9 +10,8 @@
     <string name="select">Режим выбора</string>
     <string name="err_play_next_on_error">Произошла ошибка. Воспроизведение следующий</string>
     <string name="err_stop_on_too_many_errors">Слишком много ошибок. Воспроизведение остановлено</string>
-    <string name="wait_to_reconnect">Подождите переподключения</string>"&gt;
-
-<string name="sort_by_date_modified">Дата изменения</string>
+    <string name="wait_to_reconnect">Подождите переподключения</string>
+    <string name="sort_by_date_modified">Дата изменения</string>
     <string name="sort_by_like_date">Дата добавления в понравившиеся</string>
     <string name="create_sync_playlist">Синхронизировать плейлист</string>
     <string name="play_count">Количество воспроизведений</string>
