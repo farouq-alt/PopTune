@@ -194,8 +194,14 @@ fun BottomSheetPlayer(
     }
 
     LaunchedEffect(mediaMetadata, canSkipPrevious, canSkipNext) {
-        // When the current media changes, scroll to it
-        thumbnailLazyGridState.animateScrollToItem(maxOf(0, mediaItems.indexOf(mediaMetadata)))
+        // When the media item changes, scroll to it
+        val index = maxOf(0, currentMediaIndex)
+
+        // If the state is collapsed, don't animate the scroll
+        if (state.isCollapsed)
+            thumbnailLazyGridState.scrollToItem(index)
+        else
+            thumbnailLazyGridState.animateScrollToItem(index)
     }
 
     val swipeToSkip by rememberPreference(SwipeToSkip, defaultValue = true)
