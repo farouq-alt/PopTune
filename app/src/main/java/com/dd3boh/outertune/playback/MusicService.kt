@@ -616,11 +616,12 @@ class MusicService : MediaLibraryService(),
         queueTitle = title
         queuePlaylistId = queue.playlistId
 
+        val preloadItem = queue.preloadItem
         CoroutineScope(Dispatchers.Main).launch {
-            if (queue.preloadItem != null) {
+            if (preloadItem != null) {
                 queueBoard.addQueue(
                     queueTitle ?: "Queue",
-                    listOf(queue.preloadItem),
+                    listOf(preloadItem),
                     player = this@MusicService,
                     shuffled = queue.startShuffled,
                     replace = replace,
@@ -630,11 +631,22 @@ class MusicService : MediaLibraryService(),
             }
 
             val initialStatus = withContext(Dispatchers.IO) { queue.getInitialStatus() }
-            if (queueTitle == null && initialStatus.title != null) { // do not find a title if an override is provided
+            // do not find a title if an override is provided
+            if ((title == null) && initialStatus.title != null) {
                 queueTitle = initialStatus.title
+
+                if (preloadItem != null) {
+                    queueBoard.getCurrentQueue()?.let {
+                        queueBoard.renameQueue(
+                            it,
+                            queueTitle ?: "Queue",
+                            this@MusicService
+                        )
+                    }
+                }
             }
+
             val items = ArrayList<MediaMetadata>()
-            val preloadItem = queue.preloadItem
 
             // print out queue
 //            println("-----------------------------")
