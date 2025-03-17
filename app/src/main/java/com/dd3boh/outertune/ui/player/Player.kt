@@ -190,7 +190,7 @@ fun BottomSheetPlayer(
         if (currentItem > currentMediaIndex)
             playerConnection.player.seekToNext()
         else if (currentItem < currentMediaIndex)
-            playerConnection.player.seekToPrevious()
+            playerConnection.player.seekToPreviousMediaItem()
     }
 
     LaunchedEffect(mediaMetadata, canSkipPrevious, canSkipNext) {
