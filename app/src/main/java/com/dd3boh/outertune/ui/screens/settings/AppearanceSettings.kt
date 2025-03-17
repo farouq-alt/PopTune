@@ -11,7 +11,9 @@ package com.dd3boh.outertune.ui.screens.settings
 
 import android.os.Build
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -57,6 +59,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -150,9 +153,9 @@ fun AppearanceSettings(
         mutableStateOf(false)
     }
 
-    val mutableTabs = remember { mutableStateListOf<NavigationTab>() }
+    val mutableTabs = remember { mutableStateListOf<Pair<NavigationTab, Boolean>>() }
 
-    val mutableFilters = remember { mutableStateListOf<LibraryFilter>() }
+    val mutableFilters = remember { mutableStateListOf<Pair<LibraryFilter, Boolean>>() }
 
     val lazyTabsListState = rememberLazyListState()
     var dragInfo by remember {
@@ -200,9 +203,7 @@ fun AppearanceSettings(
             clear()
 
             val enabled = decodeTabString(enabledTabs)
-            addAll(enabled)
-            add(NavigationTab.NULL)
-            addAll(NavigationTab.entries.filter { item -> enabled.none { it == item || item == NavigationTab.NULL } })
+            addAll(NavigationTab.entries.map { Pair(it, it in enabled)})
         }
     }
 
@@ -211,9 +212,7 @@ fun AppearanceSettings(
             clear()
 
             val enabled = decodeFilterString(enabledFilters)
-            addAll(enabled)
-            add(LibraryFilter.NULL)
-            addAll(LibraryFilter.entries.filter { item -> enabled.none { it == item || item == LibraryFilter.NULL } }.filterNot { it.first == LibraryFilter.ALL })
+            addAll(LibraryFilter.entries.map { Pair(it, it in enabled)}.filterNot { it.first == LibraryFilter.ALL })
         }
     }
 
@@ -309,7 +308,7 @@ fun AppearanceSettings(
                 title = stringResource(R.string.tab_arrangement),
                 onDismiss = { showTabArrangement = false },
                 onConfirm = {
-                    var encoded = encodeTabString(mutableTabs)
+                    var encoded = encodeTabString(mutableTabs.filter { it.second }.map { it.first })
 
                     // reset defaultOpenTab if it got disabled
                     if (!decodeTabString(encoded).contains(defaultOpenTab))
@@ -350,27 +349,36 @@ fun AppearanceSettings(
                             state = reorderableState,
                             key = tab.hashCode()
                         ) {
+                            fun onChecked() {
+                                mutableTabs[mutableTabs.indexOf(tab)] = tab.copy(second = !tab.second)
+                            }
+
                             Row(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
-                                    .padding(horizontal = 24.dp, vertical = 8.dp)
+                                    .padding(start = 12.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                                     .fillMaxWidth()
+                                    .clickable { onChecked() }
                             ) {
-                                Text(
-                                    text = when (tab) {
-                                        NavigationTab.HOME -> stringResource(R.string.home)
-                                        NavigationTab.SONG -> stringResource(R.string.songs)
-                                        NavigationTab.FOLDERS -> stringResource(R.string.folders)
-                                        NavigationTab.ARTIST -> stringResource(R.string.artists)
-                                        NavigationTab.ALBUM -> stringResource(R.string.albums)
-                                        NavigationTab.PLAYLIST -> stringResource(R.string.playlists)
-                                        NavigationTab.LIBRARY -> stringResource(R.string.library)
-                                        else -> {
-                                            stringResource(R.string.tab_arrangement_disable_tip)
-                                        }
+                                Row(modifier = Modifier
+                                    .background(if (tab.second) MaterialTheme.colorScheme.primary else Color.Transparent)
+                                ) {
+                                    Row(Modifier.padding(start = 8.dp).background(MaterialTheme.colorScheme.surface)) {
+                                        Text(
+                                            text = when (tab.first) {
+                                                NavigationTab.HOME -> stringResource(R.string.home)
+                                                NavigationTab.SONG -> stringResource(R.string.songs)
+                                                NavigationTab.FOLDERS -> stringResource(R.string.folders)
+                                                NavigationTab.ARTIST -> stringResource(R.string.artists)
+                                                NavigationTab.ALBUM -> stringResource(R.string.albums)
+                                                NavigationTab.PLAYLIST -> stringResource(R.string.playlists)
+                                                NavigationTab.LIBRARY -> stringResource(R.string.library)
+                                            },
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
                                     }
-                                )
+                                }
                                 Icon(
                                     imageVector = Icons.Rounded.DragHandle,
                                     contentDescription = null,
@@ -398,7 +406,7 @@ fun AppearanceSettings(
                 title = stringResource(R.string.filter_arrangement),
                 onDismiss = { showFilterArrangement = false },
                 onConfirm = {
-                    val encoded = encodeFilterString(mutableFilters)
+                    val encoded = encodeFilterString(mutableFilters.filter { it.second }.map{ it.first })
 
                     onEnabledFiltersChange(encoded)
                     showFilterArrangement = false
@@ -430,25 +438,38 @@ fun AppearanceSettings(
                             state = filtersReorderableState,
                             key = filter.hashCode()
                         ) {
+                            fun onChecked() {
+                                mutableFilters[mutableFilters.indexOf(filter)] = filter.copy(second = !filter.second)
+                            }
+
                             Row(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
-                                    .padding(horizontal = 24.dp, vertical = 8.dp)
+                                    .padding(start = 12.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                                     .fillMaxWidth()
+                                    .clickable { onChecked() }
                             ) {
-                                Text(
-                                    text = when (filter) {
-                                        LibraryFilter.ALBUMS -> stringResource(R.string.albums)
-                                        LibraryFilter.ARTISTS -> stringResource(R.string.artists)
-                                        LibraryFilter.PLAYLISTS -> stringResource(R.string.playlists)
-                                        LibraryFilter.SONGS -> stringResource(R.string.songs)
-                                        LibraryFilter.FOLDERS -> stringResource(R.string.folders)
-                                        else -> {
-                                            stringResource(R.string.tab_arrangement_disable_tip)
-                                        }
+                                Row(modifier = Modifier
+                                    .background(if (filter.second) MaterialTheme.colorScheme.primary else Color.Transparent)
+                                ) {
+                                    Row(Modifier.padding(start = 8.dp).background(MaterialTheme.colorScheme.surface)) {
+                                        Text(
+                                            text = when (filter.first) {
+                                                LibraryFilter.ALBUMS -> stringResource(R.string.albums)
+                                                LibraryFilter.ARTISTS -> stringResource(R.string.artists)
+                                                LibraryFilter.PLAYLISTS -> stringResource(R.string.playlists)
+                                                LibraryFilter.SONGS -> stringResource(R.string.songs)
+                                                LibraryFilter.FOLDERS -> stringResource(R.string.folders)
+                                                else -> {
+                                                    // TODO: Do we even need this?
+                                                    stringResource(R.string.tab_arrangement_disable_tip)
+                                                }
+                                            },
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
                                     }
-                                )
+                                }
                                 Icon(
                                     imageVector = Icons.Rounded.DragHandle,
                                     contentDescription = null,
@@ -516,18 +537,12 @@ enum class PlayerBackgroundStyle {
     DEFAULT, GRADIENT, BLUR
 }
 
-/**
- * NULL is used to separate enabled and disabled tabs. It should be ignored in regular use
- */
 enum class NavigationTab {
-    HOME, SONG, FOLDERS, ARTIST, ALBUM, PLAYLIST, LIBRARY, NULL
+    HOME, SONG, FOLDERS, ARTIST, ALBUM, PLAYLIST, LIBRARY
 }
 
-/**
- * NULL is used to separate enabled and disabled tabs. It should be ignored in regular use
- */
 enum class LibraryFilter {
-    ALL, ALBUMS, ARTISTS, PLAYLISTS, SONGS, FOLDERS, NULL
+    ALL, ALBUMS, ARTISTS, PLAYLISTS, SONGS, FOLDERS
 }
 
 enum class LyricsPosition {
