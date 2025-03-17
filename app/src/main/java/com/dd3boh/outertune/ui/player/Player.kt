@@ -193,7 +193,7 @@ fun BottomSheetPlayer(
             playerConnection.player.seekToPrevious()
     }
 
-    LaunchedEffect(mediaMetadata) {
+    LaunchedEffect(mediaMetadata, canSkipPrevious, canSkipNext) {
         // When the current media changes, scroll to it
         thumbnailLazyGridState.animateScrollToItem(maxOf(0, mediaItems.indexOf(mediaMetadata)))
     }
