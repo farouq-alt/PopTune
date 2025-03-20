@@ -134,7 +134,6 @@ import com.dd3boh.outertune.constants.MiniPlayerHeight
 import com.dd3boh.outertune.constants.NavigationBarAnimationSpec
 import com.dd3boh.outertune.constants.NavigationBarHeight
 import com.dd3boh.outertune.constants.PauseSearchHistoryKey
-import com.dd3boh.outertune.constants.PersistentQueueKey
 import com.dd3boh.outertune.constants.PlayerBackgroundStyleKey
 import com.dd3boh.outertune.constants.PureBlackKey
 import com.dd3boh.outertune.constants.ScanPathsKey
@@ -149,7 +148,6 @@ import com.dd3boh.outertune.constants.SlimNavBarKey
 import com.dd3boh.outertune.constants.StopMusicOnTaskClearKey
 import com.dd3boh.outertune.db.MusicDatabase
 import com.dd3boh.outertune.db.entities.SearchHistory
-import com.dd3boh.outertune.extensions.toEnum
 import com.dd3boh.outertune.playback.DownloadUtil
 import com.dd3boh.outertune.playback.MusicService
 import com.dd3boh.outertune.playback.MusicService.MusicBinder
@@ -293,15 +291,10 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
         unbindService(serviceConnection)
 
-        if (dataStore.get(StopMusicOnTaskClearKey, false) && playerConnection?.isPlaying?.value == true
-            && isFinishing
-        ) {
-            if (dataStore.get(PersistentQueueKey, true)) {
+        if (dataStore.get(StopMusicOnTaskClearKey, false) && isFinishing) {
 //                stopService(Intent(this, MusicService::class.java)) // Believe me, this doesn't actually stop
-                playerConnection?.service?.onDestroy()
-
-                playerConnection = null
-            }
+            playerConnection?.service?.onDestroy()
+            playerConnection = null
         } else {
             playerConnection?.service?.saveQueueToDisk()
         }
