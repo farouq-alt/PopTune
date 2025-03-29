@@ -24,7 +24,7 @@ import com.dd3boh.outertune.db.entities.GenreEntity
 import com.dd3boh.outertune.db.entities.LyricsEntity
 import com.dd3boh.outertune.db.entities.QueueEntity
 import com.dd3boh.outertune.db.entities.QueueSongMap
-import com.dd3boh.outertune.db.entities.RecentActivityItem
+import com.dd3boh.outertune.db.entities.RecentActivityEntity
 import com.dd3boh.outertune.db.entities.RecentActivityType
 import com.dd3boh.outertune.db.entities.RelatedSongMap
 import com.dd3boh.outertune.db.entities.SearchHistory
@@ -380,12 +380,12 @@ AND NOT EXISTS (
     }
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(item: RecentActivityItem)
+    fun insert(item: RecentActivityEntity)
 
     @Delete
-    fun delete(item: RecentActivityItem)
+    fun delete(item: RecentActivityEntity)
 
-    @Query("DELETE FROM RecentActivityItem")
+    @Query("DELETE FROM recent_activity")
     fun clearRecentActivity()
 
     @Transaction
@@ -393,7 +393,7 @@ AND NOT EXISTS (
         when (item) {
             is AlbumItem -> {
                 insert(
-                    RecentActivityItem(
+                    RecentActivityEntity(
                         id = item.browseId,
                         title = item.title,
                         thumbnail = item.thumbnail,
@@ -409,7 +409,7 @@ AND NOT EXISTS (
 
             is PlaylistItem -> {
                 insert(
-                    RecentActivityItem(
+                    RecentActivityEntity(
                         id = item.id,
                         title = item.title,
                         thumbnail = item.thumbnail,
@@ -425,7 +425,7 @@ AND NOT EXISTS (
 
             is ArtistItem -> {
                 insert(
-                    RecentActivityItem(
+                    RecentActivityEntity(
                         id = item.id,
                         title = item.title,
                         thumbnail = item.thumbnail,
@@ -445,6 +445,6 @@ AND NOT EXISTS (
         }
     }
 
-    @Query("SELECT * FROM RecentActivityItem ORDER BY date DESC")
-    fun recentActivity(): Flow<List<RecentActivityItem>>
+    @Query("SELECT * FROM recent_activity ORDER BY date DESC")
+    fun recentActivity(): Flow<List<RecentActivityEntity>>
 }

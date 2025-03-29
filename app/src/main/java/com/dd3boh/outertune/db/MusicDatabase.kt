@@ -30,7 +30,7 @@ import com.dd3boh.outertune.db.entities.PlaylistSongMap
 import com.dd3boh.outertune.db.entities.PlaylistSongMapPreview
 import com.dd3boh.outertune.db.entities.QueueEntity
 import com.dd3boh.outertune.db.entities.QueueSongMap
-import com.dd3boh.outertune.db.entities.RecentActivityItem
+import com.dd3boh.outertune.db.entities.RecentActivityEntity
 import com.dd3boh.outertune.db.entities.RelatedSongMap
 import com.dd3boh.outertune.db.entities.SearchHistory
 import com.dd3boh.outertune.db.entities.SongAlbumMap
@@ -92,7 +92,7 @@ class MusicDatabase(
         PlayCountEntity::class,
         Event::class,
         RelatedSongMap::class,
-        RecentActivityItem::class
+        RecentActivityEntity::class
     ],
     views = [
         SortedSongArtistMap::class,
@@ -115,7 +115,7 @@ class MusicDatabase(
         AutoMigration(from = 12, to = 13, spec = Migration12To13::class), // Migration from InnerTune
         AutoMigration(from = 13, to = 14), // Initial queue as database
         AutoMigration(from = 17, to = 18, spec = Migration17To18::class), // Fix Room nonsense
-        AutoMigration(from = 18, to = 19)
+        AutoMigration(from = 18, to = 19) // Recent activity
     ]
 )
 @TypeConverters(Converters::class)
