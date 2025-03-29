@@ -45,10 +45,12 @@ import com.dd3boh.outertune.LocalPlayerAwareWindowInsets
 import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.MaxImageCacheSizeKey
+import com.dd3boh.outertune.constants.MaxSongCacheSizeKey
 import com.dd3boh.outertune.constants.SongSortType
 import com.dd3boh.outertune.extensions.tryOrNull
 import com.dd3boh.outertune.playback.ExoDownloadService
 import com.dd3boh.outertune.ui.component.IconButton
+import com.dd3boh.outertune.ui.component.InfoLabel
 import com.dd3boh.outertune.ui.component.ListPreference
 import com.dd3boh.outertune.ui.component.PreferenceEntry
 import com.dd3boh.outertune.ui.component.PreferenceGroupTitle
@@ -69,6 +71,7 @@ fun StorageSettings(
 ) {
     val context = LocalContext.current
     val imageDiskCache = context.imageLoader.diskCache ?: return
+    val playerCache = LocalPlayerConnection.current?.service?.playerCache ?: return
     val downloadCache = LocalPlayerConnection.current?.service?.downloadCache ?: return
     val database = LocalDatabase.current
 
@@ -76,6 +79,9 @@ fun StorageSettings(
 
     var imageCacheSize by remember {
         mutableLongStateOf(imageDiskCache.size)
+    }
+    var playerCacheSize by remember {
+        mutableLongStateOf(tryOrNull { playerCache.cacheSpace } ?: 0)
     }
     var downloadCacheSize by remember {
         mutableLongStateOf(tryOrNull { downloadCache.cacheSpace } ?: 0)
@@ -85,6 +91,12 @@ fun StorageSettings(
         while (isActive) {
             delay(500)
             imageCacheSize = imageDiskCache.size
+        }
+    }
+    LaunchedEffect(playerCache) {
+        while (isActive) {
+            delay(500)
+            playerCacheSize = tryOrNull { playerCache.cacheSpace } ?: 0
         }
     }
     LaunchedEffect(downloadCache) {
@@ -98,6 +110,8 @@ fun StorageSettings(
         key = MaxImageCacheSizeKey,
         defaultValue = 512
     )
+    val (maxSongCacheSize, onMaxSongCacheSizeChange) = rememberPreference(key = MaxSongCacheSizeKey, defaultValue = 0)
+
 
     // clear caches when turning off
     LaunchedEffect(maxImageCacheSize) {
@@ -139,6 +153,59 @@ fun StorageSettings(
                                 false
                             )
                         }
+                    }
+                }
+            },
+        )
+
+        PreferenceGroupTitle(
+            title = stringResource(R.string.song_cache)
+        )
+
+        if (maxSongCacheSize != 0) {
+            if (maxSongCacheSize == -1) {
+                Text(
+                    text = stringResource(R.string.size_used, formatFileSize(playerCacheSize)),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                )
+            } else {
+                LinearProgressIndicator(
+                    progress = { (playerCacheSize.toFloat() / (maxSongCacheSize * 1024 * 1024L)).coerceIn(0f, 1f) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                )
+
+                Text(
+                    text = stringResource(R.string.size_used, "${formatFileSize(playerCacheSize)} / ${formatFileSize(maxSongCacheSize * 1024 * 1024L)}"),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                )
+            }
+        }
+
+        ListPreference(
+            title = { Text(stringResource(R.string.max_cache_size)) },
+            selectedValue = maxSongCacheSize,
+            values = listOf(0, 128, 256, 512, 1024, 2048, 4096, 8192, -1),
+            valueText = {
+                when (it) {
+                    0 -> stringResource(androidx.compose.ui.R.string.state_off)
+                    -1 -> stringResource(R.string.unlimited)
+                    else -> formatFileSize(it * 1024 * 1024L)
+                }
+            },
+            onValueSelected = onMaxSongCacheSizeChange
+        )
+        InfoLabel(stringResource(R.string.image_cache_tooltip))
+
+        PreferenceEntry(
+            title = { Text(stringResource(R.string.clear_song_cache)) },
+            onClick = {
+                coroutineScope.launch(Dispatchers.IO) {
+                    playerCache.keys.forEach { key ->
+                        playerCache.removeResource(key)
                     }
                 }
             },
