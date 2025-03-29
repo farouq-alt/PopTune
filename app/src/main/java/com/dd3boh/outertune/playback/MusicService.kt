@@ -768,8 +768,9 @@ class MusicService : MediaLibraryService(),
                     )
                     .setCacheWriteDataSinkFactory(
                         HybridCacheDataSinkFactory(playerCache) { dataSpec ->
-                            Log.d(TAG, "SONG CACHE: ${dataSpec.key?.startsWith("LA") == false}")
-                            dataSpec.key?.startsWith("LA") == false
+                            val isLocal = queueBoard.getCurrentQueue()?.findSong(dataSpec.key ?: "")?.isLocal == true
+                            Log.d(TAG, "SONG CACHE: ${!isLocal}")
+                            !isLocal
                         }
                     )
                     .setFlags(FLAG_IGNORE_CACHE_ON_ERROR)
@@ -782,9 +783,11 @@ class MusicService : MediaLibraryService(),
         val songUrlCache = HashMap<String, Pair<String, Long>>()
         return ResolvingDataSource.Factory(createCacheDataSource()) { dataSpec ->
             val mediaId = dataSpec.key ?: error("No media id")
+            Log.d(TAG, "PLAYING: song id = $mediaId")
 
             // find a better way to detect local files later...
-            if (mediaId.startsWith("LA")) {
+            val song = queueBoard.getCurrentQueue()?.findSong(mediaId)
+            if (song?.isLocal == true) {
                 Log.d(TAG, "PLAYING: local song")
                 val songPath = runBlocking(Dispatchers.IO) {
                     database.song(mediaId).firstOrNull()?.song?.localPath
@@ -984,8 +987,8 @@ class MusicService : MediaLibraryService(),
 
         val pos = player.currentPosition
 
-       runBlocking {
-           // async issues, run blocking
+        runBlocking {
+            // async issues, run blocking
             dataStore.edit { settings ->
                 settings[LastPosKey] = pos
             }
