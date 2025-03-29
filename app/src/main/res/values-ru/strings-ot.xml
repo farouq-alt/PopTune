@@ -10,9 +10,8 @@
     <string name="select">Режим выбора</string>
     <string name="err_play_next_on_error">Произошла ошибка. Воспроизведение следующий</string>
     <string name="err_stop_on_too_many_errors">Слишком много ошибок. Воспроизведение остановлено</string>
-    <string name="wait_to_reconnect">Подождите переподключения</string>"&gt;
-
-<string name="sort_by_date_modified">Дата изменения</string>
+    <string name="wait_to_reconnect">Подождите переподключения</string>
+    <string name="sort_by_date_modified">Дата изменения</string>
     <string name="sort_by_like_date">Дата добавления в понравившиеся</string>
     <string name="create_sync_playlist">Синхронизировать плейлист</string>
     <string name="play_count">Количество воспроизведений</string>
@@ -53,7 +52,7 @@
     <string name="scanner_sensitivity_title">Настройка чувствительности сканера</string>
     <string name="scanner_sensitivity_L3">Совпадение по названию, исполнителям и альбомам</string>
     <string name="experimental_settings_title">Экспериментальные настройки</string>
-    <string name="pause_remote_listen_history">Делиться историей прослушиваний с YouTube Music</string>
+    <string name="pause_remote_listen_history">Приостановить обмен историей прослушивания с YouTube Music</string>
     <string name="m3u_import_song_failed">Не удалось импортировать:</string>
     <string name="grp_extra_scanner_settings">Дополнительные настройки сканера</string>
     <string name="grp_interface">Интерфейс</string>
@@ -149,4 +148,6 @@
     <string name="oobe_ytm_content_description">YouTube Music всегда под рукой</string>
     <string name="scan_paths_tooltip">Все подкаталоги также будут затронуты</string>
     <string name="scanner_strict_file_name_title">Точное соответствие имен файлов</string>
+    <string name="swipe_to_skip_title">Переключение треков свайпом</string>
+    <string name="swipe_to_skip_description">Использовать свайпы в плеере для переключения между треками</string>
 </resources>

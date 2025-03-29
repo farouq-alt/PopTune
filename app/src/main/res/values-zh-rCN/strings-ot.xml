@@ -21,9 +21,8 @@
     <string name="err_play_next_on_error">发生错误。播放下一首</string>
     <string name="err_stop_on_error">发生错误。播放暂停</string>
     <string name="err_stop_on_too_many_errors">太多错误。播放暂停</string>
-    <string name="wait_to_reconnect">等待重新连接</string>"&gt;
-
-<string name="sort_by_date_modified">修改日期</string>
+    <string name="wait_to_reconnect">等待重新连接</string>
+    <string name="sort_by_date_modified">修改日期</string>
     <string name="sort_by_date_released">发布日期</string>
     <string name="sort_by_like_date">收藏日期</string>
     <string name="sort_by_play_count">播放次数</string>
@@ -137,4 +136,5 @@
     <string name="token_adv_login_description">这是高级登录方法。作为门户网站的替代方法，您可以直接在此输入或更新登录令牌。例如，这可以加快在多个设备上登录的速度。请注意，应用程序无法解析的任何无效令牌格式都不会被接受</string>
     <string name="queue_local_history">历史（本地）</string>
     <string name="queue_remote_history">历史记录（远程）</string>
+    <string name="pause_remote_listen_history">与 YouTube Music 分享收听记录</string>
 </resources>

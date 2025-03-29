@@ -136,9 +136,8 @@
     <string name="err_stop_on_error">Une erreur s\'est produite. La lecture s\'est arrêtée</string>
     <string name="err_play_next_on_error">Une erreur s\'est produite. Lecture suivante</string>
     <string name="err_stop_on_too_many_errors">Trop d\'erreurs. La lecture est arrêtée</string>
-    <string name="wait_to_reconnect">Attendez pour vous reconnecter</string>"&gt;
-
-<string name="grp_general">Général</string>
+    <string name="wait_to_reconnect">Attendez pour vous reconnecter</string>
+    <string name="grp_general">Général</string>
     <string name="queue_local_history">Historique (locale)</string>
     <string name="queue_remote_history">Historique (à distance)</string>
     <string name="scanner_progress_complete">Analyse terminée</string>
@@ -146,4 +145,7 @@
     <string name="action_cancel">Annuler</string>
     <string name="queues_empty">Pas de files d\'attente</string>
     <string name="queues_title">Files d\'attente</string>
+    <string name="pause_remote_listen_history">Partager l\'historique d\'écoute avec YouTube Music</string>
+    <string name="swipe_to_skip_title">Balayer horizontalement pour changer de titre</string>
+    <string name="swipe_to_skip_description">Activer le balayage horizontal dans le lecteur pour changer de titre</string>
 </resources>

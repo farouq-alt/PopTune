@@ -122,7 +122,6 @@ android {
 
     lint {
         disable += "MissingTranslation"
-        disable += "ImpliedQuantity"
         disable += "ByteOrderMark"
     }
 
