@@ -112,7 +112,6 @@ import com.dd3boh.outertune.extensions.toggleRepeatMode
 import com.dd3boh.outertune.models.MediaMetadata
 import com.dd3boh.outertune.models.MultiQueueObject
 import com.dd3boh.outertune.playback.isShuffleEnabled
-import com.dd3boh.outertune.playback.PlayerConnection.Companion.queueBoard
 import com.dd3boh.outertune.ui.component.BottomSheet
 import com.dd3boh.outertune.ui.component.BottomSheetState
 import com.dd3boh.outertune.ui.component.LocalMenuState
@@ -213,8 +212,8 @@ fun Queue(
         // multi queue vars
         var multiqueueExpand by remember { mutableStateOf(false) }
         val mutableQueues = remember { mutableStateListOf<MultiQueueObject>() }
-        var playingQueue by remember { mutableIntStateOf(queueBoard.getMasterIndex()) }
-        var detachedHead by remember { mutableStateOf(queueBoard.detachedHead) }
+        var playingQueue by remember { mutableIntStateOf(playerConnection.service.queueBoard.getMasterIndex()) }
+        var detachedHead by remember { mutableStateOf(playerConnection.service.queueBoard.detachedHead) }
         val detachedQueue = remember { mutableStateListOf<MediaMetadata>() }
         var detachedQueueIndex by remember { mutableIntStateOf(-1) }
         var detachedQueuePos by remember { mutableIntStateOf(-1) }
@@ -250,10 +249,9 @@ fun Queue(
                         return@LaunchedEffect
                     }
 
-                    queueBoard.moveSong(
+                    playerConnection.service.queueBoard.moveSong(
                         from,
                         to,
-                        playerConnection.service
                     )
                     playerConnection.player.moveMediaItem(from, to)
                     dragInfo = null
@@ -276,9 +274,9 @@ fun Queue(
 
             mutableQueues.apply {
                 clear()
-                addAll(queueBoard.getAllQueues())
+                addAll(playerConnection.service.queueBoard.getAllQueues())
             }
-            playingQueue = queueBoard.getMasterIndex()
+            playingQueue = playerConnection.service.queueBoard.getMasterIndex()
             coroutineScope.launch {
                 delay(300) // needed for scrolling to queue when switching to new queue
                 lazySongsListState.animateScrollToItem(playerConnection.player.currentMediaItemIndex)
@@ -310,10 +308,10 @@ fun Queue(
         LaunchedEffect(reorderableStateEx.isAnyItemDragging) {
             if (!reorderableStateEx.isAnyItemDragging) {
                 dragInfoEx?.let { (from, to) ->
-                    queueBoard.move(from, to, playerConnection.service)
-                coroutineScope.launch {
-                    updateQueues()
-                }
+                    playerConnection.service.queueBoard.move(from, to)
+                    coroutineScope.launch {
+                        updateQueues()
+                    }
                     dragInfoEx = null
                 }
             }
@@ -458,9 +456,9 @@ fun Queue(
                                             icon = Icons.Rounded.Close,
                                             onClick = {
                                                 val remainingQueues =
-                                                    queueBoard.deleteQueue(mq, playerConnection.service)
+                                                    playerConnection.service.queueBoard.deleteQueue(mq)
                                                 if (playingQueue == index) {
-                                                    queueBoard.setCurrQueue(playerConnection)
+                                                    playerConnection.service.queueBoard.setCurrQueue()
                                                 }
                                                 detachedHead = false
                                                 updateQueues()
@@ -533,7 +531,7 @@ fun Queue(
                         onClick = {
                             coroutineScope.launch(Dispatchers.Main) {
                                 // change to this queue, seek to the item clicked on
-                                queueBoard.setCurrQueue(detachedQueueIndex, playerConnection)
+                                playerConnection.service.queueBoard.setCurrQueue(detachedQueueIndex)
                                 playerConnection.player.playWhenReady = true
                                 detachedHead = false
                                 updateQueues()
@@ -571,7 +569,7 @@ fun Queue(
                                         onClick = {
                                             coroutineScope.launch(Dispatchers.Main) {
                                                 // change to this queue, seek to the item clicked on
-                                                queueBoard.setCurrQueue(detachedQueueIndex, playerConnection)
+                                                playerConnection.service.queueBoard.setCurrQueue(detachedQueueIndex)
                                                 detachedHead = false
                                                 updateQueues()
                                             }
@@ -586,7 +584,7 @@ fun Queue(
                 LazyColumn(
                     state = lazySongsListState,
                     contentPadding = if (multiqueueExpand && !landscape) PaddingValues(0.dp)
-                                     else PaddingValues(0.dp, 16.dp), // header may cut off first song
+                    else PaddingValues(0.dp, 16.dp), // header may cut off first song
                     modifier = Modifier
                         .nestedScroll(state.preUpPostDownNestedScrollConnection)
                 ) {
@@ -606,7 +604,10 @@ fun Queue(
                                 confirmValueChange = { dismissValue ->
                                     when (dismissValue) {
                                         SwipeToDismissBoxValue.StartToEnd -> {
-                                            if (queueBoard.removeCurrentQueueSong(currentItem.firstPeriodIndex, playerConnection.service)) {
+                                            if (playerConnection.service.queueBoard.removeCurrentQueueSong(
+                                                    currentItem.firstPeriodIndex,
+                                                )
+                                            ) {
                                                 playerConnection.player.removeMediaItem(currentItem.firstPeriodIndex)
                                             }
                                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -614,7 +615,10 @@ fun Queue(
                                         }
 
                                         SwipeToDismissBoxValue.EndToStart -> {
-                                            if (queueBoard.removeCurrentQueueSong(currentItem.firstPeriodIndex, playerConnection.service)) {
+                                            if (playerConnection.service.queueBoard.removeCurrentQueueSong(
+                                                    currentItem.firstPeriodIndex,
+                                                )
+                                            ) {
                                                 playerConnection.player.removeMediaItem(currentItem.firstPeriodIndex)
                                             }
                                             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -739,19 +743,19 @@ fun Queue(
             ) {
                 // handle selection mode
                 if (inSelectMode) {
-                   SelectHeader(
-                       selectedItems = selectedItems.mapNotNull { uidHash ->
-                           mutableQueueWindows.find { it.uid.hashCode() == uidHash }
-                       }.mapNotNull { it.mediaItem.metadata },
-                       totalItemCount = queueWindows.size,
-                       onSelectAll = {
-                           selectedItems.clear()
-                           selectedItems.addAll(queueWindows.map { it.uid.hashCode() })
-                       },
-                       onDeselectAll = { selectedItems.clear() },
-                       menuState = menuState,
-                       onDismiss = { inSelectMode = false }
-                   )
+                    SelectHeader(
+                        selectedItems = selectedItems.mapNotNull { uidHash ->
+                            mutableQueueWindows.find { it.uid.hashCode() == uidHash }
+                        }.mapNotNull { it.mediaItem.metadata },
+                        totalItemCount = queueWindows.size,
+                        onSelectAll = {
+                            selectedItems.clear()
+                            selectedItems.addAll(queueWindows.map { it.uid.hashCode() })
+                        },
+                        onDeselectAll = { selectedItems.clear() },
+                        menuState = menuState,
+                        onDismiss = { inSelectMode = false }
+                    )
                 } else {
                     // queue title and show multiqueue button
                     Row(

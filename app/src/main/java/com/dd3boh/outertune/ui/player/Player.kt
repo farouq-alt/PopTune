@@ -777,7 +777,7 @@ fun BottomSheetPlayer(
             playerBottomSheetState = state,
             onTerminate = {
                 state.dismiss()
-                PlayerConnection.queueBoard.detachedHead = false
+                playerConnection.service.queueBoard.detachedHead = false
             },
             onBackgroundColor = onBackgroundColor,
             navController = navController
