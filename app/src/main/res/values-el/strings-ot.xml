@@ -54,4 +54,7 @@
     <string name="slim_navbar_description">Αφαίρεση ετικετών κειμένου για τη μείωση ύψους της γραμμής πλοήγησης</string>
     <string name="queues_title">Ουρές</string>
     <string name="queues_empty">Καμία ουρά</string>
+    <string name="tab_arrangement">Αναδιάταξη καρτελών</string>
+    <string name="tab_arrangement_disable_tip">– Σύρε παρακάτω για απενεργοποίηση -</string>
+    <string name="tab_arrangement_home_required">Η καρτέλα Αρχική απαιτείται.</string>
 </resources>
