@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -57,6 +59,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -100,8 +103,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -233,12 +240,16 @@ fun PlayerMenu(
     LaunchedEffect(sleepTimerEnabled) {
         if (sleepTimerEnabled) {
             while (isActive) {
-                sleepTimerTimeLeft = if (playerConnection.service.sleepTimer.pauseWhenSongEnd) {
+                val newSleepTimerTimeLeft = if (playerConnection.service.sleepTimer.pauseWhenSongEnd) {
                     playerConnection.player.duration - playerConnection.player.currentPosition
                 } else {
                     playerConnection.service.sleepTimer.triggerTime - System.currentTimeMillis()
                 }
                 delay(1000L)
+
+                withContext(Dispatchers.Main) {
+                    sleepTimerTimeLeft = newSleepTimerTimeLeft
+                }
             }
         }
     }
@@ -253,6 +264,9 @@ fun PlayerMenu(
 
     if (showSleepTimerDialog) {
         AlertDialog(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             properties = DialogProperties(usePlatformDefaultWidth = false),
             onDismissRequest = { showSleepTimerDialog = false },
             icon = { Icon(imageVector = Icons.Rounded.Timer, contentDescription = null) },
@@ -321,7 +335,8 @@ fun PlayerMenu(
                         style = MaterialTheme.typography.bodyLarge,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
-                            .padding(vertical = 8.dp)
+                            .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
+                            .clip(shape = RoundedCornerShape(8.dp))
                             .clickable {
                                 showDialog = true
                             }
@@ -366,16 +381,56 @@ fun PlayerMenu(
                     Slider(
                         value = sleepTimerValue,
                         onValueChange = { sleepTimerValue = it },
-                        valueRange = 5f..120f
+                        valueRange = 1f..120f,
+                        modifier = Modifier.padding(bottom = 16.dp)
                     )
 
-                    OutlinedButton(
-                        onClick = {
-                            showSleepTimerDialog = false
-                            playerConnection.service.sleepTimer.start(-1)
-                        }
+                    FlowRow(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(stringResource(R.string.end_of_song))
+                        // Preset time options
+                        val timeIntervals = listOf(15L, 30L, 45L, 60L)
+
+                        // Create time chips for all intervals
+                        val timeChips = timeIntervals.map { interval ->
+                            val (timeString, duration) = getNextInterval(interval)
+                            TimeChip(
+                                duration = duration,
+                                composable = {
+                                    OutlinedButton(
+                                        onClick = { sleepTimerValue = duration },
+                                        modifier = Modifier.height(40.dp)
+                                    ) {
+                                        Text(timeString)
+                                    }
+                                }
+                            )
+                        }.sortedBy { it.duration } + remember {
+                            TimeChip(
+                                duration = Float.MAX_VALUE,
+                                composable = {
+                                    OutlinedButton(
+                                        onClick = {
+                                            showSleepTimerDialog = false
+                                            playerConnection.service.sleepTimer.start(-1)
+                                        },
+                                        modifier = Modifier.height(40.dp)
+                                    ) {
+                                        Text(stringResource(R.string.end_of_song))
+                                    }
+                                }
+                            )
+                        }
+
+                        timeChips.forEach { timeChip ->
+                            Box(
+                                modifier = Modifier
+                                    .padding(horizontal = 4.dp)
+                            ) {
+                                timeChip.composable()
+                            }
+                        }
                     }
                 }
             }
@@ -657,4 +712,41 @@ fun <T> ValueAdjuster(
             )
         }
     }
+}
+
+data class TimeChip(
+    val duration: Float,
+    val composable: @Composable () -> Unit
+) : Comparable<TimeChip> {
+    override fun compareTo(other: TimeChip): Int {
+        return duration.compareTo(other.duration)
+    }
+}
+
+fun getNextInterval(targetMin: Long): Pair<String, Float> {
+    require(targetMin in 1..60) { "Interval must be between 1 and 60 minutes" }
+
+    val now = LocalDateTime.now()
+    val intervalMinutes = targetMin - now.minute
+
+    val targetTime: LocalDateTime = if (intervalMinutes > 0) {
+        // Within this hour
+        now.plusMinutes(intervalMinutes)
+    } else if (intervalMinutes < 0) {
+        // Next hour
+        now.plusHours(1).plusMinutes(targetMin - now.minute)
+//        now.plusMinutes((60 - now.minute) + targetMin)        // other way to calculate targetTime
+    } else {
+        // Equal to 0
+        now.plusHours(1)
+    }
+
+    // Format the time
+    val timeString = SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT, Locale.getDefault())
+        .format(Date(targetTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()))
+
+    // Calculate minutes between now and target
+    val minutesBetween = ChronoUnit.MINUTES.between(now, targetTime).toFloat()
+
+    return Pair(timeString, minutesBetween)
 }
