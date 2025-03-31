@@ -2,6 +2,9 @@
 while also allowing users to translate our app as well. New, specific strings to OuterTune go here. -->
 
 <resources>
+<!-- General -->
+    <string name="android_auto">Android Auto</string>
+
 <!-- Bottom navigation -->
     <string name="folders">Folders</string>
     <string name="library">Library</string>
