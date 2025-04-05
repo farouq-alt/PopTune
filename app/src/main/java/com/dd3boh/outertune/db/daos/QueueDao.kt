@@ -5,15 +5,14 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.RewriteQueriesToDropUnusedColumns
 import androidx.room.Transaction
 import androidx.room.Update
 import com.dd3boh.outertune.db.entities.QueueEntity
 import com.dd3boh.outertune.db.entities.QueueSong
 import com.dd3boh.outertune.db.entities.QueueSongMap
 import com.dd3boh.outertune.models.MultiQueueObject
-import com.dd3boh.outertune.playback.QueueBoard
 import com.dd3boh.outertune.models.toMediaMetadata
+import com.dd3boh.outertune.playback.QueueBoard
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -30,8 +29,7 @@ interface QueueDao {
     fun getAllQueues(): Flow<List<QueueEntity>>
 
     @Transaction
-    @RewriteQueriesToDropUnusedColumns
-    @Query("SELECT *, queue_song_map.shuffledIndex from queue_song_map JOIN song ON queue_song_map.songId = song.id WHERE queueId = :queueId ORDER BY `index`")
+    @Query("SELECT song.*, queue_song_map.shuffledIndex from queue_song_map JOIN song ON queue_song_map.songId = song.id WHERE queueId = :queueId ORDER BY `index`")
     fun getQueueSongs(queueId: Long): Flow<List<QueueSong>>
 
     fun readQueue(): List<MultiQueueObject> {

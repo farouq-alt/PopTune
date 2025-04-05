@@ -141,10 +141,9 @@ class FFMpegScanner(context: Context) : MetadataScanner {
             path.substringAfterLast('/').substringBeforeLast('.')
         }
 
-        val duration: Long = try {
-            (parseLong(rawDuration?.trim()) / toSeconds).roundToLong() // just let it crash
-        } catch (e: Exception) {
-//            e.printStackTrace()
+        val duration: Long = if (rawDuration != null) {
+            (parseLong(rawDuration.trim()) / toSeconds).roundToLong()
+        } else {
             -1L
         }
 
@@ -152,7 +151,7 @@ class FFMpegScanner(context: Context) : MetadataScanner {
         val dateModified = LocalDateTime.ofInstant(Instant.ofEpochMilli(File(path).lastModified()), ZoneOffset.UTC)
         val albumId = if (albumName != null) AlbumEntity.generateAlbumId() else null
         val mime = if (type != null && codec != null) {
-            "${type?.trim()}/${codec?.trim()}"
+            "${type.trim()}/${codec.trim()}"
         } else {
             "Unknown"
         }

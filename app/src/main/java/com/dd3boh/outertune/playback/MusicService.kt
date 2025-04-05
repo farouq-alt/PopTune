@@ -59,7 +59,6 @@ import androidx.media3.session.CommandButton
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaController
 import androidx.media3.session.MediaLibraryService
-import androidx.media3.session.MediaLibraryService.MediaLibrarySession
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionToken
 import com.dd3boh.outertune.MainActivity
@@ -145,7 +144,6 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.time.LocalDateTime
 import javax.inject.Inject
-import kotlin.collections.map
 import kotlin.math.min
 import kotlin.math.pow
 
@@ -483,12 +481,18 @@ class MusicService : MediaLibraryService(),
     fun updateNotification() {
         mediaSession.setCustomLayout(
             listOf(
-                CommandButton.Builder()
+                CommandButton.Builder(if (queueBoard.getCurrentQueue()?.shuffled == true) CommandButton.ICON_SHUFFLE_ON else CommandButton.ICON_SHUFFLE_OFF)
                     .setDisplayName(getString(if (queueBoard.getCurrentQueue()?.shuffled == true) R.string.action_shuffle_off else R.string.action_shuffle_on))
-                    .setIconResId(if (queueBoard.getCurrentQueue()?.shuffled == true) R.drawable.shuffle_on else R.drawable.shuffle)
                     .setSessionCommand(CommandToggleShuffle)
                     .build(),
-                CommandButton.Builder()
+                CommandButton.Builder(
+                    when (player.repeatMode) {
+                        REPEAT_MODE_OFF -> CommandButton.ICON_REPEAT_OFF
+                        REPEAT_MODE_ONE -> CommandButton.ICON_REPEAT_ONE
+                        REPEAT_MODE_ALL -> CommandButton.ICON_REPEAT_ALL
+                        else -> throw IllegalStateException()
+                    }
+                )
                     .setDisplayName(
                         getString(
                             when (player.repeatMode) {
@@ -499,25 +503,15 @@ class MusicService : MediaLibraryService(),
                             }
                         )
                     )
-                    .setIconResId(
-                        when (player.repeatMode) {
-                            REPEAT_MODE_OFF -> R.drawable.repeat
-                            REPEAT_MODE_ONE -> R.drawable.repeat_one_on
-                            REPEAT_MODE_ALL -> R.drawable.repeat_on
-                            else -> throw IllegalStateException()
-                        }
-                    )
                     .setSessionCommand(CommandToggleRepeatMode)
                     .build(),
-                CommandButton.Builder()
+                CommandButton.Builder(if (currentSong.value?.song?.liked == true) CommandButton.ICON_HEART_FILLED else CommandButton.ICON_HEART_UNFILLED)
                     .setDisplayName(getString(if (currentSong.value?.song?.liked == true) R.string.action_remove_like else R.string.action_like))
-                    .setIconResId(if (currentSong.value?.song?.liked == true) R.drawable.favorite else R.drawable.favorite_border)
                     .setSessionCommand(CommandToggleLike)
                     .setEnabled(currentSong.value != null)
                     .build(),
-                CommandButton.Builder()
+                CommandButton.Builder(CommandButton.ICON_RADIO)
                     .setDisplayName(getString(R.string.start_radio))
-                    .setIconResId(R.drawable.radio)
                     .setSessionCommand(CommandToggleStartRadio)
                     .setEnabled(currentSong.value != null)
                     .build()

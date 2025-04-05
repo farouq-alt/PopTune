@@ -222,7 +222,6 @@ fun SearchBar(
                     placeholder = placeholder,
                     leadingIcon = leadingIcon,
                     trailingIcon = trailingIcon,
-                    colors = colors.inputFieldColors,
                     interactionSource = interactionSource,
                     focusRequester = focusRequester,
                 )

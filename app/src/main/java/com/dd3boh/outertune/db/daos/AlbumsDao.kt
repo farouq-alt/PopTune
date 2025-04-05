@@ -6,7 +6,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RawQuery
-import androidx.room.RewriteQueriesToDropUnusedColumns
 import androidx.room.Transaction
 import androidx.room.Update
 import androidx.room.Upsert
@@ -70,9 +69,8 @@ interface AlbumsDao : ArtistsDao {
     fun albumSongs(albumId: String): Flow<List<Song>>
 
     @Transaction
-    @RewriteQueriesToDropUnusedColumns
     @Query("""
-        SELECT *, count(song.dateDownload) downloadCount
+        SELECT album.*, count(song.dateDownload) downloadCount
         FROM album
             JOIN song ON album.id = song.albumId
             JOIN event ON song.id = event.songId
