@@ -193,6 +193,7 @@ dependencies {
     "JitPack builds are broken with the latest CMake version.
     Please download the [aar](https://github.com/Kyant0/taglib/releases) manually but not use maven."
      */
-//    implementation(libs.taglib)
+//    implementation(libs.taglib) // jitpack
     implementation(files("../prebuilt/taglib_1.0.0.aar")) // prebuilt
+//    implementation("com.kyant:taglib") // custom
 }
