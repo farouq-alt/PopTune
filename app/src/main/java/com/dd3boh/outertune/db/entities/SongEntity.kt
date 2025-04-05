@@ -99,6 +99,6 @@ data class SongEntity(
     fun getDateModifiedLong(): Long? = dateModified?.toEpochSecond(ZoneOffset.UTC)
 
     companion object {
-        fun generateSongId() = "LA" + RandomStringUtils.insecure().next(8, true, false)
+        fun generateSongId() = "LS" + RandomStringUtils.insecure().next(8, true, false)
     }
 }

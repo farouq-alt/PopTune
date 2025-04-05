@@ -44,6 +44,6 @@ data class AlbumEntity(
     }
 
     companion object {
-        fun generateAlbumId() = "LA" + RandomStringUtils.insecure().next(8, true, false)
+        fun generateAlbumId() = "LB" + RandomStringUtils.insecure().next(8, true, false)
     }
 }
