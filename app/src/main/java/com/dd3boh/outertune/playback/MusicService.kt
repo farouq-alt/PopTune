@@ -266,7 +266,7 @@ class MusicService : MediaLibraryService(),
                             return
                         }
 
-                        if (dataStore.get(SkipOnErrorKey, true)) {
+                        if (dataStore.get(SkipOnErrorKey, false)) {
                             skipOnError()
                         } else {
                             stopOnError()
