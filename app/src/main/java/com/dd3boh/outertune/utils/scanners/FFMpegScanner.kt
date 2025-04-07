@@ -52,7 +52,7 @@ class FFMpegScanner(context: Context) : MetadataScanner {
         if (EXTRACTOR_DEBUG)
             Timber.tag(EXTRACTOR_TAG).d("Starting Full Extractor session on: $path")
 
-        var data: String = ""
+        var data = ""
         val mutex = Mutex(true)
         val intent = Intent("wah.mikooomich.ffMetadataEx.ACTION_EXTRACT_METADATA").apply {
             putExtra("filePath", path)
@@ -135,16 +135,15 @@ class FFMpegScanner(context: Context) : MetadataScanner {
          * These vars need a bit more parsing
          */
 
-        val title: String = if (rawTitle != null && rawTitle?.isBlank() == false) { // songs with no title tag
-            rawTitle!!.trim()
+        val title: String = if (rawTitle != null && rawTitle.isBlank() == false) { // songs with no title tag
+            rawTitle.trim()
         } else {
             path.substringAfterLast('/').substringBeforeLast('.')
         }
 
-        val duration: Long = try {
-            (parseLong(rawDuration?.trim()) / toSeconds).roundToLong() // just let it crash
-        } catch (e: Exception) {
-//            e.printStackTrace()
+        val duration: Long = if (rawDuration != null) {
+            (parseLong(rawDuration.trim()) / toSeconds).roundToLong()
+        } else {
             -1L
         }
 
@@ -152,7 +151,7 @@ class FFMpegScanner(context: Context) : MetadataScanner {
         val dateModified = LocalDateTime.ofInstant(Instant.ofEpochMilli(File(path).lastModified()), ZoneOffset.UTC)
         val albumId = if (albumName != null) AlbumEntity.generateAlbumId() else null
         val mime = if (type != null && codec != null) {
-            "${type?.trim()}/${codec?.trim()}"
+            "${type.trim()}/${codec.trim()}"
         } else {
             "Unknown"
         }
@@ -169,7 +168,7 @@ class FFMpegScanner(context: Context) : MetadataScanner {
         // parse album
         val albumEntity = if (albumName != null && albumId != null) AlbumEntity(
             id = albumId,
-            title = albumName!!,
+            title = albumName,
             songCount = 1,
             duration = duration.toInt()
         ) else null
@@ -190,11 +189,11 @@ class FFMpegScanner(context: Context) : MetadataScanner {
         try {
             if (rawDate != null) {
                 try {
-                    date = LocalDate.parse(rawDate!!.substringAfter(';').trim()).atStartOfDay()
+                    date = LocalDate.parse(rawDate.substringAfter(';').trim()).atStartOfDay()
                 } catch (e: Exception) {
                 }
 
-                year = date?.year ?: parseInt(rawDate!!.trim())
+                year = date?.year ?: parseInt(rawDate.trim())
             }
         } catch (e: Exception) {
             // user error at this point. I am not parsing all the weird ways the string can come in
