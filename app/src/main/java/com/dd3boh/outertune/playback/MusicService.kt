@@ -333,6 +333,7 @@ class MusicService : MediaLibraryService(),
             }
 
         mediaLibrarySessionCallback.apply {
+            service = this@MusicService
             toggleLike = ::toggleLike
             toggleStartRadio = ::toggleStartRadio
             toggleLibrary = ::toggleLibrary
@@ -1024,6 +1025,7 @@ class MusicService : MediaLibraryService(),
         const val ARTIST = "artist"
         const val ALBUM = "album"
         const val PLAYLIST = "playlist"
+        const val SEARCH = "search"
 
         const val CHANNEL_ID = "music_channel_01"
         const val CHANNEL_NAME = "fgs_workaround"
