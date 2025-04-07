@@ -57,8 +57,7 @@ class TagLibScanner : MetadataScanner {
             var albumName: String? = null
             var year: Int? = null
             var date: LocalDateTime? = null
-            var codec: String? = null
-            var type: String? = null
+            var codec: String
             var bitrate: Int
             var sampleRate: Int
             var channels: Int
@@ -77,6 +76,7 @@ class TagLibScanner : MetadataScanner {
             channels = audioProperties.channels
             sampleRate = audioProperties.sampleRate
             bitrate = audioProperties.bitrate * 1000
+            codec = audioProperties.codec
 
 
             // Read metadata
@@ -162,11 +162,6 @@ class TagLibScanner : MetadataScanner {
             // should never be invalid if scanner even gets here fine...
             val dateModified = LocalDateTime.ofInstant(Instant.ofEpochMilli(file.lastModified()), ZoneOffset.UTC)
             val albumId = if (albumName != null) AlbumEntity.generateAlbumId() else null
-            val mime = if (type != null && codec != null) {
-                "${type?.trim()}/${codec?.trim()}"
-            } else {
-                "Unknown"
-            }
 
             /**
              * Parse the more complicated structures
@@ -209,8 +204,8 @@ class TagLibScanner : MetadataScanner {
                 FormatEntity(
                     id = songId,
                     itag = -1,
-                    mimeType = "Not implemented", // mime,
-                    codecs = "Not implemented", //codec?.trim() ?: "Unknown",
+                    mimeType = "audio/$codec",
+                    codecs = codec,
                     bitrate = bitrate,
                     sampleRate = sampleRate,
                     contentLength = duration.toLong(),
