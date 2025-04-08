@@ -146,4 +146,9 @@
     <string name="audio_offload">Habilitar offload</string>
     <string name="lyrics_prefer_local_description">Priorice la resolución de archivos de letras locales antes de utilizar todos los proveedores de la nube. Desactive esto para priorizar a los proveedores de la nube</string>
     <string name="local_library_enable_title">Habilitar medios locales</string>
+    <string name="filter_arrangement">Organizar filtros</string>
+    <string name="swipe_to_skip_title">Desliza horizontalmente para cambiar de canción</string>
+    <string name="android_auto">Android Auto</string>
+    <string name="swipe_to_skip_description">Habilitar deslizar horizontalmente en el reproductor para cambiar de canción</string>
+    <string name="image_cache_tooltip">Reinicia la aplicación para que los cambios tengan efecto</string>
 </resources>
