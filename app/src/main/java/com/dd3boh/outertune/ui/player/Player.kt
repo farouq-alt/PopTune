@@ -123,7 +123,6 @@ import com.dd3boh.outertune.extensions.togglePlayPause
 import com.dd3boh.outertune.extensions.toggleRepeatMode
 import com.dd3boh.outertune.models.MediaMetadata
 import com.dd3boh.outertune.playback.isShuffleEnabled
-import com.dd3boh.outertune.playback.PlayerConnection
 import com.dd3boh.outertune.ui.component.AsyncImageLocal
 import com.dd3boh.outertune.ui.component.BottomSheet
 import com.dd3boh.outertune.ui.component.BottomSheetState
@@ -168,12 +167,13 @@ fun BottomSheetPlayer(
 
     val thumbnailLazyGridState = rememberLazyGridState()
 
-    val previousMediaMetadata = if (playerConnection.player.hasPreviousMediaItem()) {
+    val swipeToSkip by rememberPreference(SwipeToSkip, defaultValue = true)
+    val previousMediaMetadata = if (swipeToSkip && playerConnection.player.hasPreviousMediaItem()) {
         val previousIndex = playerConnection.player.previousMediaItemIndex
         playerConnection.player.getMediaItemAt(previousIndex).metadata
     } else null
 
-    val nextMediaMetadata = if (playerConnection.player.hasNextMediaItem()) {
+    val nextMediaMetadata = if (swipeToSkip && playerConnection.player.hasNextMediaItem()) {
         val nextIndex = playerConnection.player.nextMediaItemIndex
         playerConnection.player.getMediaItemAt(nextIndex).metadata
     } else null
@@ -184,8 +184,9 @@ fun BottomSheetPlayer(
     val currentItem by remember { derivedStateOf { thumbnailLazyGridState.firstVisibleItemIndex } }
     val itemScrollOffset by remember { derivedStateOf { thumbnailLazyGridState.firstVisibleItemScrollOffset } }
 
+    // todo: fix issue where when ui init, causes a skip previous immediately because song 0 is loaded before song 1 AND offset is initialized at 0 simultaneously
     LaunchedEffect(itemScrollOffset) {
-        if (itemScrollOffset != 0) return@LaunchedEffect
+        if (!swipeToSkip || itemScrollOffset != 0) return@LaunchedEffect
 
         if (currentItem > currentMediaIndex)
             playerConnection.player.seekToNext()
@@ -204,7 +205,6 @@ fun BottomSheetPlayer(
             thumbnailLazyGridState.animateScrollToItem(index)
     }
 
-    val swipeToSkip by rememberPreference(SwipeToSkip, defaultValue = true)
     val horizontalLazyGridItemWidthFactor = 1f
     val thumbnailSnapLayoutInfoProvider = remember(thumbnailLazyGridState) {
         SnapLayoutInfoProvider(
