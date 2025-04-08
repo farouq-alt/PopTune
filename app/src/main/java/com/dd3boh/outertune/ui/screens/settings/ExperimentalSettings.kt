@@ -8,6 +8,7 @@
 
 package com.dd3boh.outertune.ui.screens.settings
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -73,7 +74,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -160,7 +160,7 @@ fun ExperimentalSettings(
                     Toast.makeText(context, context.getString(R.string.scanner_ytm_link_start), Toast.LENGTH_SHORT).show()
                     coroutineScope.launch(Dispatchers.IO) {
                         val scanner = LocalMediaScanner.getScanner(context, ScannerImpl.TAGLIB)
-                        Timber.tag("Settings").d("Force Migrating local artists to YTM (MANUAL TRIGGERED)")
+                        Log.i(SETTINGS_TAG, "Force Migrating local artists to YTM (MANUAL TRIGGERED)")
                         scanner.localToRemoteArtist(database)
                         Toast.makeText(context, context.getString(R.string.scanner_ytm_link_success), Toast.LENGTH_SHORT).show()
                     }
@@ -339,7 +339,7 @@ fun ExperimentalSettings(
                     onClick = {
                         Toast.makeText(context, "Nuking local files from database...", Toast.LENGTH_SHORT).show()
                         coroutineScope.launch(Dispatchers.IO) {
-                            Timber.tag("Settings").d("Nuke database status:  ${database.nukeLocalData()}")
+                            Log.i(SETTINGS_TAG, "Nuke database status:  ${database.nukeLocalData()}")
                         }
                     }
                 )
@@ -349,7 +349,7 @@ fun ExperimentalSettings(
                     onClick = {
                         Toast.makeText(context, "Nuking local artists from database...", Toast.LENGTH_SHORT).show()
                         coroutineScope.launch(Dispatchers.IO) {
-                            Timber.tag("Settings").d("Nuke database status:  ${database.nukeLocalArtists()}")
+                            Log.i(SETTINGS_TAG, "Nuke database status:  ${database.nukeLocalArtists()}")
                         }
                     }
                 )
@@ -359,7 +359,7 @@ fun ExperimentalSettings(
                     onClick = {
                         Toast.makeText(context, "Nuking dangling format entities from database...", Toast.LENGTH_SHORT).show()
                         coroutineScope.launch(Dispatchers.IO) {
-                            Timber.tag("Settings").d("Nuke database status:  ${database.nukeDanglingFormatEntities()}")
+                            Log.i(SETTINGS_TAG, "Nuke database status:  ${database.nukeDanglingFormatEntities()}")
                         }
                     }
                 )
@@ -369,7 +369,7 @@ fun ExperimentalSettings(
                     onClick = {
                         Toast.makeText(context, "Nuking lyrics from database...", Toast.LENGTH_SHORT).show()
                         coroutineScope.launch(Dispatchers.IO) {
-                            Timber.tag("Settings").d("Nuke database status:  ${database.nukeLocalLyrics()}")
+                            Log.i(SETTINGS_TAG, "Nuke database status:  ${database.nukeLocalLyrics()}")
                         }
                     }
                 )
@@ -379,7 +379,7 @@ fun ExperimentalSettings(
                     onClick = {
                         Toast.makeText(context, "Nuking remote playlists from database...", Toast.LENGTH_SHORT).show()
                         coroutineScope.launch(Dispatchers.IO) {
-                            Timber.tag("Settings").d("Nuke database status:  ${database.nukeRemotePlaylists()}")
+                            Log.i(SETTINGS_TAG, "Nuke database status:  ${database.nukeRemotePlaylists()}")
                         }
                     }
                 )

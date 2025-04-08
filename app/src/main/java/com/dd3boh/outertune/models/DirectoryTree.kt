@@ -8,13 +8,13 @@
 
 package com.dd3boh.outertune.models
 
+import android.util.Log
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastForEach
 import com.dd3boh.outertune.constants.SongSortType
 import com.dd3boh.outertune.db.entities.Song
 import com.dd3boh.outertune.ui.utils.SCANNER_DEBUG
 import com.dd3boh.outertune.ui.utils.STORAGE_ROOT
-import timber.log.Timber
 import java.time.ZoneOffset
 
 /**
@@ -71,7 +71,7 @@ class DirectoryTree(path: String) {
         if (path.indexOf('/') == -1) {
             files.add(song)
             if (SCANNER_DEBUG)
-                Timber.tag(TAG).d("Adding song with path: $path")
+                Log.v(TAG, "Adding song with path: $path")
             return
         }
 
@@ -114,12 +114,12 @@ class DirectoryTree(path: String) {
      * @return song at path, or null if it does not exist
      */
     fun getSong(path: String): Song? {
-        Timber.tag(TAG).d("Searching for song, at path: $path")
+        Log.v(TAG, "Searching for song, at path: $path")
 
         // search for song in current dir
         if (path.indexOf('/') == -1) {
             val foundSong: Song = files.first { getFileName(it.song.localPath) == getFileName(path) }
-            Timber.tag(TAG).d("Searching for song, found?: ${foundSong.id} Name: ${foundSong.song.title}")
+            Log.v(TAG, "Searching for song, found?: ${foundSong.id} Name: ${foundSong.song.title}")
             return foundSong
         }
 

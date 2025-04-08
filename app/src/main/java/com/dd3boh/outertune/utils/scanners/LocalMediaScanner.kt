@@ -11,6 +11,7 @@ package com.dd3boh.outertune.utils.scanners
 import android.content.Context
 import android.media.MediaPlayer
 import android.os.Environment
+import android.util.Log
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastForEach
 import androidx.datastore.preferences.core.edit
@@ -27,8 +28,6 @@ import com.dd3boh.outertune.db.entities.SongGenreMap
 import com.dd3boh.outertune.models.DirectoryTree
 import com.dd3boh.outertune.models.SongTempData
 import com.dd3boh.outertune.models.toMediaMetadata
-import com.dd3boh.outertune.ui.utils.EXTRACTOR_DEBUG
-import com.dd3boh.outertune.ui.utils.EXTRACTOR_TAG
 import com.dd3boh.outertune.ui.utils.SCANNER_DEBUG
 import com.dd3boh.outertune.ui.utils.STORAGE_ROOT
 import com.dd3boh.outertune.ui.utils.SYNC_SCANNER
@@ -48,7 +47,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
-import timber.log.Timber
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -57,14 +55,14 @@ import java.util.Locale
 
 
 class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
+    private val TAG = LocalMediaScanner::class.simpleName.toString()
     private var advancedScannerImpl: MetadataScanner = when (scannerImpl) {
         ScannerImpl.TAGLIB -> TagLibScanner()
         ScannerImpl.FFMPEG_EXT -> FFMpegScanner(context)
     }
 
     init {
-        if (EXTRACTOR_DEBUG)
-            Timber.tag(EXTRACTOR_TAG).d("Creating scanner instance with scannerImpl: $scannerImpl")
+        Log.i(TAG, "Creating scanner instance with scannerImpl: $scannerImpl")
     }
 
     /**
@@ -102,9 +100,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
 
                 else -> {
                     if (SCANNER_DEBUG) {
-                        Timber.tag(TAG).d(
-                            "ERROR READING METADATA: ${e.message} for: $path"
-                        )
+                        Log.w(TAG, "ERROR READING METADATA: ${e.message} for: $path")
                         e.printStackTrace()
                     }
 
@@ -146,7 +142,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
         pathsOnly: Boolean = false,
     ): MutableStateFlow<DirectoryTree> {
         val newDirectoryStructure = DirectoryTree(STORAGE_ROOT)
-        Timber.tag(TAG).d("------------ SCAN: Starting Full Scanner ------------")
+        Log.i(TAG, "------------ SCAN: Starting Full Scanner ------------")
         scannerShowLoading.value = true
 
         val scannerJobs = ArrayList<Deferred<SongTempData?>>()
@@ -157,7 +153,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                     return@forEach
                 }
                 if (SCANNER_DEBUG)
-                    Timber.tag(TAG).d("PATH: $path")
+                    Log.v(TAG, "PATH: $path")
 
                 /**
                  * TODO: do not link album (and whatever song id) with youtube yet, figure that out later
@@ -179,8 +175,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                         async(scannerSession) {
                             var ret: SongTempData?
                             if (scannerRequestCancel) {
-                                if (SCANNER_DEBUG)
-                                    Timber.tag(TAG).d("WARNING: Canceling advanced scanner job.")
+                                Log.i(TAG, "WARNING: Canceling advanced scanner job.")
                                 throw ScannerAbortException("")
                             }
                             try {
@@ -195,7 +190,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                 } else {
                     if (scannerRequestCancel) {
                         if (SCANNER_DEBUG)
-                            Timber.tag(TAG).d("WARNING: Requested to cancel Full Scanner. Aborting.")
+                            Log.i(TAG, "WARNING: Requested to cancel Full Scanner. Aborting.")
                         scannerRequestCancel = false
                         throw ScannerAbortException("Scanner canceled during Full Scanner (synchronous)")
                     }
@@ -216,8 +211,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                 // use async scanner
                 scannerJobs.awaitAll()
                 if (scannerRequestCancel) {
-                    if (SCANNER_DEBUG)
-                        Timber.tag(TAG).d("WARNING: Requested to cancel Full Scanner. Aborting.")
+                    Log.i(TAG, "WARNING: Requested to cancel Full Scanner. Aborting.")
                     scannerRequestCancel = false
                     throw ScannerAbortException("Scanner canceled during Full Scanner (asynchronous)")
                 }
@@ -236,7 +230,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
         }
 
         scannerShowLoading.value = false
-        Timber.tag(TAG).d("------------ SCAN: Finished Full Scanner ------------")
+        Log.i(TAG, "------------ SCAN: Finished Full Scanner ------------")
         cacheDirectoryTree(newDirectoryStructure.androidStorageWorkaround().trimRoot())
         return MutableStateFlow(newDirectoryStructure)
     }
@@ -264,10 +258,10 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
         noDisable: Boolean = false
     ) {
         if (scannerActive.value) {
-            Timber.tag(TAG).d("------------ SYNC: Scanner in use. Aborting Local Library Sync ------------")
+            Log.i(TAG, "------------ SYNC: Scanner in use. Aborting Local Library Sync ------------")
             return
         }
-        Timber.tag(TAG).d("------------ SYNC: Starting Local Library Sync ------------")
+        Log.i(TAG, "------------ SYNC: Starting Local Library Sync ------------")
         scannerActive.value = true
         scannerShowLoading.value = true
         // deduplicate
@@ -277,7 +271,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                 finalSongs.add(song)
             }
         }
-        Timber.tag(TAG).d("Entries to process: ${newSongs.size}. After dedup: ${finalSongs.size}")
+        Log.d(TAG, "Entries to process: ${newSongs.size}. After dedup: ${finalSongs.size}")
         scannerProgressTotal.value = finalSongs.size
         scannerProgressCurrent.value = 0
 
@@ -286,7 +280,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
         finalSongs.forEach { song ->
             runs ++
             if (SCANNER_DEBUG && runs % 20 == 0) {
-                Timber.tag(TAG).d("------------ SYNC: Local Library Sync: $runs/${finalSongs.size} processed ------------")
+                Log.d(TAG, "------------ SYNC: Local Library Sync: $runs/${finalSongs.size} processed ------------")
             }
             if (runs % 5 == 0) {
                 scannerProgressCurrent.value += 5
@@ -294,7 +288,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
 
             if (scannerRequestCancel) {
                 if (SCANNER_DEBUG)
-                    Timber.tag(TAG).d("WARNING: Requested to cancel Local Library Sync. Aborting.")
+                    Log.i(TAG, "WARNING: Requested to cancel Local Library Sync. Aborting.")
                 scannerRequestCancel = false
                 throw ScannerAbortException("Scanner canceled during Local Library Sync")
             }
@@ -309,19 +303,16 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                 }
 
                 if (SCANNER_DEBUG) {
-                    Timber.tag(TAG)
-                        .d("Found songs that match: ${songMatch.size}, Total results from database: ${querySong.first().size}")
+                    Log.v(TAG, "Found songs that match: ${songMatch.size}, Total results from database: ${querySong.first().size}")
                     if (songMatch.isNotEmpty()) {
-                        Timber.tag(TAG)
-                            .d("FIRST Found songs ${songMatch.first().song.title}")
+                        Log.v(TAG, "FIRST Found songs ${songMatch.first().song.title}")
                     }
                 }
 
 
                 if (songMatch.isNotEmpty()) { // known song, update the song info in the database
                     if (SCANNER_DEBUG)
-                        Timber.tag(TAG)
-                            .d("Found in database, updating song: ${song.song.title} rescan = $refreshExisting")
+                        Log.v(TAG, "Found in database, updating song: ${song.song.title} rescan = $refreshExisting")
 
                     val oldSong = songMatch.first().song
                     val songToUpdate = song.song.song.copy(id = oldSong.id, localPath = song.song.song.localPath)
@@ -400,7 +391,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
 
                 } else { // new song
                     if (SCANNER_DEBUG)
-                        Timber.tag(TAG).d("NOT found in database, adding song: ${song.song.title}")
+                        Log.v(TAG, "NOT found in database, adding song: ${song.song.title}")
 
                     database.insert(song.song.toMediaMetadata())
                 }
@@ -413,7 +404,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
         }
         scannerShowLoading.value = false
         scannerActive.value = false
-        Timber.tag(TAG).d("------------ SYNC: Finished Local Library Sync ------------")
+        Log.i(TAG, "------------ SYNC: Finished Local Library Sync ------------")
     }
 
     /**
@@ -436,8 +427,8 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
         matchCriteria: ScannerMatchCriteria,
         strictFileNames: Boolean,
     ) {
-        Timber.tag(TAG).d("------------ SYNC: Starting Quick (additive delta) Library Sync ------------")
-        Timber.tag(TAG).d("Entries to process: ${newSongs.size}")
+        Log.i(TAG, "------------ SYNC: Starting Quick (additive delta) Library Sync ------------")
+        Log.d(TAG, "Entries to process: ${newSongs.size}")
         scannerShowLoading.value = true
 
         runBlocking(Dispatchers.IO) {
@@ -453,8 +444,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                 // Get song basic metadata
                 delta.forEach { s ->
                     if (scannerRequestCancel) {
-                        if (SCANNER_DEBUG)
-                            Timber.tag(TAG).d("WARNING: Requested to cancel. Aborting.")
+                        Log.i(TAG, "WARNING: Requested to cancel. Aborting.")
                         scannerRequestCancel = false
                         throw ScannerAbortException("Scanner canceled during Quick (additive delta) Library Sync")
                     }
@@ -467,7 +457,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                     val path = "" + s.song.localPath
 
                     if (SCANNER_DEBUG)
-                        Timber.tag(TAG).d("PATH: $path")
+                        Log.v(TAG, "PATH: $path")
 
                     /**
                      * TODO: do not link album (and whatever song id) with youtube yet, figure that out later
@@ -478,8 +468,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                         scannerJobs.add(
                             async(scannerSession) {
                                 if (scannerRequestCancel) {
-                                    if (SCANNER_DEBUG)
-                                        Timber.tag(TAG).d("WARNING: Canceling advanced scanner job.")
+                                    Log.i(TAG, "WARNING: Canceling advanced scanner job.")
                                     throw ScannerAbortException("")
                                 }
                                 try {
@@ -510,8 +499,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
             if (finalSongs.isNotEmpty()) {
                 syncDB(database, finalSongs, matchCriteria, strictFileNames, noDisable = true)
             } else {
-                if (SCANNER_DEBUG)
-                    Timber.tag(TAG).d("Not syncing, no valid songs found!")
+                Log.i(TAG, "Not syncing, no valid songs found!")
             }
 
             // we handle disabling songs here instead
@@ -520,7 +508,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
 
         cacheDirectoryTree(null)
         scannerShowLoading.value = false
-        Timber.tag(TAG).d("------------ SYNC: Finished Quick (additive delta) Library Sync ------------")
+        Log.i(TAG, "------------ SYNC: Finished Quick (additive delta) Library Sync ------------")
     }
 
 
@@ -543,8 +531,8 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
         matchCriteria: ScannerMatchCriteria,
         strictFileNames: Boolean,
     ) {
-        Timber.tag(TAG).d("------------ SYNC: Starting FULL Library Sync ------------")
-        Timber.tag(TAG).d("Entries to process: ${newSongs.size}")
+        Log.i(TAG, "------------ SYNC: Starting FULL Library Sync ------------")
+        Log.d(TAG, "Entries to process: ${newSongs.size}")
         scannerShowLoading.value = true
 
         runBlocking(Dispatchers.IO) {
@@ -554,8 +542,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                 // Get song basic metadata
                 newSongs.forEach { s ->
                     if (scannerRequestCancel) {
-                        if (SCANNER_DEBUG)
-                            Timber.tag(TAG).d("WARNING: Requested to cancel. Aborting.")
+                        Log.i(TAG, "WARNING: Requested to cancel. Aborting.")
                         scannerRequestCancel = false
                         throw ScannerAbortException("Scanner canceled during FULL Library Sync")
                     }
@@ -568,7 +555,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                     val path = "" + s.song.localPath
 
                     if (SCANNER_DEBUG)
-                        Timber.tag(TAG).d("PATH: $path")
+                        Log.d(TAG, "PATH: $path")
 
                     /**
                      * TODO: do not link album (and whatever song id) with youtube yet, figure that out later
@@ -579,8 +566,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                         scannerJobs.add(
                             async(scannerSession) {
                                 if (scannerRequestCancel) {
-                                    if (SCANNER_DEBUG)
-                                        Timber.tag(TAG).d("WARNING: Canceling advanced scanner job.")
+                                    Log.i(TAG, "WARNING: Canceling advanced scanner job.")
                                     throw ScannerAbortException("")
                                 }
                                 try {
@@ -614,14 +600,13 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                  */
                 syncDB(database, finalSongs, matchCriteria, strictFileNames, refreshExisting = true)
             } else {
-                if (SCANNER_DEBUG)
-                    Timber.tag(TAG).d("Not syncing, no valid songs found!")
+                Log.i(TAG, "Not syncing, no valid songs found!")
             }
         }
 
         cacheDirectoryTree(null)
         scannerShowLoading.value = false
-        Timber.tag(TAG).d("------------ SYNC: Finished Quick (additive delta) Library Sync ------------")
+        Log.i(TAG, "------------ SYNC: Finished Quick (additive delta) Library Sync ------------")
     }
 
 
@@ -630,11 +615,11 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
      */
     fun localToRemoteArtist(database: MusicDatabase) {
         if (scannerActive.value) {
-            Timber.tag(TAG).d("------------ SYNC: Scanner in use. Aborting youtubeArtistLookup job ------------")
+            Log.i(TAG, "------------ SYNC: Scanner in use. Aborting youtubeArtistLookup job ------------")
             return
         }
         var runs = 0
-        Timber.tag(TAG).d("------------ SYNC: Starting youtubeArtistLookup job ------------")
+        Log.i(TAG, "------------ SYNC: Starting youtubeArtistLookup job ------------")
         scannerActive.value = true
         scannerShowLoading.value = true
         runBlocking(Dispatchers.IO) {
@@ -643,7 +628,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
             allLocal.forEach { element ->
                 runs ++
                 if (runs % 20 == 0) {
-                    Timber.tag(TAG).d("------------ SYNC: youtubeArtistLookup job: $runs artists processed ------------")
+                    Log.v(TAG, "------------ SYNC: youtubeArtistLookup job: $runs artists processed ------------")
                 }
 
                 val artistVal = element.name.trim()
@@ -658,13 +643,11 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                     }
 
                 if (SCANNER_DEBUG)
-                    Timber.tag(TAG)
-                        .d("ARTIST FOUND IN DB??? Results size: ${databaseArtistMatch.size}")
+                    Log.v(TAG, "ARTIST FOUND IN DB??? Results size: ${databaseArtistMatch.size}")
 
                 // cancel here since this is where the real heavy action is
                 if (scannerRequestCancel) {
-                    if (SCANNER_DEBUG)
-                        Timber.tag(TAG).d("WARNING: Requested to cancel youtubeArtistLookup job. Aborting.")
+                    Log.i(TAG, "WARNING: Requested to cancel youtubeArtistLookup job. Aborting.")
                     throw ScannerAbortException("Scanner canceled during youtubeArtistLookup job")
                 }
 
@@ -694,15 +677,14 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
             }
 
             if (scannerRequestCancel) {
-                if (SCANNER_DEBUG)
-                    Timber.tag(TAG).d("WARNING: Requested to cancel during localToRemoteArtist. Aborting.")
+                Log.i(TAG, "WARNING: Requested to cancel during localToRemoteArtist. Aborting.")
                 throw ScannerAbortException("Scanner canceled during localToRemoteArtist")
             }
         }
 
         scannerShowLoading.value = false
         scannerActive.value = false
-        Timber.tag(TAG).d("------------ SYNC: youtubeArtistLookup job ended------------")
+        Log.i(TAG, "------------ SYNC: youtubeArtistLookup job ended------------")
     }
 
 
@@ -710,8 +692,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
      * Remove inaccessible, and duplicate songs from the library
      */
     private fun finalize(newSongs: List<Song>, database: MusicDatabase) {
-        if (SCANNER_DEBUG)
-            Timber.tag(TAG).d("Start finalize (disable songs) job. Number of valid songs: ${newSongs.size}")
+        Log.i(TAG, "Start finalize (disable songs) job. Number of valid songs: ${newSongs.size}")
         runBlocking(Dispatchers.IO) {
             // get list of all local songs in db
             database.disableInvalidLocalSongs() // make sure path is existing
@@ -727,7 +708,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                 // delete all songs in the DB that do not match a path
                 if (newSongs.none { it.song.localPath == song.song.localPath }) {
                     if (SCANNER_DEBUG)
-                        Timber.tag(TAG).d("Disabling song ${song.song.localPath}")
+                        Log.v(TAG, "Disabling song ${song.song.localPath}")
                     database.transaction {
                         disableLocalSong(song.song.id)
                     }
@@ -738,9 +719,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
             val dupes = database.duplicatedLocalSongs().first().toMutableList()
             var index = 0
 
-            if (SCANNER_DEBUG)
-                Timber.tag(TAG).d("Start finalize (duplicate removal) job. Number of candidates: ${dupes.size}")
-
+            Log.d(TAG, "Start finalize (duplicate removal) job. Number of candidates: ${dupes.size}")
             while (index < dupes.size) {
                 // collect all the duplicates
                 val contenders = ArrayList<Pair<SongEntity, Int>>()
@@ -753,7 +732,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                 contenders.remove(contenders.maxByOrNull { it.second })
                 contenders.forEach {
                     if (SCANNER_DEBUG)
-                        Timber.tag(TAG).d("Deleting song ${it.first.id} (${it.first.title})")
+                        Log.v(TAG, "Deleting song ${it.first.id} (${it.first.title})")
                     database.delete(it.first)
                 }
             }
@@ -766,8 +745,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
      * from the database
      */
     fun nukeLocalDB(database: MusicDatabase) {
-        Timber.tag(TAG)
-            .w("NUKING LOCAL FILE LIBRARY FROM DATABASE! Nuke status: ${database.nukeLocalData()}")
+        Log.w(TAG, "NUKING LOCAL FILE LIBRARY FROM DATABASE! Nuke status: ${database.nukeLocalData()}")
     }
 
 
@@ -833,8 +811,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
             scannerProgressTotal.value = -1
             scannerProgressCurrent.value = -1
 
-            if (EXTRACTOR_DEBUG)
-                Timber.tag(EXTRACTOR_TAG).d("Scanner instance destroyed")
+             Log.i(TAG, "Scanner instance destroyed")
         }
 
 
@@ -914,10 +891,10 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                 existingSongs = database.allLocalSongs().first()
             }
 
-            Timber.tag(TAG).d("------------ SCAN: Starting Quick Directory Rebuild ------------")
+            Log.i(TAG, "------------ SCAN: Starting Quick Directory Rebuild ------------")
             getScanPaths(scanPaths, excludedScanPaths).fastForEach { path ->
                 if (SCANNER_DEBUG)
-                    Timber.tag(TAG).d("Quick scanner: PATH: $path")
+                    Log.v(TAG, "Quick scanner: PATH: $path")
 
                 // Build directory tree with existing files
                 val possibleMatch = existingSongs.fastFirstOrNull { it.song.localPath == path }
@@ -927,7 +904,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                 }
             }
 
-            Timber.tag(TAG).d("------------ SCAN: Finished Quick Directory Rebuild ------------")
+            Log.i(TAG, "------------ SCAN: Finished Quick Directory Rebuild ------------")
             cacheDirectoryTree(newDirectoryStructure.androidStorageWorkaround().trimRoot())
             return newDirectoryStructure
         }
@@ -1020,8 +997,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                     )
 
                     if (SCANNER_DEBUG)
-                        Timber.tag(TAG)
-                            .d("Found remote artist:  ${result.items.first().title}")
+                        Log.v(TAG, "Found remote artist:  ${result.items.first().title}")
                 }.onFailure {
                     throw Exception("Failed to search on YouTube Music")
                 }

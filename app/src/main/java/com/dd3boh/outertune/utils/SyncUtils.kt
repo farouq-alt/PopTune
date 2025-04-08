@@ -9,6 +9,7 @@
 package com.dd3boh.outertune.utils
 
 import android.content.Context
+import android.util.Log
 import com.dd3boh.outertune.db.MusicDatabase
 import com.dd3boh.outertune.db.entities.ArtistEntity
 import com.dd3boh.outertune.db.entities.PlaylistEntity
@@ -35,7 +36,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import java.time.LocalDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -61,7 +61,7 @@ class SyncUtils @Inject constructor(
     val isSyncingRemoteArtists: StateFlow<Boolean> = _isSyncingRemoteArtists.asStateFlow()
     val isSyncingRemotePlaylists: StateFlow<Boolean> = _isSyncingRemotePlaylists.asStateFlow()
 
-    private val logTag = "SyncUtils"
+    private val TAG = "SyncUtils"
 
     suspend fun syncAll() {
         coroutineScope {
@@ -78,12 +78,12 @@ class SyncUtils @Inject constructor(
      */
     suspend fun syncRemoteLikedSongs() {
         if (!_isSyncingRemoteLikedSongs.compareAndSet(expect = false, update = true)) {
-            Timber.tag(logTag).d("Liked songs synchronization already in progress")
+            Log.d(TAG, "Liked songs synchronization already in progress")
             return // Synchronization already in progress
         }
 
         try {
-            Timber.tag(logTag).d("Liked songs synchronization started")
+            Log.d(TAG, "Liked songs synchronization started")
 
             // Get remote and local liked songs
             YouTube.playlist("LM").completed().onSuccess{ page->
@@ -123,7 +123,7 @@ class SyncUtils @Inject constructor(
             val songs = database.likedSongsNotDownloaded().first().map { it.song }
             downloadUtil.autoDownloadIfLiked(songs)
         } finally {
-            Timber.tag(logTag).d("Liked songs synchronization ended")
+            Log.i(TAG, "Liked songs synchronization ended")
             _isSyncingRemoteLikedSongs.value = false
         }
     }
@@ -133,12 +133,12 @@ class SyncUtils @Inject constructor(
      */
     suspend fun syncRemoteSongs() {
         if (!_isSyncingRemoteSongs.compareAndSet(expect = false, update = true)) {
-            Timber.tag(logTag).d("Library songs synchronization already in progress")
+            Log.i(TAG, "Library songs synchronization already in progress")
             return // Synchronization already in progress
         }
 
         try {
-            Timber.tag(logTag).d("Library songs synchronization started")
+            Log.i(TAG, "Library songs synchronization started")
 
             // Get remote songs (from library and uploads)
             val remoteSongs = getRemoteData<SongItem>("FEmusic_liked_videos", "FEmusic_library_privately_owned_tracks")
@@ -177,7 +177,7 @@ class SyncUtils @Inject constructor(
                 jobs.joinAll()
             }
         } finally {
-            Timber.tag(logTag).d("Library songs synchronization ended")
+            Log.i(TAG, "Library songs synchronization ended")
             _isSyncingRemoteSongs.value = false
         }
     }
@@ -187,12 +187,12 @@ class SyncUtils @Inject constructor(
      */
     suspend fun syncRemoteAlbums() {
         if (!_isSyncingRemoteAlbums.compareAndSet(expect = false, update = true)) {
-            Timber.tag(logTag).d("Library albums synchronization already in progress")
+            Log.i(TAG, "Library albums synchronization already in progress")
             return // Synchronization already in progress
         }
 
         try {
-            Timber.tag(logTag).d("Library albums synchronization started")
+            Log.i(TAG, "Library albums synchronization started")
 
             // Get remote albums (from library and uploads)
             val remoteAlbums = getRemoteData<AlbumItem>("FEmusic_liked_albums", "FEmusic_library_privately_owned_releases")
@@ -231,7 +231,7 @@ class SyncUtils @Inject constructor(
                 }
             }
         } finally {
-            Timber.tag(logTag).d("Library albums synchronization ended")
+            Log.i(TAG, "Library albums synchronization ended")
             _isSyncingRemoteAlbums.value = false // Use the correct AtomicBoolean
         }
     }
@@ -241,12 +241,12 @@ class SyncUtils @Inject constructor(
      */
     suspend fun syncRemoteArtists() {
         if (!_isSyncingRemoteArtists.compareAndSet(expect = false, update = true)) {
-            Timber.tag(logTag).d("Artist subscriptions synchronization already in progress")
+            Log.i(TAG, "Artist subscriptions synchronization already in progress")
             return // Synchronization already in progress
         }
 
         try {
-            Timber.tag(logTag).d("Artist subscriptions synchronization started")
+            Log.i(TAG, "Artist subscriptions synchronization started")
 
             // Get remote artists (from library and uploads)
             val likedArtists = getRemoteData<ArtistItem>(
@@ -308,7 +308,7 @@ class SyncUtils @Inject constructor(
                 }
             }
         } finally {
-            Timber.tag(logTag).d("Artist subscriptions synchronization ended")
+            Log.i(TAG, "Artist subscriptions synchronization ended")
             _isSyncingRemoteArtists.value = false
         }
     }
@@ -318,12 +318,12 @@ class SyncUtils @Inject constructor(
      */
     suspend fun syncRemotePlaylists() {
         if (!_isSyncingRemotePlaylists.compareAndSet(expect = false, update = true)) {
-            Timber.tag(logTag).d("Library playlist synchronization already in progress")
+            Log.i(TAG, "Library playlist synchronization already in progress")
             return
         }
 
         try {
-            Timber.tag(logTag).d("Library playlist synchronization started")
+            Log.i(TAG, "Library playlist synchronization started")
 
             // Get remote and local playlists
             YouTube.library("FEmusic_liked_playlists").completed().onSuccess { page ->
@@ -392,7 +392,7 @@ class SyncUtils @Inject constructor(
             }
         } finally {
             _isSyncingRemotePlaylists.value = false
-            Timber.tag(logTag).d("Library playlist synchronization ended")
+            Log.i(TAG, "Library playlist synchronization ended")
         }
     }
 

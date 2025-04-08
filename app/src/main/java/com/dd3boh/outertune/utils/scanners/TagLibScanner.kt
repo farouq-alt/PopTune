@@ -9,6 +9,7 @@
 package com.dd3boh.outertune.utils.scanners
 
 import android.os.ParcelFileDescriptor
+import android.util.Log
 import com.dd3boh.outertune.db.entities.AlbumEntity
 import com.dd3boh.outertune.db.entities.ArtistEntity
 import com.dd3boh.outertune.db.entities.FormatEntity
@@ -22,7 +23,6 @@ import com.dd3boh.outertune.ui.utils.EXTRACTOR_DEBUG
 import com.dd3boh.outertune.ui.utils.EXTRACTOR_TAG
 import com.dd3boh.outertune.ui.utils.SCANNER_DEBUG
 import com.kyant.taglib.TagLib
-import timber.log.Timber
 import java.io.File
 import java.lang.Integer.parseInt
 import java.time.Instant
@@ -49,7 +49,7 @@ class TagLibScanner : MetadataScanner {
      */
     override fun getAllMetadataFromFile(file: File): SongTempData {
         if (EXTRACTOR_DEBUG)
-            Timber.tag(EXTRACTOR_TAG).d("Starting Full Extractor session on: ${file.path}")
+            Log.v(EXTRACTOR_TAG, "Starting Full Extractor session on: ${file.path}")
 
         ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY).use { fd ->
             val songId = SongEntity.generateSongId()
@@ -142,7 +142,7 @@ class TagLibScanner : MetadataScanner {
             }
 
             if (EXTRACTOR_DEBUG && DEBUG_SAVE_OUTPUT) {
-                Timber.tag(EXTRACTOR_TAG).d("Full output for: ${file.path} \n $allData")
+                Log.v(EXTRACTOR_TAG,"Full output for: ${file.path} \n $allData")
             }
 
 

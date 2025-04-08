@@ -12,6 +12,7 @@ package com.dd3boh.outertune
 import android.app.Application
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.datastore.preferences.core.edit
@@ -36,17 +37,17 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.net.Proxy
-import java.util.*
+import java.util.Locale
 
 @HiltAndroidApp
 class App : Application(), ImageLoaderFactory {
+    private val TAG = App::class.simpleName.toString()
+
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate() {
         super.onCreate()
         instance = this;
-        Timber.plant(Timber.DebugTree())
 
         val locale = Locale.getDefault()
         val languageTag = locale.toLanguageTag().replace("-Hant", "") // replace zh-Hant-* to zh-*
@@ -128,7 +129,7 @@ class App : Application(), ImageLoaderFactory {
                         YouTube.cookie = cookie
                     } catch (e: Exception) {
                         // we now allow user input now, here be the demons. This serves as a last ditch effort to avoid a crash loop
-                        Timber.e("Could not parse cookie. Clearing existing cookie. %s", e.message)
+                        Log.e(TAG, "Could not parse cookie. Clearing existing cookie. ${e.message}")
                         forgetAccount(this@App)
                     }
                 }

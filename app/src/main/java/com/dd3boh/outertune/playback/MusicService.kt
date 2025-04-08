@@ -137,7 +137,6 @@ import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
-import timber.log.Timber
 import java.io.File
 import java.net.ConnectException
 import java.net.SocketTimeoutException
@@ -997,7 +996,7 @@ class MusicService : MediaLibraryService(),
 
 
     override fun onDestroy() {
-        Timber.tag("MusicService").e("Terminating MusicService.")
+        Log.i(TAG, "Terminating MusicService.")
         deInitQueue()
 
         mediaSession.player.stop()

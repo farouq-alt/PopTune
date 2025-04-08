@@ -32,7 +32,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import okhttp3.internal.toImmutableList
-import timber.log.Timber
 import java.util.PriorityQueue
 import kotlin.math.max
 import kotlin.math.min
@@ -143,9 +142,9 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
         startIndex: Int = 0
     ): MultiQueueObject? {
         if (QUEUE_DEBUG)
-            Timber.tag(TAG).d(
-                "Adding to queue \"$title\". medialist size = ${mediaList.size}. " +
-                        "forceInsert/replace/delta/startIndex = $forceInsert/$replace/$delta/$startIndex"
+            Log.d(
+                TAG,
+                "Adding to queue \"$title\". medialist size = ${mediaList.size}. forceInsert/replace/delta/startIndex = $forceInsert/$replace/$delta/$startIndex"
             )
 
         if (mediaList.isEmpty()) {
@@ -158,7 +157,7 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
             val anyExts = masterQueues.firstOrNull { it.title == match.title + " +\u200B" }
             if (replace) { // force replace
                 if (QUEUE_DEBUG)
-                    Timber.tag(TAG).d("Adding to queue: Replacing all queue items")
+                    Log.d(TAG, "Adding to queue: Replacing all queue items")
 
                 mediaList.fastForEachIndexed { index, s ->
                     s?.shuffleIndex = index
@@ -181,7 +180,7 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
             val containsAll = mediaList.all { s -> match.queue.any { s?.id == it.id } } // if is subset
             if (containsAll && match.getSize() == mediaList.size && !forceInsert) { // jump to song, don't add
                 if (QUEUE_DEBUG)
-                    Timber.tag(TAG).d("Adding to queue: jump only")
+                    Log.d(TAG, "Adding to queue: jump only")
                 // find the song in existing queue song, track the index to jump to
                 val findSong = match.queue.firstOrNull { it.id == mediaList[startIndex]?.id }
                 if (findSong != null) {
@@ -197,7 +196,7 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
                 return match
             } else if (delta) {
                 if (QUEUE_DEBUG)
-                    Timber.tag(TAG).d("Adding to queue: delta additive")
+                    Log.d(TAG, "Adding to queue: delta additive")
 
                 mediaList.fastForEachIndexed { index, s ->
                     s?.shuffleIndex = index
@@ -221,7 +220,7 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
                 return match
             } else if (match.title.endsWith("+\u200B") || anyExts != null) { // this queue is an already an extension queue
                 if (QUEUE_DEBUG)
-                    Timber.tag(TAG).d("Adding to queue: extension queue additive")
+                    Log.d(TAG, "Adding to queue: extension queue additive")
                 // add items to existing queue unconditionally
                 if (anyExts != null) {
                     addSongsToQueue(anyExts, Int.MAX_VALUE, mediaList.filterNotNull(), saveToDb = false)
@@ -245,7 +244,7 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
                 return match
             } else { // make new extension queue
                 if (QUEUE_DEBUG)
-                    Timber.tag(TAG).d("Adding to queue: extension queue creation (and additive)")
+                    Log.d(TAG, "Adding to queue: extension queue creation (and additive)")
                 // add items to NEW queue unconditionally (add entirely new queue)
                 if (masterQueues.size > MAX_QUEUES) {
                     deleteQueue(masterQueues.first())
@@ -447,7 +446,7 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
      */
     fun deleteQueue(item: MultiQueueObject): Int {
         if (QUEUE_DEBUG)
-            Timber.tag(TAG).d("DELETING QUEUE ${item.title}")
+            Log.d(TAG, "DELETING QUEUE ${item.title}")
 
         val match = masterQueues.firstOrNull { it.title == item.title }
         if (match != null) {
@@ -461,8 +460,8 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
             CoroutineScope(Dispatchers.IO).launch {
                 player.database.deleteQueue(match.id)
             }
-        } else if (QUEUE_DEBUG) {
-            Timber.tag(TAG).w("Cannot find queue ${item.title}")
+        } else {
+            Log.w(TAG, "Cannot find queue to delete: ${item.title}")
         }
 
         return masterQueues.size
@@ -485,7 +484,7 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
         val item = masterQueues[index]
         if (item.shuffled) {
             if (QUEUE_DEBUG)
-                Timber.tag(TAG).d("Un-shuffling queue ${item.title}")
+                Log.d(TAG, "Un-shuffling queue ${item.title}")
 
             item.shuffled = false
             isShuffleEnabled.value = false
@@ -547,7 +546,7 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
 
         val item = masterQueues[index]
         if (QUEUE_DEBUG)
-            Timber.tag(TAG).d("Shuffling queue ${item.title}")
+            Log.d(TAG, "Shuffling queue ${item.title}")
 
         val currentSong = item.queue[item.queuePos]
 
@@ -668,7 +667,7 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
         saveQueueSongs(queue)
 
         if (QUEUE_DEBUG)
-            Timber.tag(TAG).d("Moved item from $currentMediaItemIndex to ${queue.queuePos}")
+            Log.d(TAG, "Moved item from $currentMediaItemIndex to ${queue.queuePos}")
         return queue.queuePos
     }
 
@@ -712,7 +711,7 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
             }
 
             if (QUEUE_DEBUG)
-                Timber.tag(TAG).d("Renamed queue from \"${queue.title}\" to \"$newName\"")
+                Log.d(TAG, "Renamed queue from \"${queue.title}\" to \"$newName\"")
         }
     }
 
@@ -751,11 +750,10 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
      * @return New current position tracker
      */
     fun setCurrQueue(item: MultiQueueObject?, autoSeek: Boolean = true): Int? {
-        if (QUEUE_DEBUG)
-            Timber.tag(TAG).d(
-                "Loading queue ${item?.title ?: "null"} into player. " +
-                        "autoSeek = $autoSeek shuffle state = ${item?.shuffled}"
-            )
+        Log.d(
+            TAG,
+            "Loading queue ${item?.title ?: "null"} into player. " + "autoSeek = $autoSeek shuffle state = ${item?.shuffled}"
+        )
 
         if (item == null) {
             player.player.setMediaItems(ArrayList())

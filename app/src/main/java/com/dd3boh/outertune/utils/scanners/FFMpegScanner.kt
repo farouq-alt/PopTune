@@ -12,6 +12,7 @@ import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.dd3boh.outertune.MainActivity
 import com.dd3boh.outertune.db.entities.AlbumEntity
 import com.dd3boh.outertune.db.entities.ArtistEntity
@@ -28,7 +29,6 @@ import com.dd3boh.outertune.utils.reportException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
-import timber.log.Timber
 import java.io.File
 import java.lang.Integer.parseInt
 import java.lang.Long.parseLong
@@ -50,7 +50,7 @@ class FFMpegScanner(context: Context) : MetadataScanner {
      */
     override fun getAllMetadataFromPath(path: String): SongTempData {
         if (EXTRACTOR_DEBUG)
-            Timber.tag(EXTRACTOR_TAG).d("Starting Full Extractor session on: $path")
+            Log.v(EXTRACTOR_TAG, "Starting Full Extractor session on: $path")
 
         var data = ""
         val mutex = Mutex(true)
@@ -92,7 +92,7 @@ class FFMpegScanner(context: Context) : MetadataScanner {
         }
 
         if (EXTRACTOR_DEBUG && DEBUG_SAVE_OUTPUT) {
-            Timber.tag(EXTRACTOR_TAG).d("Full output for: $path \n $data")
+            Log.v(EXTRACTOR_TAG, "Full output for: $path \n $data")
         }
 
         val songId = SongEntity.generateSongId()
