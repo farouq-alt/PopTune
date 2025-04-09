@@ -80,6 +80,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -142,6 +143,7 @@ import com.dd3boh.outertune.utils.rememberPreference
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -184,9 +186,8 @@ fun BottomSheetPlayer(
     val currentItem by remember { derivedStateOf { thumbnailLazyGridState.firstVisibleItemIndex } }
     val itemScrollOffset by remember { derivedStateOf { thumbnailLazyGridState.firstVisibleItemScrollOffset } }
 
-    // todo: fix issue where when ui init, causes a skip previous immediately because song 0 is loaded before song 1 AND offset is initialized at 0 simultaneously
     LaunchedEffect(itemScrollOffset) {
-        if (!swipeToSkip || itemScrollOffset != 0) return@LaunchedEffect
+        if (!thumbnailLazyGridState.isScrollInProgress || !swipeToSkip || itemScrollOffset != 0) return@LaunchedEffect
 
         if (currentItem > currentMediaIndex)
             playerConnection.player.seekToNext()
@@ -198,11 +199,11 @@ fun BottomSheetPlayer(
         // When the media item changes, scroll to it
         val index = maxOf(0, currentMediaIndex)
 
-        // If the state is collapsed, don't animate the scroll
-        if (state.isCollapsed)
-            thumbnailLazyGridState.scrollToItem(index)
-        else
+        // Only animate scroll when player expanded, otherwise animated scroll won't work
+        if (state.isExpanded)
             thumbnailLazyGridState.animateScrollToItem(index)
+        else
+            thumbnailLazyGridState.scrollToItem(index)
     }
 
     val horizontalLazyGridItemWidthFactor = 1f
@@ -742,7 +743,7 @@ fun BottomSheetPlayer(
                             state = thumbnailLazyGridState,
                             rows = GridCells.Fixed(1),
                             flingBehavior = rememberSnapFlingBehavior(thumbnailSnapLayoutInfoProvider),
-                            userScrollEnabled = state.isExpanded && swipeToSkip
+                            userScrollEnabled = swipeToSkip && state.isExpanded
                         ) {
                             items(
                                 items = mediaItems,
