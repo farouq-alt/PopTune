@@ -277,6 +277,12 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        try {
+            connectivityObserver.unregister()
+        } catch (e: UninitializedPropertyAccessException) {
+            // lol
+        }
+
         /*
          * While music is playing:
          *      StopMusicOnTaskClearKey true: clearing from recent apps will kill service
