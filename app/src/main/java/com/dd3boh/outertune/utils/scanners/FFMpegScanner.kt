@@ -49,6 +49,7 @@ class FFMpegScanner(context: Context) : MetadataScanner {
      * @param path Full file path
      */
     override fun getAllMetadataFromPath(path: String): SongTempData {
+        throw NotImplementedError("FFMpeg extractor is not implemented")
         if (EXTRACTOR_DEBUG)
             Log.v(EXTRACTOR_TAG, "Starting Full Extractor session on: $path")
 
