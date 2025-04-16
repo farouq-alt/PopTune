@@ -409,8 +409,7 @@ fun HistoryScreen(
         )
 
         FloatingFooter(
-            visible = inSelectMode,
-            modifier = Modifier.padding(bottom = 16.dp)
+            visible = inSelectMode
         ) {
             SelectHeader(
                 selectedItems = eventsMap.flatMap { group ->

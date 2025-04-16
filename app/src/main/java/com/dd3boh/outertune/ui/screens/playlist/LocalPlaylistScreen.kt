@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
@@ -30,6 +31,7 @@ import androidx.compose.material.icons.rounded.LockOpen
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.OfflinePin
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Shuffle
 import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material3.Button
@@ -44,6 +46,8 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
@@ -63,15 +67,20 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.util.fastSumBy
 import androidx.core.net.toUri
@@ -164,8 +173,34 @@ fun LocalPlaylistScreen(
         inSelectMode = false
         selection.clear()
     }
+
+    // search
+    var isSearching by rememberSaveable { mutableStateOf(false) }
+    var query by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue())
+    }
+    val filteredSongs = remember(songs, query) {
+        if (query.text.isEmpty()) songs
+        else songs.filter { song ->
+            song.song.title.contains(query.text, ignoreCase = true) || song.song.artists.fastAny {
+                it.name.contains(query.text, ignoreCase = true)
+            }
+        }
+    }
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(isSearching) {
+        if (isSearching) {
+            focusRequester.requestFocus()
+        }
+    }
+
     if (inSelectMode) {
         BackHandler(onBack = onExitSelectionMode)
+    } else if (isSearching) {
+        BackHandler {
+            isSearching = false
+            query = TextFieldValue()
+        }
     }
 
     val editable: Boolean = playlist?.playlist?.isLocal == true || playlist?.playlist?.isEditable == true
@@ -387,18 +422,20 @@ fun LocalPlaylistScreen(
                     }
                 } else {
                     // playlist header
-                    item(
-                        key = "playlist header",
-                        contentType = CONTENT_TYPE_HEADER
-                    ) {
-                        LocalPlaylistHeader(
-                            playlist = playlist,
-                            songs = songs,
-                            onShowEditDialog = { showEditDialog = true },
-                            onShowRemoveDownloadDialog = { showRemoveDownloadDialog = true },
-                            snackbarHostState = snackbarHostState,
-                            modifier = Modifier // .animateItem()
-                        )
+                    if (!isSearching) {
+                        item(
+                            key = "playlist header",
+                            contentType = CONTENT_TYPE_HEADER
+                        ) {
+                            LocalPlaylistHeader(
+                                playlist = playlist,
+                                songs = songs,
+                                onShowEditDialog = { showEditDialog = true },
+                                onShowRemoveDownloadDialog = { showRemoveDownloadDialog = true },
+                                snackbarHostState = snackbarHostState,
+                                modifier = Modifier // .animateItem()
+                            )
+                        }
                     }
 
                     item(
@@ -426,7 +463,7 @@ fun LocalPlaylistScreen(
                                 modifier = Modifier.weight(1f)
                             )
 
-                            if (editable) {
+                            if (editable && !(inSelectMode || isSearching)) {
                                 IconButton(
                                     onClick = { locked = !locked },
                                     modifier = Modifier.padding(horizontal = 6.dp)
@@ -444,7 +481,7 @@ fun LocalPlaylistScreen(
 
             // songs
             itemsIndexed(
-                items = mutableSongs,
+                items = if (isSearching) filteredSongs else mutableSongs,
                 key = { _, song -> song.map.id }
             ) { index, song ->
                 ReorderableItem(
@@ -457,13 +494,13 @@ fun LocalPlaylistScreen(
                             playerConnection.playQueue(
                                 ListQueue(
                                     title = playlist!!.playlist.name,
-                                    items = songs.map { it.song.toMediaMetadata() },
+                                    items = (if (isSearching) filteredSongs else mutableSongs).map { it.song.toMediaMetadata() },
                                     startIndex = index,
                                     playlistId = playlist?.playlist?.browseId
                                 )
                             )
                         },
-                        showDragHandle = sortType == PlaylistSongSortType.CUSTOM && !locked && editable,
+                        showDragHandle = sortType == PlaylistSongSortType.CUSTOM && !locked && !isSearching && editable,
                         dragHandleModifier = Modifier.draggableHandle(),
                         onSelectedChange = {
                             inSelectMode = true
@@ -488,11 +525,64 @@ fun LocalPlaylistScreen(
         }
 
         TopAppBar(
-            title = { if (showTopBarTitle) Text(playlist?.playlist?.name.orEmpty()) },
+            title = {
+                if (isSearching) {
+                    TextField(
+                        value = query,
+                        onValueChange = { query = it },
+                        placeholder = {
+                            Text(
+                                text = stringResource(R.string.search),
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        },
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.titleLarge,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester)
+                    )
+                } else if (showTopBarTitle) {
+                    Text(playlist?.playlist?.name.orEmpty())
+                }
+            },
+            actions = {
+                if (!isSearching) {
+                    IconButton(
+                        onClick = {
+                            isSearching = true
+                        }
+                    ) {
+                        Icon(
+                            Icons.Rounded.Search,
+                            contentDescription = null
+                        )
+                    }
+                }
+            },
             navigationIcon = {
                 IconButton(
-                    onClick = navController::navigateUp,
-                    onLongClick = navController::backToMain
+                    onClick = {
+                        if (isSearching) {
+                            isSearching = false
+                            query = TextFieldValue()
+                        } else {
+                            navController.navigateUp()
+                        }
+                    },
+                    onLongClick = {
+                        if (!isSearching) {
+                            navController.backToMain()
+                        }
+                    }
                 ) {
                     Icon(
                         Icons.AutoMirrored.Rounded.ArrowBack,
@@ -521,7 +611,7 @@ fun LocalPlaylistScreen(
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier
-                .windowInsetsPadding(LocalPlayerAwareWindowInsets.current)
+                .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.union(WindowInsets.ime))
                 .align(Alignment.BottomCenter)
         )
     }
