@@ -57,8 +57,9 @@ import java.util.Locale
 class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
     private val TAG = LocalMediaScanner::class.simpleName.toString()
     private var advancedScannerImpl: MetadataScanner = when (scannerImpl) {
-        ScannerImpl.TAGLIB -> TagLibScanner()
-        ScannerImpl.FFMPEG_EXT -> FFMpegScanner(context)
+//        ScannerImpl.TAGLIB -> TagLibScanner()
+//        ScannerImpl.FFMPEG_EXT -> FFMpegScanner(context)
+        else -> TagLibScanner()
     }
 
     init {
@@ -80,7 +81,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
             testPlayer.release()
 
             // decide which scanner to use
-            val ffmpegData = if (advancedScannerImpl is FFMpegScanner) {
+            val ffmpegData = if (false && advancedScannerImpl is FFMpegScanner) {
                 advancedScannerImpl.getAllMetadataFromPath(path)
             } else if (advancedScannerImpl is TagLibScanner) {
                 advancedScannerImpl.getAllMetadataFromFile(File(path))
@@ -783,8 +784,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
             we don't want to run the taglib scanner fallback if the user explicitly selected FFmpeg as differences
             can muck with the song detection. Throw the error to the ui where it can be handled there
              */
-            val isFFmpegInstalled = isPackageInstalled("wah.mikooomich.ffMetadataEx", context.packageManager)
-            if (scannerImpl == ScannerImpl.FFMPEG_EXT && !isFFmpegInstalled) {
+            if (scannerImpl != ScannerImpl.TAGLIB) {
                 runBlocking {
                     context.dataStore.edit { settings ->
                         settings[ScannerImplKey] = ScannerImpl.TAGLIB.toString()
@@ -795,7 +795,8 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
             }
 
             if (localScanner == null) {
-                localScanner = LocalMediaScanner(context, if (isFFmpegInstalled) scannerImpl else ScannerImpl.TAGLIB)
+                localScanner = LocalMediaScanner(context, ScannerImpl.TAGLIB)
+//                localScanner = LocalMediaScanner(context, if (isFFmpegInstalled) scannerImpl else ScannerImpl.TAGLIB)
                 scannerProgressTotal.value = 0
             }
 
