@@ -27,6 +27,9 @@ val SlimNavBarKey = booleanPreferencesKey("slimNavBar")
  */
 const val SYSTEM_DEFAULT = "SYSTEM_DEFAULT"
 val YtmSyncKey = booleanPreferencesKey("ytmSync")
+val YtmSyncContentKey = stringPreferencesKey("ytmSyncContent")
+val YtmSyncModeKey = stringPreferencesKey("ytmSyncMode")
+val YtmSyncConflictKey = stringPreferencesKey("ytmSyncConflict")
 val LikedAutoDownloadKey = stringPreferencesKey("likedAutoDownloadKey")
 val ContentLanguageKey = stringPreferencesKey("contentLanguage")
 val ContentCountryKey = stringPreferencesKey("contentCountry")
@@ -34,6 +37,22 @@ val ProxyEnabledKey = booleanPreferencesKey("proxyEnabled")
 val ProxyUrlKey = stringPreferencesKey("proxyUrl")
 val ProxyTypeKey = stringPreferencesKey("proxyType")
 
+// sync time tracks
+val LastFullSyncKey = longPreferencesKey("lastFullSync")
+val LastLikeSongSyncKey = longPreferencesKey("lastLikeSongSync")
+val LastLibSongSyncKey = longPreferencesKey("lastLibSongSync")
+val LastAlbumSyncKey = longPreferencesKey("lastAlbumSync")
+val LastArtistSyncKey = longPreferencesKey("lastArtistSync")
+val LastPlaylistSyncKey = longPreferencesKey("lastPlaylistSync")
+val LastRecentActivitySyncKey = longPreferencesKey("lastRecentActivitySync")
+
+
+enum class SyncMode {
+    RO, RW, // USER_CHOICE
+}
+enum class SyncConflictResolution {
+    ADD_ONLY, OVERWRITE_WITH_REMOTE, // OVERWRITE_WITH_LOCAL, USER_CHOICE
+}
 
 /**
  * Player & audio

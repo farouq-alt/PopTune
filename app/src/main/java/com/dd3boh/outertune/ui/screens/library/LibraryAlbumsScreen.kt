@@ -1,7 +1,6 @@
 package com.dd3boh.outertune.ui.screens.library
 
 import android.content.pm.PackageManager
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -22,11 +21,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.rounded.Album
 import androidx.compose.material.icons.rounded.GridView
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.pullToRefresh
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -61,7 +64,6 @@ import com.dd3boh.outertune.constants.GridThumbnailHeight
 import com.dd3boh.outertune.constants.LibraryViewType
 import com.dd3boh.outertune.constants.LibraryViewTypeKey
 import com.dd3boh.outertune.constants.LocalLibraryEnableKey
-import com.dd3boh.outertune.extensions.isSyncEnabled
 import com.dd3boh.outertune.ui.component.ChipsRow
 import com.dd3boh.outertune.ui.component.EmptyPlaceholder
 import com.dd3boh.outertune.ui.component.LibraryAlbumGridItem
@@ -73,6 +75,7 @@ import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.viewmodels.LibraryAlbumsViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryAlbumsScreen(
     navController: NavController,
@@ -100,13 +103,14 @@ fun LibraryAlbumsScreen(
 
     val albums by viewModel.allAlbums.collectAsState()
     val isSyncingLibraryAlbums by viewModel.isSyncingRemoteAlbums.collectAsState()
+    val pullRefreshState = rememberPullToRefreshState()
 
     val lazyListState = rememberLazyListState()
     val lazyGridState = rememberLazyGridState()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val scrollToTop = backStackEntry?.savedStateHandle?.getStateFlow("scrollToTop", false)?.collectAsState()
 
-    LaunchedEffect(Unit) { if (context.isSyncEnabled()) viewModel.syncAlbums() }
+    LaunchedEffect(Unit) { viewModel.syncAlbums() }
 
     LaunchedEffect(scrollToTop?.value) {
         if (scrollToTop?.value == true) {
@@ -151,9 +155,7 @@ fun LibraryAlbumsScreen(
                 currentValue = filter,
                 onValueUpdate = {
                     filter = it
-                    if (context.isSyncEnabled()) {
-                        if (it == AlbumFilter.LIBRARY) viewModel.syncAlbums()
-                    }
+                    if (it == AlbumFilter.LIBRARY) viewModel.syncAlbums()
                 },
                 modifier = Modifier.weight(1f),
                 isLoading = { filter -> filter == AlbumFilter.LIBRARY && isSyncingLibraryAlbums }
@@ -213,7 +215,15 @@ fun LibraryAlbumsScreen(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .pullToRefresh(
+                state = pullRefreshState,
+                isRefreshing = isSyncingLibraryAlbums,
+                onRefresh = {
+                    viewModel.syncAlbums(true)
+                }
+            ),
     ) {
         when (viewType) {
             LibraryViewType.LIST ->
@@ -312,5 +322,13 @@ fun LibraryAlbumsScreen(
                     }
                 }
         }
+
+        Indicator(
+            isRefreshing = isSyncingLibraryAlbums,
+            state = pullRefreshState,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(LocalPlayerAwareWindowInsets.current.asPaddingValues()),
+        )
     }
 }
