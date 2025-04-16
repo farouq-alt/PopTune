@@ -286,7 +286,7 @@ fun LibrarySettings(
     }
 
     TopAppBar(
-        title = { Text(stringResource(R.string.library)) },
+        title = { Text(stringResource(R.string.grp_library_and_content)) },
         navigationIcon = {
             IconButton(
                 onClick = navController::navigateUp,

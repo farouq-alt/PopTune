@@ -71,6 +71,7 @@ while also allowing users to translate our app as well. New, specific strings to
     <string name="grp_general">General</string>
     <string name="grp_interface">Interface</string>
     <string name="grp_layout">Layout</string>
+    <string name="grp_library_and_content">Library &amp; Content</string>
 	<string name="grp_localization">Localization</string>
     <string name="grp_lyrics_format">Formatting</string>
     <string name="grp_lyrics_parser">Parser</string>
