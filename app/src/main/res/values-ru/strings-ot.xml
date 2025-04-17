@@ -71,7 +71,7 @@
     <string name="player_background_style">Стиль фона плеера</string>
     <string name="slim_navbar_description">Убрать подписи с панели навигации чтобы уменьшить её высоту</string>
     <string name="tab_arrangement">Расположение вкладок</string>
-    <string name="show_liked_and_downloaded_playlist">Показывать понравившиеся треки и загруженную музыку в библиотеке</string>
+    <string name="show_liked_and_downloaded_playlist">Показывать плейлисты для понравившихся треков и загруженной музыки в библиотеке</string>
     <string name="slim_navbar_title">Тонкая панель навигации</string>
     <string name="like_autodownload">Автоматически скачивать понравившиеся песни</string>
     <string name="token_hidden">Нажмите, чтобы показать токен</string>
