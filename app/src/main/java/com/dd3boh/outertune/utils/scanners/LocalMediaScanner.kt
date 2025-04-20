@@ -779,6 +779,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
 
         var scannerProgressTotal = MutableStateFlow(-1)
         var scannerProgressCurrent = MutableStateFlow(-1)
+        var scannerProgressProbe = -1
 
 
         /**
@@ -810,6 +811,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                 localScanner = LocalMediaScanner(context, ScannerImpl.TAGLIB)
 //                localScanner = LocalMediaScanner(context, if (isFFmpegInstalled) scannerImpl else ScannerImpl.TAGLIB)
                 scannerProgressTotal.value = 0
+                scannerProgressProbe = 0
             }
 
             return localScanner!!
@@ -823,8 +825,9 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
             scannerRequestCancel = false
             scannerProgressTotal.value = -1
             scannerProgressCurrent.value = -1
+            scannerProgressProbe = -1
 
-             Log.i(TAG, "Scanner instance destroyed")
+            Log.i(TAG, "Scanner instance destroyed")
         }
 
 
