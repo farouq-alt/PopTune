@@ -393,7 +393,7 @@ fun CounterDialog(
                     IconButton(
                         onClick = {
                             if (tempValue.intValue < upperBound) {
-                                tempValue.value += 1
+                                tempValue.intValue += 1
                             }
                         },
                         onLongClick = {}
@@ -409,7 +409,7 @@ fun CounterDialog(
                     IconButton(
                         onClick = {
                             if (tempValue.intValue > lowerBound) {
-                                tempValue.value -= 1
+                                tempValue.intValue -= 1
                             }
                         },
                         onLongClick = {}

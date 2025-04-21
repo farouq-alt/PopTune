@@ -1,5 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 
 plugins {
     id("com.android.application")
@@ -105,6 +107,10 @@ android {
     kotlinOptions {
         freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
         jvmTarget = "17"
+    }
+
+    tasks.withType<KotlinCompile> {
+        exclude("**/*FFMpegScanner.kt")
     }
 
     // for IzzyOnDroid

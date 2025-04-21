@@ -70,6 +70,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.ripple
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -95,15 +96,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.dd3boh.outertune.BuildConfig
 import com.dd3boh.outertune.R
-import com.dd3boh.outertune.constants.AccountChannelHandleKey
-import com.dd3boh.outertune.constants.AccountEmailKey
-import com.dd3boh.outertune.constants.AccountNameKey
 import com.dd3boh.outertune.constants.AutomaticScannerKey
 import com.dd3boh.outertune.constants.ContentCountryKey
 import com.dd3boh.outertune.constants.ContentLanguageKey
 import com.dd3boh.outertune.constants.CountryCodeToName
 import com.dd3boh.outertune.constants.DarkModeKey
-import com.dd3boh.outertune.constants.DataSyncIdKey
+import com.dd3boh.outertune.constants.EnabledTabsKey
 import com.dd3boh.outertune.constants.FirstSetupPassed
 import com.dd3boh.outertune.constants.InnerTubeCookieKey
 import com.dd3boh.outertune.constants.LanguageCodeToName
@@ -112,14 +110,13 @@ import com.dd3boh.outertune.constants.LocalLibraryEnableKey
 import com.dd3boh.outertune.constants.LyricTrimKey
 import com.dd3boh.outertune.constants.PureBlackKey
 import com.dd3boh.outertune.constants.SYSTEM_DEFAULT
-import com.dd3boh.outertune.constants.UseLoginForBrowse
-import com.dd3boh.outertune.constants.VisitorDataKey
 import com.dd3boh.outertune.ui.component.EnumListPreference
 import com.dd3boh.outertune.ui.component.ListPreference
 import com.dd3boh.outertune.ui.component.PreferenceGroupTitle
 import com.dd3boh.outertune.ui.component.ResizableIconButton
 import com.dd3boh.outertune.ui.component.SettingsClickToReveal
 import com.dd3boh.outertune.ui.component.SwitchPreference
+import com.dd3boh.outertune.ui.screens.settings.DEFAULT_ENABLED_TABS
 import com.dd3boh.outertune.ui.screens.settings.DarkMode
 import com.dd3boh.outertune.ui.screens.settings.LibraryFilter
 import com.dd3boh.outertune.ui.screens.settings.fragments.AccountFrag
@@ -156,24 +153,34 @@ fun SetupWizard(
     var filter by rememberEnumPreference(LibraryFilterKey, LibraryFilter.ALL)
 
 
-    val (accountName, onAccountNameChange) = rememberPreference(AccountNameKey, "")
-    val (accountEmail, onAccountEmailChange) = rememberPreference(AccountEmailKey, "")
-    val (accountChannelHandle, onAccountChannelHandleChange) = rememberPreference(AccountChannelHandleKey, "")
-    val (innerTubeCookie, onInnerTubeCookieChange) = rememberPreference(InnerTubeCookieKey, "")
-    val (visitorData, onVisitorDataChange) = rememberPreference(VisitorDataKey, "")
-    val (dataSyncId, onDataSyncIdChange) = rememberPreference(DataSyncIdKey, "")
+    val innerTubeCookie by rememberPreference(InnerTubeCookieKey, "")
     val isLoggedIn = remember(innerTubeCookie) {
         "SAPISID" in parseCookieString(innerTubeCookie)
     }
     val (ytmSync, onYtmSyncChange) = rememberPreference(LyricTrimKey, defaultValue = true)
-    val (useLoginForBrowse, onUseLoginForBrowseChange) = rememberPreference(UseLoginForBrowse, true)
 
     // local media prefs
     val (localLibEnable, onLocalLibEnableChange) = rememberPreference(LocalLibraryEnableKey, defaultValue = true)
     val (autoScan, onAutoScanChange) = rememberPreference(AutomaticScannerKey, defaultValue = false)
+    val (enabledTabs, onEnabledTabsChange) = rememberPreference(EnabledTabsKey, defaultValue = DEFAULT_ENABLED_TABS)
 
     var position by remember {
         mutableIntStateOf(0)
+    }
+
+    LaunchedEffect(localLibEnable) {
+        val containsFolders = enabledTabs.contains('F')
+        if (localLibEnable && !containsFolders) {
+            if (enabledTabs.last() == 'M') {
+                // add folders before library if library is last
+                onEnabledTabsChange(enabledTabs.replace('M', 'F') + "M")
+            } else {
+                // add folders to end
+                onEnabledTabsChange(enabledTabs + "M")
+            }
+        } else if (!localLibEnable && containsFolders) {
+            onEnabledTabsChange(enabledTabs.drop(enabledTabs.indexOf('F')))
+        }
     }
 
     val MAX_POS = 4

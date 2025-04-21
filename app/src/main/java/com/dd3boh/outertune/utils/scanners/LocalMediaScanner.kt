@@ -22,6 +22,7 @@ import com.dd3boh.outertune.constants.ScannerMatchCriteria
 import com.dd3boh.outertune.db.MusicDatabase
 import com.dd3boh.outertune.db.entities.ArtistEntity
 import com.dd3boh.outertune.db.entities.Song
+import com.dd3boh.outertune.db.entities.SongAlbumMap
 import com.dd3boh.outertune.db.entities.SongArtistMap
 import com.dd3boh.outertune.db.entities.SongEntity
 import com.dd3boh.outertune.db.entities.SongGenreMap
@@ -33,9 +34,9 @@ import com.dd3boh.outertune.ui.utils.STORAGE_ROOT
 import com.dd3boh.outertune.ui.utils.SYNC_SCANNER
 import com.dd3boh.outertune.ui.utils.cacheDirectoryTree
 import com.dd3boh.outertune.ui.utils.scannerSession
+import com.dd3boh.outertune.utils.closestAlbumMatch
 import com.dd3boh.outertune.utils.closestMatch
 import com.dd3boh.outertune.utils.dataStore
-import com.dd3boh.outertune.utils.isPackageInstalled
 import com.dd3boh.outertune.utils.reportException
 import com.zionhuang.innertube.YouTube
 import kotlinx.coroutines.Deferred
@@ -81,7 +82,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
             testPlayer.release()
 
             // decide which scanner to use
-            val ffmpegData = if (false && advancedScannerImpl is FFMpegScanner) {
+            val ffmpegData = if (false && advancedScannerImpl !is TagLibScanner) {
                 advancedScannerImpl.getAllMetadataFromPath(path)
             } else if (advancedScannerImpl is TagLibScanner) {
                 advancedScannerImpl.getAllMetadataFromFile(File(path))
@@ -181,12 +182,15 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                             }
                             try {
                                 ret = advancedScan(path)
-                                scannerProgressProbe ++
+                                scannerProgressProbe++
                                 if (SCANNER_DEBUG && scannerProgressProbe % 20 == 0) {
-                                    Log.d(TAG, "------------ SCAN: Full Scanner: $scannerProgressProbe discovered ------------")
+                                    Log.d(
+                                        TAG,
+                                        "------------ SCAN: Full Scanner: $scannerProgressProbe discovered ------------"
+                                    )
                                 }
                                 if (scannerProgressProbe % 20 == 0) {
-                                    scannerProgressCurrent.value = scannerProgressProbe
+                                    scannerProgressTotal.value = scannerProgressProbe
                                 }
                             } catch (e: InvalidAudioFileException) {
                                 ret = null
@@ -208,12 +212,12 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                         newDirectoryStructure.insert(
                             s.substringAfter(STORAGE_ROOT), toInsert.song
                         )
-                        scannerProgressProbe ++
+                        scannerProgressProbe++
                         if (SCANNER_DEBUG) {
                             Log.d(TAG, "------------ SCAN: Full Scanner: $scannerProgressProbe discovered ------------")
                         }
                         if (scannerProgressProbe % 5 == 0) {
-                            scannerProgressCurrent.value = scannerProgressProbe
+                            scannerProgressTotal.value = scannerProgressProbe
                         }
                     }
                 }
@@ -291,7 +295,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
         // sync
         var runs = 0
         finalSongs.forEach { song ->
-            runs ++
+            runs++
             if (SCANNER_DEBUG && runs % 20 == 0) {
                 Log.d(TAG, "------------ SYNC: Local Library Sync: $runs/${finalSongs.size} processed ------------")
             }
@@ -316,7 +320,10 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                 }
 
                 if (SCANNER_DEBUG) {
-                    Log.v(TAG, "Found songs that match: ${songMatch.size}, Total results from database: ${querySong.first().size}")
+                    Log.v(
+                        TAG,
+                        "Found songs that match: ${songMatch.size}, Total results from database: ${querySong.first().size}"
+                    )
                     if (songMatch.isNotEmpty()) {
                         Log.v(TAG, "FIRST Found songs ${songMatch.first().song.title}")
                     }
@@ -354,6 +361,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
 
                         // destroy existing artist links
                         unlinkSongArtists(songToUpdate.id)
+                        unlinkSongAlbums(songToUpdate.id)
                     }
 
                     // update artists
@@ -395,6 +403,22 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                         artistPos++
                     }
 
+                    song.song.album?.let {
+                        val dbQuery =
+                            database.searchAlbums(it.title).firstOrNull()?.sortedBy { item -> item.album.title.length }
+                        val dbAlbum = dbQuery?.let { item -> closestAlbumMatch(it.title, item) }
+
+                        database.transaction {
+                            if (dbAlbum == null) {
+                                // album does not exist in db, add it then link it
+                                insert(it)
+                                insert(SongAlbumMap(songToUpdate.id, it.id, 0))
+                            } else {
+                                // album does  exist in db, link to it
+                                insert(SongAlbumMap(songToUpdate.id, dbAlbum.album.id, dbAlbum.album.songCount))
+                            }
+                        }
+                    }
                     // update format
                     if (song.format != null) {
                         database.query {
@@ -448,7 +472,14 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
             // get list of all songs in db, then get songs unknown to the database
             val allSongs = database.allLocalSongs().first()
             val delta = newSongs.filterNot {
-                allSongs.any { dbSong -> compareSong(it, dbSong, matchCriteria, true) } // ignore user strictFileNames prefs for initial matching
+                allSongs.any { dbSong ->
+                    compareSong(
+                        it,
+                        dbSong,
+                        matchCriteria,
+                        true
+                    )
+                } // ignore user strictFileNames prefs for initial matching
             }
 
             val finalSongs = ArrayList<SongTempData>()
@@ -639,7 +670,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
             val allLocal = database.allLocalArtists().first()
 
             allLocal.forEach { element ->
-                runs ++
+                runs++
                 if (runs % 20 == 0) {
                     Log.v(TAG, "------------ SYNC: youtubeArtistLookup job: $runs artists processed ------------")
                 }
@@ -811,6 +842,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                 localScanner = LocalMediaScanner(context, ScannerImpl.TAGLIB)
 //                localScanner = LocalMediaScanner(context, if (isFFmpegInstalled) scannerImpl else ScannerImpl.TAGLIB)
                 scannerProgressTotal.value = 0
+                scannerProgressCurrent.value = -1
                 scannerProgressProbe = 0
             }
 

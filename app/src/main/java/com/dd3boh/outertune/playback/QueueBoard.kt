@@ -755,7 +755,7 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
             "Loading queue ${item?.title ?: "null"} into player. " + "autoSeek = $autoSeek shuffle state = ${item?.shuffled}"
         )
 
-        if (item == null) {
+        if (item == null || item.queue.isEmpty()) {
             player.player.setMediaItems(ArrayList())
             return null
         }
@@ -775,7 +775,7 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
         /**
          * current playing == jump target, do seamlessly
          */
-        val seamlessSupported = (queuePos >= 0 && queuePos < mediaItems.size)
+        val seamlessSupported = (queuePos < mediaItems.size)
                 && player.player.currentMetadata?.id == mediaItems[queuePos].id
         if (seamlessSupported) {
             Log.d(TAG, "Trying seamless queue switch. Is first song?: ${queuePos == 0}")
