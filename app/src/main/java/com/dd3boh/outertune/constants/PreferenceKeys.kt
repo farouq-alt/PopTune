@@ -47,20 +47,10 @@ val LastPlaylistSyncKey = longPreferencesKey("lastPlaylistSync")
 val LastRecentActivitySyncKey = longPreferencesKey("lastRecentActivitySync")
 
 
-enum class SyncMode {
-    RO, RW, // USER_CHOICE
-}
-enum class SyncConflictResolution {
-    ADD_ONLY, OVERWRITE_WITH_REMOTE, // OVERWRITE_WITH_LOCAL, USER_CHOICE
-}
-
 /**
  * Player & audio
  */
 val AudioQualityKey = stringPreferencesKey("audioQuality")
-enum class AudioQuality {
-    AUTO, HIGH, LOW
-}
 val AudioOffload = booleanPreferencesKey("enableOffload")
 
 val PersistentQueueKey = booleanPreferencesKey("persistentQueue")
@@ -126,22 +116,6 @@ val ScanPathsKey = stringPreferencesKey("scanPaths")
 val ExcludedScanPathsKey = stringPreferencesKey("excludedScanPaths")
 val LastLocalScanKey = longPreferencesKey("lastLocalScan")
 
-
-enum class ScannerImpl {
-    TAGLIB,
-    FFMPEG_EXT,
-}
-
-/**
- * Specify how strict the metadata scanner should be
- */
-enum class ScannerMatchCriteria {
-    LEVEL_1, // Title only
-    LEVEL_2, // Title and artists
-    LEVEL_3, // Title, artists, albums
-}
-
-
 /**
  * Experimental settings
  */
@@ -180,68 +154,7 @@ val LibraryViewTypeKey = stringPreferencesKey("libraryViewType")
 
 val PlaylistEditLockKey = booleanPreferencesKey("playlistEditLock")
 
-enum class LibraryViewType {
-    LIST, GRID;
-
-    fun toggle() = when (this) {
-        LIST -> GRID
-        GRID -> LIST
-    }
-}
-
-enum class SongSortType {
-    CREATE_DATE, MODIFIED_DATE, RELEASE_DATE, NAME, ARTIST, PLAY_TIME, PLAY_COUNT
-}
-
-enum class PlaylistSongSortType {
-    CUSTOM, CREATE_DATE, NAME, ARTIST, PLAY_TIME
-}
-
-enum class ArtistSortType {
-    CREATE_DATE, NAME, SONG_COUNT, PLAY_TIME
-}
-
-enum class ArtistSongSortType {
-    CREATE_DATE, NAME, PLAY_TIME
-}
-
-enum class AlbumSortType {
-    CREATE_DATE, NAME, ARTIST, YEAR, SONG_COUNT, LENGTH, PLAY_TIME
-}
-
-enum class PlaylistSortType {
-    CREATE_DATE, NAME, SONG_COUNT
-}
-
-enum class LibrarySortType {
-    CREATE_DATE, NAME
-}
-
-enum class SongFilter {
-    LIBRARY, LIKED, DOWNLOADED
-}
-
-enum class ArtistFilter {
-    LIBRARY, LIKED, DOWNLOADED
-}
-
-enum class AlbumFilter {
-    LIBRARY, LIKED, DOWNLOADED
-}
-
-enum class PlaylistFilter {
-    LIBRARY, DOWNLOADED
-}
-
 val SearchSourceKey = stringPreferencesKey("searchSource")
-
-enum class SearchSource {
-    LOCAL, ONLINE
-}
-
-enum class LikedAutodownloadMode {
-    OFF, ON, WIFI_ONLY
-}
 
 val VisitorDataKey = stringPreferencesKey("visitorData")
 val DataSyncIdKey = stringPreferencesKey("dataSyncId")
