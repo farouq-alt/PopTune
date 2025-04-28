@@ -70,7 +70,6 @@ object YTPlayerUtils {
     suspend fun playerResponseForPlayback(
         videoId: String,
         playlistId: String? = null,
-        playedFormat: FormatEntity?,
         audioQuality: AudioQuality,
         connectivityManager: ConnectivityManager,
     ): Result<PlaybackData> = runCatching {
@@ -151,7 +150,6 @@ object YTPlayerUtils {
                 format =
                     findFormat(
                         streamPlayerResponse,
-                        playedFormat,
                         audioQuality,
                         connectivityManager,
                     ) ?: continue
@@ -220,7 +218,6 @@ object YTPlayerUtils {
 
     private fun findFormat(
         playerResponse: PlayerResponse,
-        playedFormat: FormatEntity?,
         audioQuality: AudioQuality,
         connectivityManager: ConnectivityManager,
     ): PlayerResponse.StreamingData.Format? =
