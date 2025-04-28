@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -28,17 +30,21 @@ import androidx.compose.material.icons.rounded.Devices
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.WarningAmber
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -48,14 +54,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.dd3boh.outertune.LocalDatabase
+import com.dd3boh.outertune.LocalDownloadUtil
 import com.dd3boh.outertune.LocalPlayerAwareWindowInsets
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.DevSettingsKey
+import com.dd3boh.outertune.constants.DownloadPathKey
 import com.dd3boh.outertune.constants.FirstSetupPassed
 import com.dd3boh.outertune.constants.ScannerImpl
 import com.dd3boh.outertune.constants.ScannerImplKey
 import com.dd3boh.outertune.constants.TabletUiKey
 import com.dd3boh.outertune.constants.TopBarInsets
+import com.dd3boh.outertune.constants.allowedPath
+import com.dd3boh.outertune.constants.defaultDownloadPath
+import com.dd3boh.outertune.ui.component.DefaultDialog
 import com.dd3boh.outertune.ui.component.IconButton
 import com.dd3boh.outertune.ui.component.PreferenceEntry
 import com.dd3boh.outertune.ui.component.PreferenceGroupTitle
@@ -93,6 +104,14 @@ fun ExperimentalSettings(
         defaultValue = ScannerImpl.TAGLIB
     )
 
+
+    val (downloadPath, onDownloadPathChange) = rememberPreference(DownloadPathKey, defaultDownloadPath)
+    val downloadUtil = LocalDownloadUtil.current
+    val isLoading by downloadUtil.isProcessingDownloads.collectAsState()
+    var showMigrationDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+
     var nukeEnabled by remember {
         mutableStateOf(false)
     }
@@ -126,18 +145,83 @@ fun ExperimentalSettings(
         )
 
 
+        PreferenceGroupTitle(
+            title = "Download settings"
+        )
+        if (isLoading) {
+            Spacer(Modifier.width(8.dp))
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(32.dp),
+                color = MaterialTheme.colorScheme.secondary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            )
+            Spacer(Modifier.width(8.dp))
+        }
+
+        PreferenceEntry(
+            title = { Text("Migrate download songs") },
+            icon = { Icon(Icons.Rounded.Backup, null) },
+            onClick = {
+                showMigrationDialog = true
+            }
+        )
+        if (showMigrationDialog) {
+            DefaultDialog(
+                onDismiss = { showMigrationDialog = false },
+                content = {
+                    Text(
+                        text = "Are you sure you want to migrate downloads to $allowedPath/${downloadPath}? This action cannot be undone.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(horizontal = 18.dp)
+                    )
+                },
+                buttons = {
+                    TextButton(
+                        onClick = {
+                            showMigrationDialog = false
+                        }
+                    ) {
+                        Text(text = stringResource(android.R.string.cancel))
+                    }
+
+                    TextButton(
+                        onClick = {
+                            showMigrationDialog = false
+
+                            downloadUtil.migrateDownloads()
+                        }
+                    ) {
+                        Text(text = stringResource(android.R.string.ok))
+                    }
+                }
+            )
+        }
+
+        PreferenceEntry(
+            title = { Text("Scan dl songs") },
+            icon = { Icon(Icons.Rounded.Backup, null) },
+            onClick = {
+                downloadUtil.scanDownloads()
+            }
+        )
 
         if (devSettings) {
             PreferenceEntry(
                 title = { Text("DEBUG: Force local to remote artist migration NOW") },
                 icon = { Icon(Icons.Rounded.Backup, null) },
                 onClick = {
-                    Toast.makeText(context, context.getString(R.string.scanner_ytm_link_start), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.scanner_ytm_link_start), Toast.LENGTH_SHORT)
+                        .show()
                     coroutineScope.launch(Dispatchers.IO) {
                         val scanner = LocalMediaScanner.getScanner(context, ScannerImpl.TAGLIB)
                         Log.i(SETTINGS_TAG, "Force Migrating local artists to YTM (MANUAL TRIGGERED)")
                         scanner.localToRemoteArtist(database)
-                        Toast.makeText(context, context.getString(R.string.scanner_ytm_link_success), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.scanner_ytm_link_success),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             )
@@ -161,43 +245,69 @@ fun ExperimentalSettings(
 
 
             Column {
-                Row(Modifier.padding(10.dp).background(MaterialTheme.colorScheme.primary)) {
+                Row(Modifier
+                    .padding(10.dp)
+                    .background(MaterialTheme.colorScheme.primary)) {
                     Text("Primary", color = MaterialTheme.colorScheme.onPrimary)
                 }
-                Row(Modifier.padding(10.dp).background(MaterialTheme.colorScheme.secondary)) {
+                Row(Modifier
+                    .padding(10.dp)
+                    .background(MaterialTheme.colorScheme.secondary)) {
                     Text("Secondary", color = MaterialTheme.colorScheme.onSecondary)
                 }
-                Row(Modifier.padding(10.dp).background(MaterialTheme.colorScheme.tertiary)) {
+                Row(Modifier
+                    .padding(10.dp)
+                    .background(MaterialTheme.colorScheme.tertiary)) {
                     Text("Tertiary", color = MaterialTheme.colorScheme.onTertiary)
                 }
-                Row(Modifier.padding(10.dp).background(MaterialTheme.colorScheme.surface)) {
+                Row(Modifier
+                    .padding(10.dp)
+                    .background(MaterialTheme.colorScheme.surface)) {
                     Text("Surface", color = MaterialTheme.colorScheme.onSurface)
                 }
-                Row(Modifier.padding(10.dp).background(MaterialTheme.colorScheme.inverseSurface)) {
+                Row(Modifier
+                    .padding(10.dp)
+                    .background(MaterialTheme.colorScheme.inverseSurface)) {
                     Text("Inverse Surface", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Row(Modifier.padding(10.dp).background(MaterialTheme.colorScheme.surfaceVariant)) {
+                Row(Modifier
+                    .padding(10.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)) {
                     Text("Surface Variant", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Row(Modifier.padding(10.dp).background(MaterialTheme.colorScheme.surfaceBright)) {
+                Row(Modifier
+                    .padding(10.dp)
+                    .background(MaterialTheme.colorScheme.surfaceBright)) {
                     Text("Surface Bright", color = MaterialTheme.colorScheme.onSurface)
                 }
-                Row(Modifier.padding(10.dp).background(MaterialTheme.colorScheme.surfaceTint)) {
+                Row(Modifier
+                    .padding(10.dp)
+                    .background(MaterialTheme.colorScheme.surfaceTint)) {
                     Text("Surface Tint", color = MaterialTheme.colorScheme.onSurface)
                 }
-                Row(Modifier.padding(10.dp).background(MaterialTheme.colorScheme.surfaceDim)) {
+                Row(Modifier
+                    .padding(10.dp)
+                    .background(MaterialTheme.colorScheme.surfaceDim)) {
                     Text("Surface Dim", color = MaterialTheme.colorScheme.onSurface)
                 }
-                Row(Modifier.padding(10.dp).background(MaterialTheme.colorScheme.surfaceContainerHighest)) {
+                Row(Modifier
+                    .padding(10.dp)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)) {
                     Text("Surface Container Highest", color = MaterialTheme.colorScheme.onSurface)
                 }
-                Row(Modifier.padding(10.dp).background(MaterialTheme.colorScheme.surfaceContainerHigh)) {
+                Row(Modifier
+                    .padding(10.dp)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)) {
                     Text("Surface Container High", color = MaterialTheme.colorScheme.onSurface)
                 }
-                Row(Modifier.padding(10.dp).background(MaterialTheme.colorScheme.surfaceContainerLow)) {
+                Row(Modifier
+                    .padding(10.dp)
+                    .background(MaterialTheme.colorScheme.surfaceContainerLow)) {
                     Text("Surface Container Low", color = MaterialTheme.colorScheme.onSurface)
                 }
-                Row(Modifier.padding(10.dp).background(MaterialTheme.colorScheme.errorContainer)) {
+                Row(Modifier
+                    .padding(10.dp)
+                    .background(MaterialTheme.colorScheme.errorContainer)) {
                     Text("Error Container", color = MaterialTheme.colorScheme.onErrorContainer)
                 }
             }
@@ -332,7 +442,8 @@ fun ExperimentalSettings(
                     title = { Text("DEBUG: Nuke dangling format entities") },
                     icon = { Icon(Icons.Rounded.WarningAmber, null) },
                     onClick = {
-                        Toast.makeText(context, "Nuking dangling format entities from database...", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Nuking dangling format entities from database...", Toast.LENGTH_SHORT)
+                            .show()
                         coroutineScope.launch(Dispatchers.IO) {
                             Log.i(SETTINGS_TAG, "Nuke database status:  ${database.nukeDanglingFormatEntities()}")
                         }
