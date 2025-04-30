@@ -47,7 +47,7 @@
     <string name="grp_lyrics_parser">Intérprete</string>
     <string name="special_thanks">Agradecimiento especial</string>
     <string name="new_interface">Nuevo layout de interfaz</string>
-    <string name="show_liked_and_downloaded_playlist">Mostrar playlists con me gusta y descargadas en la librería</string>
+    <string name="show_liked_and_downloaded_playlist">Mostrar playlist con me gusta y descargadas en la librería</string>
     <string name="slim_navbar_title">Barra de navegación delgada</string>
     <string name="tab_arrangement">Organizar pestañas</string>
     <string name="tab_arrangement_home_required">La pestaña Inicio es obligatoria.</string>
@@ -146,4 +146,19 @@
     <string name="audio_offload">Habilitar offload</string>
     <string name="lyrics_prefer_local_description">Priorice la resolución de archivos de letras locales antes de utilizar todos los proveedores de la nube. Desactive esto para priorizar a los proveedores de la nube</string>
     <string name="local_library_enable_title">Habilitar medios locales</string>
+    <string name="filter_arrangement">Organizar filtros</string>
+    <string name="swipe_to_skip_title">Desliza horizontalmente para cambiar de canción</string>
+    <string name="android_auto">Android Auto</string>
+    <string name="swipe_to_skip_description">Habilitar deslizar horizontalmente en el reproductor para cambiar de canción</string>
+    <string name="image_cache_tooltip">Reinicia la aplicación para que los cambios tengan efecto</string>
+    <string name="more_settings">Más ajustes</string>
+    <string name="grp_account_sync">Cuenta y Sincronización</string>
+    <string name="grp_library_and_content">Librería y Contenido</string>
+    <string name="sync_mode_rw">Lectura/Escritura (También permite cambios en el contenido remoto)</string>
+    <string name="sync_conflict_add_only">Mantener todo el contenido local, añadir contenido remoto nuevo</string>
+    <string name="sync_conflict_overwrite">Sobreescribir contenido local con el contenido remoto</string>
+    <string name="sync_mode">Modo de sincronización</string>
+    <string name="missing_media_permission_warning">Los permisos de almacenamiento son necesarios para los medios locales. Pulsa para conceder los permisos.</string>
+    <string name="sync_conflict_title">Resolución de conflicto</string>
+    <string name="sync_mode_ro">Sólo lectura (Ver contenido remoto)</string>
 </resources>
