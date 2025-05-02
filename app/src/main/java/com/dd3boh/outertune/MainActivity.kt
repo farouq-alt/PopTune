@@ -192,6 +192,7 @@ import com.dd3boh.outertune.ui.screens.settings.AccountSyncSettings
 import com.dd3boh.outertune.ui.screens.settings.AppearanceSettings
 import com.dd3boh.outertune.ui.screens.settings.BackupAndRestore
 import com.dd3boh.outertune.constants.DEFAULT_ENABLED_TABS
+import com.dd3boh.outertune.ui.screens.library.FolderScreen
 import com.dd3boh.outertune.ui.screens.settings.ExperimentalSettings
 import com.dd3boh.outertune.ui.screens.settings.InterfaceSettings
 import com.dd3boh.outertune.ui.screens.settings.LibrarySettings
@@ -207,6 +208,7 @@ import com.dd3boh.outertune.ui.theme.extractThemeColor
 import com.dd3boh.outertune.ui.utils.DEFAULT_SCAN_PATH
 import com.dd3boh.outertune.ui.utils.MEDIA_PERMISSION_LEVEL
 import com.dd3boh.outertune.ui.utils.appBarScrollBehavior
+import com.dd3boh.outertune.ui.utils.clearDtCache
 import com.dd3boh.outertune.ui.utils.imageCache
 import com.dd3boh.outertune.ui.utils.resetHeightOffset
 import com.dd3boh.outertune.utils.ActivityLauncherHelper
@@ -438,6 +440,7 @@ class MainActivity : ComponentActivity() {
                             }
 
                             // post scan actions
+                            clearDtCache()
                             imageCache.purgeCache()
                             playerConnection?.service?.initQueue()
                         } else if (perms == PackageManager.PERMISSION_DENIED) {
@@ -589,8 +592,8 @@ class MainActivity : ComponentActivity() {
 
                     val shouldShowSearchBar = remember(active, navBackStackEntry, inSelectMode?.value) {
                         (active || navigationItems.fastAny { it.route == navBackStackEntry?.destination?.route } ||
-                                navBackStackEntry?.destination?.route?.startsWith("search/") == true) &&
-                                inSelectMode?.value != true
+                                navBackStackEntry?.destination?.route?.startsWith("search/") == true)
+                                && inSelectMode?.value != true
                     }
                     val shouldShowNavigationBar = remember(navBackStackEntry, active) {
                         navBackStackEntry?.destination?.route == null ||
@@ -1044,7 +1047,17 @@ class MainActivity : ComponentActivity() {
                                     LibrarySongsScreen(navController)
                                 }
                                 composable(Screens.Folders.route) {
-                                    LibraryFoldersScreen(navController)
+                                    LibraryFoldersScreen(navController, scrollBehavior)
+                                }
+                                composable(
+                                    route = "${Screens.Folders.route}/{path}",
+                                    arguments = listOf(
+                                        navArgument("path") {
+                                            type = NavType.StringType
+                                        }
+                                    )
+                                ) {
+                                    FolderScreen(navController, scrollBehavior)
                                 }
                                 composable(Screens.Artists.route) {
                                     LibraryArtistsScreen(navController)
@@ -1056,7 +1069,7 @@ class MainActivity : ComponentActivity() {
                                     LibraryPlaylistsScreen(navController)
                                 }
                                 composable(Screens.Library.route) {
-                                    LibraryScreen(navController)
+                                    LibraryScreen(navController, scrollBehavior)
                                 }
                                 composable("history") {
                                     HistoryScreen(navController)
