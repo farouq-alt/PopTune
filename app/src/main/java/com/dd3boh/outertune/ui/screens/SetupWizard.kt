@@ -171,15 +171,9 @@ fun SetupWizard(
     LaunchedEffect(localLibEnable) {
         val containsFolders = enabledTabs.contains('F')
         if (localLibEnable && !containsFolders) {
-            if (enabledTabs.last() == 'M') {
-                // add folders before library if library is last
-                onEnabledTabsChange(enabledTabs.replace('M', 'F') + "M")
-            } else {
-                // add folders to end
-                onEnabledTabsChange(enabledTabs + "M")
-            }
+            onEnabledTabsChange(enabledTabs + "F")
         } else if (!localLibEnable && containsFolders) {
-            onEnabledTabsChange(enabledTabs.drop(enabledTabs.indexOf('F')))
+            onEnabledTabsChange(enabledTabs.filterNot { it == 'F' })
         }
     }
 
