@@ -6,7 +6,7 @@ body:
     id: checklist
     attributes:
       label: Checklist
-      description: Make sure to complete each task before checking it off the checklist. We reserve the right to ignore or delete your issue if you check the list blindly, disregard the template, or post a nonsensical issue.
+      description: Make sure to complete each task before checking it off the checklist. We reserve the right to ignore or delete your issue, (and/or block your account in extreme cases) if you check the list blindly, disregard the template, or post a nonsensical or blatantly duplicate issue.
       options:
         - label: I am able to reproduce the bug with the [latest debug version](https://github.com/dd3boh/OuterTune/actions) AND any logs I have attached are taken with the DEBUG version (NOT release).
           required: true
@@ -16,6 +16,8 @@ body:
           required: true
         - label: The title of this issue accurately describes the bug.
           required: true
+        - label: I've checked these boxes without reading carefully.
+          required: false
 
   - type: textarea
     id: reproduce-steps
