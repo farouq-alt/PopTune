@@ -776,7 +776,7 @@ fun BottomSheetPlayer(
         }
 
 
-        Queue(
+        QueueSheet(
             state = queueSheetState,
             playerBottomSheetState = state,
             onTerminate = {
