@@ -37,5 +37,5 @@ fun Context.tabMode(): Boolean {
     val isTablet = config.smallestScreenWidthDp >= 600
     val isLandscape = config.orientation == Configuration.ORIENTATION_LANDSCAPE
     val forceTabMode = dataStore.get(TabletUiKey, isTablet)
-    return (isTablet || forceTabMode) && isLandscape
+    return forceTabMode // (isTablet || forceTabMode) && isLandscape
 }
