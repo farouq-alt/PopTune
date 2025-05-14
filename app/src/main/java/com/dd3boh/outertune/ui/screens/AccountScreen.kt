@@ -106,6 +106,7 @@ fun AccountScreen(
                         onLongClick = {
                             menuState.show {
                                 YouTubePlaylistMenu(
+                                    navController = navController,
                                     playlist = item,
                                     coroutineScope = coroutineScope,
                                     onDismiss = menuState::dismiss

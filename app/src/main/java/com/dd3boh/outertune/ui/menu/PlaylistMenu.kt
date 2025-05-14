@@ -41,6 +41,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadService
+import androidx.navigation.NavController
 import com.dd3boh.outertune.LocalDatabase
 import com.dd3boh.outertune.LocalDownloadUtil
 import com.dd3boh.outertune.LocalNetworkConnected
@@ -68,6 +69,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun PlaylistMenu(
+    navController: NavController,
     playlist: Playlist,
     coroutineScope: CoroutineScope,
     onDismiss: () -> Unit,
@@ -246,6 +248,7 @@ fun PlaylistMenu(
     }
 
     AddToPlaylistDialog(
+        navController = navController,
         isVisible = showChoosePlaylistDialog,
         onGetSong = {
             coroutineScope.launch(Dispatchers.IO) {

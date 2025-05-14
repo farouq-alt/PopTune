@@ -562,6 +562,7 @@ fun FolderScreen(
 
         FloatingFooter(inSelectMode) {
             SelectHeader(
+                navController = navController,
                 selectedItems = selection.mapNotNull { songId ->
                     mutableSongs.find { it.id == songId }
                 }.map { it.toMediaMetadata() },

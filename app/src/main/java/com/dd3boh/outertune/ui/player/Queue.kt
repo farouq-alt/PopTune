@@ -474,6 +474,7 @@ fun Queue(
                                     onLongClick = {
                                         menuState.show {
                                             QueueMenu(
+                                                navController = navController,
                                                 mq = mq,
                                                 onDismiss = menuState::dismiss,
                                                 refreshUi = { updateQueues() }
@@ -839,6 +840,7 @@ fun Queue(
                 // handle selection mode
                 if (inSelectMode && !isSearching) {
                     SelectHeader(
+                        navController = navController,
                         selectedItems = selectedItems.mapNotNull { uidHash ->
                             mutableQueueWindows.find { it.uid.hashCode() == uidHash }
                         }.mapNotNull { it.mediaItem.metadata },
@@ -1045,6 +1047,7 @@ fun Queue(
                             if (inSelectMode) {
                                 Row {
                                     SelectHeader(
+                                        navController = navController,
                                         selectedItems = selectedItems.mapNotNull { uidHash ->
                                             mutableQueueWindows.find { it.uid.hashCode() == uidHash }
                                         }.mapNotNull { it.mediaItem.metadata },
@@ -1102,6 +1105,7 @@ fun Queue(
                     if (inSelectMode) {
                         Row {
                             SelectHeader(
+                                navController = navController,
                                 selectedItems = selectedItems.mapNotNull { uidHash ->
                                     filteredSongs.find { it.uid.hashCode() == uidHash }
                                 }.mapNotNull { it.mediaItem.metadata },

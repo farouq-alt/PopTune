@@ -140,6 +140,7 @@ fun BackupAndRestore(
             }
         )
         AddToPlaylistDialog(
+            navController = navController,
             isVisible = showChoosePlaylistDialog,
             allowSyncing = false,
             initialTextFieldValue = importedTitle,

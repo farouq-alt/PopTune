@@ -737,6 +737,10 @@ class MainActivity : ComponentActivity() {
                             if (navigationItems.fastAny { it.route == previousTab })
                                 searchBarScrollBehavior.state.resetHeightOffset()
 
+                        if (navBackStackEntry?.destination?.route?.startsWith("settings/") == true) {
+                            playerBottomSheetState.collapseSoft()
+                        }
+
                         navController.currentBackStackEntry?.destination?.route?.let {
                             setPreviousTab(it)
                         }

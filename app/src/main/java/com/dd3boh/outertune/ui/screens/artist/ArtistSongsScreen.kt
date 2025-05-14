@@ -219,6 +219,7 @@ fun ArtistSongsScreen(
 
         FloatingFooter(inSelectMode) {
             SelectHeader(
+                navController = navController,
                 selectedItems = selection.mapNotNull { songId ->
                     songs.find { it.id == songId }
                 }.map { it.toMediaMetadata() },
