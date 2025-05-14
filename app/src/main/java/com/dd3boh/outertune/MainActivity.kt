@@ -11,6 +11,7 @@ package com.dd3boh.outertune
 
 import android.annotation.SuppressLint
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
@@ -20,6 +21,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -34,6 +36,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,6 +60,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -67,6 +71,8 @@ import androidx.compose.material.icons.rounded.LibraryMusic
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.AlertDialogDefaults
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -97,6 +103,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -207,6 +214,9 @@ import com.dd3boh.outertune.ui.screens.settings.AccountSyncSettings
 import com.dd3boh.outertune.ui.screens.settings.AppearanceSettings
 import com.dd3boh.outertune.ui.screens.settings.BackupAndRestore
 import com.dd3boh.outertune.constants.DEFAULT_ENABLED_TABS
+import com.dd3boh.outertune.constants.ENABLE_UPDATE_CHECKER
+import com.dd3boh.outertune.constants.LastVersionKey
+import com.dd3boh.outertune.constants.UpdateAvailableKey
 import com.dd3boh.outertune.ui.screens.library.FolderScreen
 import com.dd3boh.outertune.ui.screens.settings.ExperimentalSettings
 import com.dd3boh.outertune.ui.screens.settings.InterfaceSettings
@@ -222,6 +232,7 @@ import com.dd3boh.outertune.ui.theme.OuterTuneTheme
 import com.dd3boh.outertune.ui.theme.extractThemeColor
 import com.dd3boh.outertune.ui.utils.DEFAULT_SCAN_PATH
 import com.dd3boh.outertune.ui.utils.MEDIA_PERMISSION_LEVEL
+import com.dd3boh.outertune.ui.utils.Updater
 import com.dd3boh.outertune.ui.utils.appBarScrollBehavior
 import com.dd3boh.outertune.ui.utils.clearDtCache
 import com.dd3boh.outertune.ui.utils.imageCache
@@ -229,6 +240,7 @@ import com.dd3boh.outertune.ui.utils.resetHeightOffset
 import com.dd3boh.outertune.utils.ActivityLauncherHelper
 import com.dd3boh.outertune.utils.NetworkConnectivityObserver
 import com.dd3boh.outertune.utils.SyncUtils
+import com.dd3boh.outertune.utils.compareVersion
 import com.dd3boh.outertune.utils.dataStore
 import com.dd3boh.outertune.utils.get
 import com.dd3boh.outertune.utils.rememberEnumPreference
@@ -252,6 +264,8 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    val MAIN_TAG = "MainOtActivity"
+
     @Inject
     lateinit var database: MusicDatabase
 
@@ -277,6 +291,8 @@ class MainActivity : ComponentActivity() {
             playerConnection = null
         }
     }
+
+    private var latestVersionName by mutableStateOf(BuildConfig.VERSION_NAME)
 
     // storage permission helpers
     val permissionLauncher =
@@ -399,6 +415,14 @@ class MainActivity : ComponentActivity() {
             val (strictExtensions) = rememberPreference(ScannerStrictExtKey, defaultValue = false)
             val (lookupYtmArtists) = rememberPreference(LookupYtmArtistsKey, defaultValue = true)
             val (autoScan) = rememberPreference(AutomaticScannerKey, defaultValue = false)
+
+            // updater
+            val (updateAvailable, onUpdateAvailableChange) = rememberPreference(
+                UpdateAvailableKey,
+                defaultValue = false
+            )
+            val (lastVer, onLastVerChange) = rememberPreference(LastVersionKey, defaultValue = "0.0.0")
+
             LaunchedEffect(Unit) {
                 downloadUtil.resumeDownloadsOnStart()
 
@@ -460,7 +484,24 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+
+                if (!ENABLE_UPDATE_CHECKER) return@LaunchedEffect
+                if (compareVersion(lastVer, BuildConfig.VERSION_NAME) < 0) {
+                    onLastVerChange(BuildConfig.VERSION_NAME)
+                    onUpdateAvailableChange(false)
+                    Log.d(MAIN_TAG, "App version is >= latest. Tracking current version")
+                }
+
+                Updater.tryCheckUpdate(this@MainActivity as Context)?.let {
+                    if (compareVersion(lastVer, it) < 0) {
+                        onUpdateAvailableChange(true)
+                        Log.d(MAIN_TAG, "Update available. UpdateAvailable set to true")
+                    } else {
+                        Log.d(MAIN_TAG, "No new updates available")
+                    }
+                }
             }
+
             OuterTuneTheme(
                 darkTheme = useDarkTheme,
                 pureBlack = pureBlack,
@@ -1127,15 +1168,27 @@ class MainActivity : ComponentActivity() {
                                         } else if (navBackStackEntry?.destination?.route in Screens.getAllScreens()
                                                 .map { it.route }
                                         ) {
-                                            IconButton(
-                                                onClick = {
-                                                    navController.navigate("settings")
-                                                }
+                                            Box(
+                                                contentAlignment = Alignment.Center,
+                                                modifier = Modifier
+                                                    .size(48.dp)
+                                                    .clip(CircleShape)
+                                                    .clickable {
+                                                        navController.navigate("settings")
+                                                    }
                                             ) {
-                                                Icon(
-                                                    imageVector = Icons.Rounded.Settings,
-                                                    contentDescription = null
-                                                )
+                                                BadgedBox(
+                                                    badge = {
+                                                        if (ENABLE_UPDATE_CHECKER && updateAvailable) {
+                                                            Badge()
+                                                        }
+                                                    }
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Rounded.Settings,
+                                                        contentDescription = null
+                                                    )
+                                                }
                                             }
                                         }
                                     },
