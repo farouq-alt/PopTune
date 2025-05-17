@@ -116,7 +116,7 @@ fun BackupAndRestore(
             .verticalScroll(rememberScrollState())
     ) {
         PreferenceEntry(
-            title = { Text(stringResource(R.string.backup)) },
+            title = { Text(stringResource(R.string.action_backup)) },
             icon = { Icon(Icons.Rounded.Backup, null) },
             onClick = {
                 val formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
@@ -124,7 +124,7 @@ fun BackupAndRestore(
             }
         )
         PreferenceEntry(
-            title = { Text(stringResource(R.string.restore)) },
+            title = { Text(stringResource(R.string.action_restore)) },
             icon = { Icon(Icons.Rounded.Restore, null) },
             onClick = {
                 restoreLauncher.launch(arrayOf("application/octet-stream"))

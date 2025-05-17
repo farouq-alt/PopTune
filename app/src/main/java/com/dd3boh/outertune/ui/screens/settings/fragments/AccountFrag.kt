@@ -79,7 +79,7 @@ fun ColumnScope.AccountFrag(navController: NavController) {
     )
     if (isLoggedIn) {
         PreferenceEntry(
-            title = { Text(stringResource(R.string.logout)) },
+            title = { Text(stringResource(R.string.action_logout)) },
             icon = { Icon(Icons.AutoMirrored.Rounded.Logout, null) },
             onClick = {
                 forgetAccount(context)
