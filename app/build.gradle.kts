@@ -200,6 +200,6 @@ dependencies {
     Please download the [aar](https://github.com/Kyant0/taglib/releases) manually but not use maven."
      */
 //    implementation(libs.taglib) // jitpack
-    implementation(files("../prebuilt/taglib-1.0.1-outertune-universal-release.aar")) // prebuilt
+    implementation(files("../prebuilt/taglib-1.0.2-outertune-universal-release.aar")) // prebuilt
 //    implementation("com.kyant:taglib") // custom
 }

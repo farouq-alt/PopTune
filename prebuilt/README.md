@@ -1,3 +1,3 @@
 ## taglib library
-Commit: f284015bd26906443a92dc71b359b2bda5106d4a
-Source: https://github.com/OuterTune/taglib/releases/tag/1.0.1-outertune
+Commit: 912c219c0044eaa82c28e600ba315e16790460fa
+Source: https://github.com/OuterTune/taglib/releases/tag/1.0.2-outertune
