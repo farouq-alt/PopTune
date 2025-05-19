@@ -271,8 +271,7 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
                     shuffle(newQueue, false, true)
                 }
 
-                saveQueue(newQueue)
-
+                saveQueueSongs(newQueue)
                 bubbleUp(newQueue) // move queue to end of list so it shows as most recent
                 return newQueue
             }
@@ -302,7 +301,7 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
                 newQueue.queuePos = newQueue.queue.indexOf(newQueue.queue.find { it.shuffleIndex == 0 })
             }
 
-            saveQueue(newQueue)
+            saveQueueSongs(newQueue)
             bubbleUp(newQueue) // move queue to end of list so it shows as most recent
             return newQueue
         }
@@ -848,7 +847,7 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
     private fun databaseDispatcher() {
         Log.d(TAG, "Starting database save task")
         if (jobActive.isLocked) {
-            Log.d(TAG, "Database save task is already acive, aborting")
+            Log.d(TAG, "Database save task is already active, aborting")
             return
         }
 
