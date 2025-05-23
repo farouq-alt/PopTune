@@ -10,7 +10,11 @@ package com.dd3boh.outertune.ui.screens.settings
 
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,14 +23,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Backup
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.ConfirmationNumber
 import androidx.compose.material.icons.rounded.DeveloperMode
 import androidx.compose.material.icons.rounded.Devices
+import androidx.compose.material.icons.rounded.Downloading
 import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.material.icons.rounded.FolderCopy
+import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material.icons.rounded.WarningAmber
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -45,6 +54,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -57,16 +67,21 @@ import com.dd3boh.outertune.LocalDownloadUtil
 import com.dd3boh.outertune.LocalPlayerAwareWindowInsets
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.DevSettingsKey
+import com.dd3boh.outertune.constants.DownloadExtraPathKey
 import com.dd3boh.outertune.constants.DownloadPathKey
 import com.dd3boh.outertune.constants.FirstSetupPassed
+import com.dd3boh.outertune.constants.SCANNER_OWNER_LM
 import com.dd3boh.outertune.constants.ScannerImpl
 import com.dd3boh.outertune.constants.ScannerImplKey
 import com.dd3boh.outertune.constants.TabletUiKey
+import com.dd3boh.outertune.constants.ThumbnailCornerRadius
 import com.dd3boh.outertune.constants.TopBarInsets
 import com.dd3boh.outertune.constants.allowedPath
 import com.dd3boh.outertune.constants.defaultDownloadPath
+import com.dd3boh.outertune.ui.component.ActionPromptDialog
 import com.dd3boh.outertune.ui.component.DefaultDialog
 import com.dd3boh.outertune.ui.component.IconButton
+import com.dd3boh.outertune.ui.component.InfoLabel
 import com.dd3boh.outertune.ui.component.PreferenceEntry
 import com.dd3boh.outertune.ui.component.PreferenceGroupTitle
 import com.dd3boh.outertune.ui.component.SwitchPreference
@@ -105,9 +120,16 @@ fun ExperimentalSettings(
 
 
     val (downloadPath, onDownloadPathChange) = rememberPreference(DownloadPathKey, defaultDownloadPath)
+    val (dlPathExtra, onDlPathExtraChange) = rememberPreference(DownloadExtraPathKey, "")
     val downloadUtil = LocalDownloadUtil.current
     val isLoading by downloadUtil.isProcessingDownloads.collectAsState()
     var showMigrationDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var showImportDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+    var showPathsDialog by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -149,29 +171,30 @@ fun ExperimentalSettings(
         )
 
         PreferenceEntry(
-            title = { Text("Migrate download songs") },
+            title = { Text(stringResource(R.string.dl_migrate_title)) },
+            description = stringResource(R.string.dl_migrate_description),
             icon = {
                 if (isLoading) {
                     CircularProgressIndicator(
-                        modifier = Modifier
-                            .size(28.dp),
+                        modifier = Modifier.size(28.dp),
                         color = MaterialTheme.colorScheme.secondary,
                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     )
                 } else {
-                    Icon(Icons.Rounded.Backup, null)
+                    Icon(Icons.Rounded.Downloading, null)
                 }
             },
             onClick = {
                 showMigrationDialog = true
-            }
+            },
+            isEnabled = !isLoading
         )
         if (showMigrationDialog) {
             DefaultDialog(
                 onDismiss = { showMigrationDialog = false },
                 content = {
                     Text(
-                        text = "Are you sure you want to migrate downloads to $allowedPath/${downloadPath}? This action cannot be undone.",
+                        text = stringResource(R.string.dl_migrate_confirm, "$allowedPath/${downloadPath}"),
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.padding(horizontal = 18.dp)
                     )
@@ -198,13 +221,178 @@ fun ExperimentalSettings(
             )
         }
 
+        if (showImportDialog) {
+            DefaultDialog(
+                onDismiss = { showImportDialog = false },
+                content = {
+                    Text(
+                        text = stringResource(R.string.dl_rescan_confirm),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(horizontal = 18.dp)
+                    )
+                },
+                buttons = {
+                    TextButton(
+                        onClick = {
+                            showImportDialog = false
+                        }
+                    ) {
+                        Text(text = stringResource(android.R.string.cancel))
+                    }
+
+                    TextButton(
+                        onClick = {
+                            showImportDialog = false
+                            downloadUtil.scanDownloads()
+                        }
+                    ) {
+                        Text(text = stringResource(android.R.string.ok))
+                    }
+                }
+            )
+        }
         PreferenceEntry(
-            title = { Text("Scan dl songs") },
-            icon = { Icon(Icons.Rounded.Backup, null) },
+            title = { Text(stringResource(R.string.dl_rescan_title)) },
+            description = stringResource(R.string.dl_rescan_description),
+            icon = {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(28.dp),
+                        color = MaterialTheme.colorScheme.secondary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    )
+                } else {
+                    Icon(Icons.Rounded.Sync, null)
+                }
+            },
             onClick = {
-                downloadUtil.scanDownloads()
-            }
+                showImportDialog = true
+            },
+            isEnabled = !isLoading
         )
+
+        PreferenceEntry(
+            title = { Text(stringResource(R.string.dl_extra_path_title)) },
+            description = stringResource(R.string.dl_extra_path_description),
+            icon = { Icon(Icons.Rounded.FolderCopy, null) },
+            onClick = {
+                showPathsDialog = true
+            },
+            isEnabled = !isLoading
+        )
+        if (showPathsDialog) {
+            var tempScanPaths by remember { mutableStateOf(dlPathExtra) }
+            ActionPromptDialog(
+                titleBar = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.scan_paths_incl),
+                            style = MaterialTheme.typography.titleLarge,
+                        )
+                    }
+                },
+                onDismiss = {
+                    showPathsDialog = false
+                    tempScanPaths = ""
+                },
+                onConfirm = {
+                    onDlPathExtraChange(tempScanPaths)
+                    coroutineScope.launch {
+                        delay(1000)
+                        downloadUtil.cd()
+                        downloadUtil.scanDownloads()
+                    }
+
+                    showPathsDialog = false
+                    tempScanPaths = ""
+                },
+                onReset = {
+                    // reset to whitespace so not empty
+                    tempScanPaths = " "
+                },
+                onCancel = {
+                    showPathsDialog = false
+                    tempScanPaths = ""
+                }
+            ) {
+                val dirPickerLauncher = rememberLauncherForActivityResult(
+                    ActivityResultContracts.OpenDocumentTree()
+                ) { uri ->
+                    if (uri?.path != null && !("$tempScanPaths\u200B").contains(uri.path!! + "\u200B")) {
+                        if (tempScanPaths.isBlank()) {
+                            tempScanPaths = "${uri.path}\n"
+                        } else {
+                            tempScanPaths += "${uri.path}\n"
+                        }
+                    }
+                }
+
+                // folders list
+                Column(
+                    modifier = Modifier
+                        .padding(vertical = 12.dp)
+                        .border(
+                            2.dp,
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                            RoundedCornerShape(ThumbnailCornerRadius)
+                        )
+                ) {
+                    tempScanPaths.split('\n').forEach {
+                        if (it.isNotBlank())
+                            Row(
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp)
+                                    .clickable { }) {
+                                Text(
+                                    // I hate this but I'll do it properly... eventually
+                                    text = if (it.substringAfter("tree/")
+                                            .substringBefore(':') == "primary"
+                                    ) {
+                                        "Internal Storage/${it.substringAfter(':')}"
+                                    } else {
+                                        "External (${
+                                            it.substringAfter("tree/").substringBefore(':')
+                                        })/${it.substringAfter(':')}"
+                                    },
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .align(Alignment.CenterVertically)
+                                )
+                                IconButton(
+                                    onClick = {
+                                        tempScanPaths = if (tempScanPaths.substringAfter("\n").contains("\n")) {
+                                            tempScanPaths.replace("$it\n", "")
+                                        } else {
+                                            " " // cursed bug
+                                        }
+                                    },
+                                    onLongClick = {}
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Close,
+                                        contentDescription = null,
+                                    )
+                                }
+                            }
+                    }
+                }
+
+                // add folder button
+                Column {
+                    Button(onClick = { dirPickerLauncher.launch(null) }) {
+                        Text(stringResource(R.string.scan_paths_add_folder))
+                    }
+
+                    InfoLabel(
+                        text = stringResource(R.string.scan_paths_tooltip),
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+            }
+        }
 
         if (devSettings) {
             PreferenceEntry(
@@ -214,7 +402,7 @@ fun ExperimentalSettings(
                     Toast.makeText(context, context.getString(R.string.scanner_ytm_link_start), Toast.LENGTH_SHORT)
                         .show()
                     coroutineScope.launch(Dispatchers.IO) {
-                        val scanner = LocalMediaScanner.getScanner(context, ScannerImpl.TAGLIB)
+                        val scanner = LocalMediaScanner.getScanner(context, ScannerImpl.TAGLIB, SCANNER_OWNER_LM)
                         Log.i(SETTINGS_TAG, "Force Migrating local artists to YTM (MANUAL TRIGGERED)")
                         scanner.localToRemoteArtist(database)
                         Toast.makeText(
@@ -245,69 +433,95 @@ fun ExperimentalSettings(
 
 
             Column {
-                Row(Modifier
-                    .padding(10.dp)
-                    .background(MaterialTheme.colorScheme.primary)) {
+                Row(
+                    Modifier
+                        .padding(10.dp)
+                        .background(MaterialTheme.colorScheme.primary)
+                ) {
                     Text("Primary", color = MaterialTheme.colorScheme.onPrimary)
                 }
-                Row(Modifier
-                    .padding(10.dp)
-                    .background(MaterialTheme.colorScheme.secondary)) {
+                Row(
+                    Modifier
+                        .padding(10.dp)
+                        .background(MaterialTheme.colorScheme.secondary)
+                ) {
                     Text("Secondary", color = MaterialTheme.colorScheme.onSecondary)
                 }
-                Row(Modifier
-                    .padding(10.dp)
-                    .background(MaterialTheme.colorScheme.tertiary)) {
+                Row(
+                    Modifier
+                        .padding(10.dp)
+                        .background(MaterialTheme.colorScheme.tertiary)
+                ) {
                     Text("Tertiary", color = MaterialTheme.colorScheme.onTertiary)
                 }
-                Row(Modifier
-                    .padding(10.dp)
-                    .background(MaterialTheme.colorScheme.surface)) {
+                Row(
+                    Modifier
+                        .padding(10.dp)
+                        .background(MaterialTheme.colorScheme.surface)
+                ) {
                     Text("Surface", color = MaterialTheme.colorScheme.onSurface)
                 }
-                Row(Modifier
-                    .padding(10.dp)
-                    .background(MaterialTheme.colorScheme.inverseSurface)) {
+                Row(
+                    Modifier
+                        .padding(10.dp)
+                        .background(MaterialTheme.colorScheme.inverseSurface)
+                ) {
                     Text("Inverse Surface", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Row(Modifier
-                    .padding(10.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)) {
+                Row(
+                    Modifier
+                        .padding(10.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
                     Text("Surface Variant", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Row(Modifier
-                    .padding(10.dp)
-                    .background(MaterialTheme.colorScheme.surfaceBright)) {
+                Row(
+                    Modifier
+                        .padding(10.dp)
+                        .background(MaterialTheme.colorScheme.surfaceBright)
+                ) {
                     Text("Surface Bright", color = MaterialTheme.colorScheme.onSurface)
                 }
-                Row(Modifier
-                    .padding(10.dp)
-                    .background(MaterialTheme.colorScheme.surfaceTint)) {
+                Row(
+                    Modifier
+                        .padding(10.dp)
+                        .background(MaterialTheme.colorScheme.surfaceTint)
+                ) {
                     Text("Surface Tint", color = MaterialTheme.colorScheme.onSurface)
                 }
-                Row(Modifier
-                    .padding(10.dp)
-                    .background(MaterialTheme.colorScheme.surfaceDim)) {
+                Row(
+                    Modifier
+                        .padding(10.dp)
+                        .background(MaterialTheme.colorScheme.surfaceDim)
+                ) {
                     Text("Surface Dim", color = MaterialTheme.colorScheme.onSurface)
                 }
-                Row(Modifier
-                    .padding(10.dp)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)) {
+                Row(
+                    Modifier
+                        .padding(10.dp)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                ) {
                     Text("Surface Container Highest", color = MaterialTheme.colorScheme.onSurface)
                 }
-                Row(Modifier
-                    .padding(10.dp)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)) {
+                Row(
+                    Modifier
+                        .padding(10.dp)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                ) {
                     Text("Surface Container High", color = MaterialTheme.colorScheme.onSurface)
                 }
-                Row(Modifier
-                    .padding(10.dp)
-                    .background(MaterialTheme.colorScheme.surfaceContainerLow)) {
+                Row(
+                    Modifier
+                        .padding(10.dp)
+                        .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                ) {
                     Text("Surface Container Low", color = MaterialTheme.colorScheme.onSurface)
                 }
-                Row(Modifier
-                    .padding(10.dp)
-                    .background(MaterialTheme.colorScheme.errorContainer)) {
+                Row(
+                    Modifier
+                        .padding(10.dp)
+                        .background(MaterialTheme.colorScheme.errorContainer)
+                ) {
                     Text("Error Container", color = MaterialTheme.colorScheme.onErrorContainer)
                 }
             }
