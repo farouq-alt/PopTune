@@ -12,16 +12,16 @@ import android.net.ConnectivityManager
 import android.util.Log
 import androidx.media3.common.PlaybackException
 import com.dd3boh.outertune.constants.AudioQuality
-import com.dd3boh.outertune.db.entities.FormatEntity
+import com.dd3boh.outertune.utils.YTPlayerUtils.MAIN_CLIENT
+import com.dd3boh.outertune.utils.YTPlayerUtils.STREAM_FALLBACK_CLIENTS
+import com.dd3boh.outertune.utils.YTPlayerUtils.validateStatus
+import com.dd3boh.outertune.utils.potoken.PoTokenGenerator
+import com.dd3boh.outertune.utils.potoken.PoTokenResult
 import com.zionhuang.innertube.NewPipeUtils
 import com.zionhuang.innertube.YouTube
 import com.zionhuang.innertube.models.YouTubeClient
 import com.zionhuang.innertube.models.YouTubeClient.Companion.IOS
-import com.zionhuang.innertube.models.YouTubeClient.Companion.TVHTML5_SIMPLY_EMBEDDED_PLAYER
-import com.zionhuang.innertube.models.YouTubeClient.Companion.WEB_REMIX
 import com.zionhuang.innertube.models.response.PlayerResponse
-import com.dd3boh.outertune.utils.potoken.PoTokenGenerator
-import com.dd3boh.outertune.utils.potoken.PoTokenResult
 import okhttp3.OkHttpClient
 
 object YTPlayerUtils {
@@ -42,15 +42,15 @@ object YTPlayerUtils {
      * [com.zionhuang.innertube.models.YouTubeClient.WEB_REMIX] should be preferred here because currently it is the only client which provides:
      * - the correct metadata (like loudnessDb)
      * - premium formats
+     *
+     * **** NOTE: IOS client will temporarily be used until the there are other functional clients
      */
-    private val MAIN_CLIENT: YouTubeClient = WEB_REMIX
+    private val MAIN_CLIENT: YouTubeClient = IOS
 
     /**
      * Clients used for fallback streams in case the streams of the main client do not work.
      */
     private val STREAM_FALLBACK_CLIENTS: Array<YouTubeClient> = arrayOf(
-        TVHTML5_SIMPLY_EMBEDDED_PLAYER,
-        IOS,
     )
 
     data class PlaybackData(
@@ -123,10 +123,12 @@ object YTPlayerUtils {
             // decide which client to use for streams and load its player response
             val client: YouTubeClient
             if (clientIndex == -1) {
+                Log.d(TAG, "Trying client: ${MAIN_CLIENT.clientName}")
                 // try with streams from main client first
                 client = MAIN_CLIENT
                 streamPlayerResponse = mainPlayerResponse
             } else {
+                Log.d(TAG, "Trying fallback client: ${STREAM_FALLBACK_CLIENTS[clientIndex].clientName}")
                 // after main client use fallback clients
                 client = STREAM_FALLBACK_CLIENTS[clientIndex]
 
