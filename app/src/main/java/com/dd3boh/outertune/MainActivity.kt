@@ -216,6 +216,7 @@ import com.dd3boh.outertune.ui.screens.settings.BackupAndRestore
 import com.dd3boh.outertune.constants.DEFAULT_ENABLED_TABS
 import com.dd3boh.outertune.constants.ENABLE_UPDATE_CHECKER
 import com.dd3boh.outertune.constants.LastVersionKey
+import com.dd3boh.outertune.constants.SCANNER_OWNER_LM
 import com.dd3boh.outertune.constants.UpdateAvailableKey
 import com.dd3boh.outertune.ui.screens.library.FolderScreen
 import com.dd3boh.outertune.ui.screens.settings.ExperimentalSettings
@@ -424,7 +425,6 @@ class MainActivity : ComponentActivity() {
             val (lastVer, onLastVerChange) = rememberPreference(LastVersionKey, defaultValue = "0.0.0")
 
             LaunchedEffect(Unit) {
-                downloadUtil.resumeDownloadsOnStart()
 
                 CoroutineScope(Dispatchers.IO).launch {
                     val perms = checkSelfPermission(MEDIA_PERMISSION_LEVEL)
@@ -436,7 +436,9 @@ class MainActivity : ComponentActivity() {
                                 withContext(Dispatchers.Main) {
                                     playerConnection?.player?.pause()
                                 }
-                                val scanner = LocalMediaScanner.getScanner(this@MainActivity, scannerImpl)
+                                val scanner = LocalMediaScanner.getScanner(
+                                    this@MainActivity, scannerImpl, SCANNER_OWNER_LM
+                                )
                                 val directoryStructure = scanner.scanLocal(
                                     database,
                                     scanPaths.split('\n'),
@@ -471,7 +473,7 @@ class MainActivity : ComponentActivity() {
                                     Toast.LENGTH_LONG
                                 ).show()
                             } finally {
-                                destroyScanner()
+                                destroyScanner(SCANNER_OWNER_LM)
                             }
 
                             // post scan actions
