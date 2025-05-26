@@ -127,8 +127,7 @@ android {
     }
 
     lint {
-        disable += "MissingTranslation"
-        disable += "ByteOrderMark"
+        lintConfig = file("app/lint.xml")
     }
 
     androidResources {
