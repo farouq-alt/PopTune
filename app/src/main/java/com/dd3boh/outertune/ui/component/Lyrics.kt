@@ -9,6 +9,7 @@
 
 package com.dd3boh.outertune.ui.component
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -73,11 +74,6 @@ import com.dd3boh.outertune.constants.PlayerBackgroundStyle
 import com.dd3boh.outertune.constants.PlayerBackgroundStyleKey
 import com.dd3boh.outertune.constants.ShowLyricsKey
 import com.dd3boh.outertune.db.entities.LyricsEntity.Companion.LYRICS_NOT_FOUND
-import com.dd3boh.outertune.lyrics.LyricsEntry
-import com.dd3boh.outertune.lyrics.LyricsEntry.Companion.HEAD_LYRICS_ENTRY
-import org.akanework.gramophone.logic.utils.LyricsUtils
-import org.akanework.gramophone.logic.utils.LyricsUtils.findCurrentLineIndex
-import org.akanework.gramophone.logic.utils.LyricsUtils.loadAndParseLyricsString
 import com.dd3boh.outertune.ui.component.shimmer.ShimmerHost
 import com.dd3boh.outertune.ui.component.shimmer.TextPlaceholder
 import com.dd3boh.outertune.ui.menu.LyricsMenu
@@ -87,8 +83,14 @@ import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
+import org.akanework.gramophone.logic.utils.LrcUtils.LrcParserOptions
+import org.akanework.gramophone.logic.utils.LrcUtils.LyricFormat
+import org.akanework.gramophone.logic.utils.LrcUtils.findCurrentLineIndex
+import org.akanework.gramophone.logic.utils.LrcUtils.loadAndParseLyricsString
+import org.akanework.gramophone.logic.utils.MediaStoreUtils.Lyric
 import kotlin.time.Duration.Companion.seconds
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun Lyrics(
     sliderPositionProvider: () -> Long?,
@@ -118,11 +120,22 @@ fun Lyrics(
         if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
     }
 
-    val lines: List<LyricsEntry> = remember(lyrics) {
-        if (lyrics == null || lyrics == LYRICS_NOT_FOUND) emptyList()
-        else if (lyrics.startsWith("[")) listOf(HEAD_LYRICS_ENTRY) +
-                loadAndParseLyricsString(lyrics, LyricsUtils.LrcParserOptions(lyricTrim.value, multilineLrc.value, "Unable to parse lyrics"))
-        else lyrics.lines().mapIndexed { index, line -> LyricsEntry(index * 100L, line) }
+    val lines: List<Lyric> = remember(lyrics) {
+        if (lyrics == null || lyrics == LYRICS_NOT_FOUND) {
+            emptyList()
+        } else if (lyrics.startsWith("[")) {
+            val result = ArrayList<Lyric>()
+            result.add(Lyric.HEAD_LYRICS_ENTRY)
+            val parserLyrics = loadAndParseLyricsString(
+                lyrics = lyrics,
+                parserOptions = LrcParserOptions(lyricTrim.value, multilineLrc.value, "Unable to parse lyrics"),
+                format = LyricFormat.LRC
+            )
+            result.addAll(parserLyrics)
+            result
+        } else {
+            lyrics.lines().mapIndexed { index, line -> Lyric(index * 100L, line) }
+        }
     }
     val isSynced = remember(lyrics) {
         !lyrics.isNullOrEmpty() && lyrics.startsWith("[")
@@ -274,8 +287,8 @@ fun Lyrics(
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable(enabled = isSynced) {
-                                playerConnection.player.seekTo(item.timeStamp)
+                            .clickable(enabled = isSynced && item.timeStamp != null) {
+                                playerConnection.player.seekTo(item.timeStamp ?: 0L)
                                 lastPreviewTime = 0L
                                 haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
                             }
