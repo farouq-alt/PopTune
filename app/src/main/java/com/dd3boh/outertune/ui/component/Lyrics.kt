@@ -41,6 +41,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -67,27 +68,28 @@ import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.DarkMode
 import com.dd3boh.outertune.constants.DarkModeKey
 import com.dd3boh.outertune.constants.LyricFontSizeKey
-import com.dd3boh.outertune.constants.LyricTrimKey
 import com.dd3boh.outertune.constants.LyricsTextPositionKey
-import com.dd3boh.outertune.constants.MultilineLrcKey
 import com.dd3boh.outertune.constants.PlayerBackgroundStyle
 import com.dd3boh.outertune.constants.PlayerBackgroundStyleKey
 import com.dd3boh.outertune.constants.ShowLyricsKey
-import com.dd3boh.outertune.db.entities.LyricsEntity.Companion.LYRICS_NOT_FOUND
 import com.dd3boh.outertune.ui.component.shimmer.ShimmerHost
 import com.dd3boh.outertune.ui.component.shimmer.TextPlaceholder
 import com.dd3boh.outertune.ui.menu.LyricsMenu
 import com.dd3boh.outertune.constants.LyricsPosition
+import com.dd3boh.outertune.db.entities.LyricsEntity
 import com.dd3boh.outertune.ui.utils.fadingEdge
 import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
-import org.akanework.gramophone.logic.utils.LrcUtils.LrcParserOptions
-import org.akanework.gramophone.logic.utils.LrcUtils.LyricFormat
+import kotlinx.coroutines.runBlocking
+import org.akanework.gramophone.logic.utils.LrcUtils
 import org.akanework.gramophone.logic.utils.LrcUtils.findCurrentLineIndex
-import org.akanework.gramophone.logic.utils.LrcUtils.loadAndParseLyricsString
 import org.akanework.gramophone.logic.utils.MediaStoreUtils.Lyric
+import org.akanework.gramophone.logic.utils.convertForLegacy
+import java.io.File
 import kotlin.time.Duration.Companion.seconds
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
@@ -107,12 +109,13 @@ fun Lyrics(
     val lyricsFontSize by rememberPreference(LyricFontSizeKey, 20)
 
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
-    val lyricsEntity by playerConnection.currentLyrics.collectAsState(initial = null)
-    val lyrics = remember(lyricsEntity) { lyricsEntity?.lyrics?.trim() }
-    val multilineLrc = rememberPreference(MultilineLrcKey, defaultValue = true)
-    val lyricTrim = rememberPreference(LyricTrimKey, defaultValue = false)
+    val lyricsModel by playerConnection.currentLyrics.collectAsState(initial = null)
+    val lyrics = lyricsModel.convertForLegacy()
 
-    val playerBackground by rememberEnumPreference(key = PlayerBackgroundStyleKey, defaultValue = PlayerBackgroundStyle.DEFAULT)
+    val playerBackground by rememberEnumPreference(
+        key = PlayerBackgroundStyleKey,
+        defaultValue = PlayerBackgroundStyle.DEFAULT
+    )
 
     val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
     val isSystemInDarkTheme = isSystemInDarkTheme()
@@ -120,25 +123,18 @@ fun Lyrics(
         if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
     }
 
-    val lines: List<Lyric> = remember(lyrics) {
-        if (lyrics == null || lyrics == LYRICS_NOT_FOUND) {
-            emptyList()
-        } else if (lyrics.startsWith("[")) {
-            val result = ArrayList<Lyric>()
-            result.add(Lyric.HEAD_LYRICS_ENTRY)
-            val parserLyrics = loadAndParseLyricsString(
-                lyrics = lyrics,
-                parserOptions = LrcParserOptions(lyricTrim.value, multilineLrc.value, "Unable to parse lyrics"),
-                format = LyricFormat.LRC
-            )
-            result.addAll(parserLyrics)
-            result
-        } else {
-            lyrics.lines().mapIndexed { index, line -> Lyric(index * 100L, line) }
-        }
+    val lines = remember { mutableStateListOf<Lyric>() }
+
+    val isSynced = remember(lyricsModel) {
+        !lyrics.isNullOrEmpty() && (lyrics.filterNot { it.timeStamp == null }.size) > 0
     }
-    val isSynced = remember(lyrics) {
-        !lyrics.isNullOrEmpty() && lyrics.startsWith("[")
+
+    LaunchedEffect(lyricsModel) {
+        lines.clear()
+        lyricsModel.convertForLegacy()?.let {
+            lines.add(Lyric.HEAD_LYRICS_ENTRY)
+            lines.addAll(it)
+        }
     }
 
     val textColor = when (playerBackground) {
@@ -166,8 +162,8 @@ fun Lyrics(
         mutableStateOf(false)
     }
 
-    LaunchedEffect(lyrics) {
-        if (lyrics.isNullOrEmpty() || !lyrics.startsWith("[")) {
+    LaunchedEffect(lyricsModel) {
+        if (lyrics.isNullOrEmpty() || !isSynced) {
             currentLineIndex = -1
             return@LaunchedEffect
         }
@@ -212,10 +208,12 @@ fun Lyrics(
             deferredCurrentLineIndex = currentLineIndex
             if (lastPreviewTime == 0L) {
                 if (isSeeking) {
-                    lazyListState.scrollToItem(currentLineIndex,
+                    lazyListState.scrollToItem(
+                        currentLineIndex,
                         with(density) { 36.dp.toPx().toInt() } + calculateOffset())
                 } else {
-                    lazyListState.animateScrollToItem(currentLineIndex,
+                    lazyListState.animateScrollToItem(
+                        currentLineIndex,
                         with(density) { 36.dp.toPx().toInt() } + calculateOffset())
                 }
             }
@@ -238,7 +236,11 @@ fun Lyrics(
                 .fadingEdge(vertical = 64.dp)
                 .nestedScroll(remember {
                     object : NestedScrollConnection {
-                        override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+                        override fun onPostScroll(
+                            consumed: Offset,
+                            available: Offset,
+                            source: NestedScrollSource
+                        ): Offset {
                             lastPreviewTime = System.currentTimeMillis()
                             return super.onPostScroll(consumed, available, source)
                         }
@@ -299,7 +301,7 @@ fun Lyrics(
             }
         }
 
-        if (lyrics == LYRICS_NOT_FOUND) {
+        if (lyrics.isNullOrEmpty()) {
             Text(
                 text = stringResource(R.string.lyrics_not_found),
                 fontSize = 20.sp,
@@ -336,7 +338,20 @@ fun Lyrics(
                     onClick = {
                         menuState.show {
                             LyricsMenu(
-                                lyricsProvider = { lyricsEntity },
+                                lyricsProvider = {
+                                    var dbLyric = runBlocking(Dispatchers.IO) {
+                                        playerConnection.service.database.lyrics(mediaMetadata.id).first()
+                                    }
+
+                                    // eye bleach to try to load local file for editor
+                                    if (dbLyric == null && mediaMetadata.localPath != null) {
+                                        LrcUtils.loadLyricsFile(File(mediaMetadata.localPath))?.let {
+                                            dbLyric = LyricsEntity(mediaMetadata.id, it)
+                                        }
+                                    }
+
+                                    dbLyric
+                                },
                                 mediaMetadataProvider = { mediaMetadata },
                                 onDismiss = menuState::dismiss
                             )

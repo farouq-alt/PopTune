@@ -286,6 +286,9 @@ interface DatabaseDao : SongsDao, AlbumsDao, ArtistsDao, PlaylistsDao, QueueDao 
     @Delete
     fun delete(lyrics: LyricsEntity)
 
+    @Query("DELETE FROM lyrics where id = :id")
+    fun deleteLyricById(id: String)
+
     @Delete
     fun delete(searchHistory: SearchHistory)
 
