@@ -10,10 +10,8 @@
 package com.dd3boh.outertune.ui.player
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.res.Configuration
 import android.graphics.drawable.BitmapDrawable
-import android.os.PowerManager
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -121,6 +119,7 @@ import com.dd3boh.outertune.constants.PlayerHorizontalPadding
 import com.dd3boh.outertune.constants.QueuePeekHeight
 import com.dd3boh.outertune.constants.ShowLyricsKey
 import com.dd3boh.outertune.constants.SwipeToSkip
+import com.dd3boh.outertune.extensions.isPowerSaver
 import com.dd3boh.outertune.extensions.metadata
 import com.dd3boh.outertune.extensions.tabMode
 import com.dd3boh.outertune.extensions.togglePlayPause
@@ -252,12 +251,10 @@ fun BottomSheetPlayer(
         mutableStateOf<List<Color>>(emptyList())
     }
 
-    val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-
 
     // gradient colours
     LaunchedEffect(mediaMetadata) {
-        if (playerBackground != PlayerBackgroundStyle.GRADIENT || powerManager.isPowerSaveMode) return@LaunchedEffect
+        if (playerBackground != PlayerBackgroundStyle.GRADIENT || context.isPowerSaver()) return@LaunchedEffect
 
         withContext(Dispatchers.IO) {
             if (mediaMetadata?.isLocal == true) {
@@ -607,7 +604,7 @@ fun BottomSheetPlayer(
         }
 
         AnimatedVisibility(
-            visible = !powerManager.isPowerSaveMode && state.isExpanded,
+            visible = !context.isPowerSaver() && state.isExpanded,
             enter = fadeIn(tween(500)),
             exit = fadeOut(tween(500))
         ) {

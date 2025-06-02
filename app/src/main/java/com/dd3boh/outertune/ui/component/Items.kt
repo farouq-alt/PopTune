@@ -9,8 +9,6 @@
 
 package com.dd3boh.outertune.ui.component
 
-import android.content.Context
-import android.os.PowerManager
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandIn
@@ -116,6 +114,7 @@ import com.dd3boh.outertune.db.entities.PlaylistEntity
 import com.dd3boh.outertune.db.entities.PlaylistSong
 import com.dd3boh.outertune.db.entities.RecentActivityEntity
 import com.dd3boh.outertune.db.entities.Song
+import com.dd3boh.outertune.extensions.isPowerSaver
 import com.dd3boh.outertune.extensions.toMediaItem
 import com.dd3boh.outertune.extensions.togglePlayPause
 import com.dd3boh.outertune.models.DirectoryTree
@@ -1509,7 +1508,7 @@ fun ItemThumbnail(
         }
 
         PlayingIndicatorBox(
-            isActive = isActive && !(context.getSystemService(Context.POWER_SERVICE) as PowerManager).isPowerSaveMode,
+            isActive = isActive && !context.isPowerSaver(),
             playWhenReady = isPlaying,
             color = if (albumIndex != null) MaterialTheme.colorScheme.onBackground else Color.White,
             modifier = Modifier
