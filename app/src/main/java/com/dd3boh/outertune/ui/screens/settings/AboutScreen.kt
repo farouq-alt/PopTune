@@ -199,7 +199,7 @@ fun AboutScreen(
         )
 
         Spacer(Modifier.height(64.dp))
-
+/*
         PreferenceEntry(
             title = { Text(stringResource(R.string.attribution_title)) },
             onClick = {
@@ -212,7 +212,7 @@ fun AboutScreen(
                 navController.navigate("settings/about/oss_licenses")
             }
         )
-
+*/
         // debug info
         if (showDebugInfo) {
             Spacer(Modifier.height(400.dp))
