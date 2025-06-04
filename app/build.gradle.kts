@@ -15,14 +15,14 @@ plugins {
 
 android {
     namespace = "com.dd3boh.outertune"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.dd3boh.outertune"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 60
-        versionName = "0.9.0-alpha1"
+        versionName = "0.9.0-alpha2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
