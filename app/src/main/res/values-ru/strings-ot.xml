@@ -150,7 +150,7 @@
     <string name="scanner_strict_file_name_title">Точное соответствие имен файлов</string>
     <string name="swipe_to_skip_title">Переключение треков свайпом</string>
     <string name="swipe_to_skip_description">Использовать свайпы в плеере для переключения между треками</string>
-    <string name="image_cache_tooltip">Перезапустите приложение, чтобы изменения вступили в силу</string>
+    <string name="restart_to_apply_changes">Перезапустите приложение, чтобы изменения вступили в силу</string>
     <string name="filter_arrangement">Порядок фильтров</string>
     <string name="android_auto">Android Auto</string>
     <string name="grp_account_sync">Аккаунт и синхронизация</string>
