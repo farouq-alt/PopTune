@@ -150,10 +150,6 @@ while also allowing users to translate our app as well. New, specific strings to
     <string name="flat_subfolders_title">Flatten subfolders</string>
     <string name="flat_subfolders_description">Disable to preserve the file structure as on disk</string>
 
-    <string name="import_innertune_tooltip">Restoring InnerTune backups are supported, albeit a possibility of anomalies due to technical limitations</string>
-    <string name="import_m3u">Import a playlist (m3u)</string>
-    <string name="m3u_import_playlist_failed">Failed to import playlist</string>
-
 <!-- Scanner settings -->
     <string name="auto_scanner_title">Scan automatically</string>
     <string name="auto_scanner_description">Automatically scan for songs when opening the app. This does not reload metadata of existing songs.</string>
@@ -222,7 +218,7 @@ while also allowing users to translate our app as well. New, specific strings to
     <string name="pause_remote_listen_history">Pause sharing listen history with YouTube Music</string>
 
 <!-- Backup and restore settings -->
-    <string name="m3u_import_song_failed">Could not import:</string>
+    <string name="import_innertune_tooltip">Restoring InnerTune backups are supported, albeit a possibility of anomalies due to technical limitations</string>
 
 <!-- Experimental settings -->
     <string name="experimental_settings_title">Experimental</string>
@@ -241,6 +237,14 @@ while also allowing users to translate our app as well. New, specific strings to
     <string name="oobe_ytm_sync_description">Account sync</string>
     <string name="oobe_local_playback_description">Local music playback</string>
     <string name="oobe_use_backup">I have a backup</string>
+
+<!-- M3U -->
+    <string name="import_failed_songs">Could not import</string>
+    <string name="import_success_songs">Successfully imported</string>
+    <string name="m3u_export">Export as M3U file</string>
+    <string name="m3u_import_playlist">Import a playlist (m3u)</string>
+    <string name="m3u_import_playlist_failed">Failed to import</string>
+    <string name="m3u_ytm_lookup">Search on YouTube Music for songs not found in the app database</string>
 
 <!-- Misc -->
     <string name="action_back">Back</string>

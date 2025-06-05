@@ -33,6 +33,8 @@ import com.dd3boh.outertune.constants.ListThumbnailSize
 import com.dd3boh.outertune.constants.SyncMode
 import com.dd3boh.outertune.constants.YtmSyncModeKey
 import com.dd3boh.outertune.db.entities.Playlist
+import com.dd3boh.outertune.db.entities.Song
+import com.dd3boh.outertune.models.toMediaMetadata
 import com.dd3boh.outertune.ui.component.CreatePlaylistDialog
 import com.dd3boh.outertune.ui.component.DefaultDialog
 import com.dd3boh.outertune.ui.component.InfoLabel
@@ -51,6 +53,7 @@ fun AddToPlaylistDialog(
     allowSyncing: Boolean = true,
     initialTextFieldValue: String? = null,
     onGetSong: suspend (Playlist) -> List<String>, // list of song ids. Songs should be inserted to database in this function.
+    songs: List<Song>? = null,
     onDismiss: () -> Unit,
 ) {
     val database = LocalDatabase.current
@@ -125,6 +128,10 @@ fun AddToPlaylistDialog(
                                 showDuplicateDialog = true
                             } else {
                                 onDismiss()
+                                songs?.forEach {
+                                    // import m3u needs this for importing remote songs
+                                    database.insert(it.toMediaMetadata())
+                                }
                                 database.addSongToPlaylist(playlist, songIds!!)
 
                                 if (!playlist.playlist.isLocal) {

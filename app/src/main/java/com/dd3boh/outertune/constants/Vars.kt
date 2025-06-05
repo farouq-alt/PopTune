@@ -25,6 +25,7 @@ const val MAX_CONCURRENT_JOBS = 4
  */
 const val SCANNER_OWNER_DL = 32
 const val SCANNER_OWNER_LM = 1
+const val SCANNER_OWNER_M3U = 2
 
 
 /**
