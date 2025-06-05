@@ -101,7 +101,6 @@ import com.dd3boh.outertune.ui.screens.Screens
 import com.dd3boh.outertune.ui.utils.MEDIA_PERMISSION_LEVEL
 import com.dd3boh.outertune.ui.utils.STORAGE_ROOT
 import com.dd3boh.outertune.ui.utils.backToMain
-import com.dd3boh.outertune.ui.utils.canNavigateUp
 import com.dd3boh.outertune.utils.fixFilePath
 import com.dd3boh.outertune.utils.numberToAlpha
 import com.dd3boh.outertune.utils.rememberEnumPreference
@@ -122,7 +121,7 @@ fun FolderScreen(
     navController: NavController,
     scrollBehavior: TopAppBarScrollBehavior,
     viewModel: LibraryFoldersViewModel = hiltViewModel(),
-    filterContent: @Composable (() -> Unit)? = null
+    libraryFilterContent: @Composable (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     val menuState = LocalMenuState.current
@@ -265,103 +264,105 @@ fun FolderScreen(
                 Column(
                     modifier = Modifier.background(MaterialTheme.colorScheme.background)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                    ) {
-                        // search
-                        IconButton(
-                            onClick = {
-                                isSearching = true
+                    Column {
+                        if (libraryFilterContent == null) {
+                            var showStoragePerm by remember {
+                                mutableStateOf(context.checkSelfPermission(MEDIA_PERMISSION_LEVEL) != PackageManager.PERMISSION_GRANTED)
                             }
-                        ) {
-                            Icon(
-                                Icons.Rounded.Search,
-                                contentDescription = null
-                            )
-                        }
-                        if (isSearching) {
-                            TextField(
-                                value = query,
-                                onValueChange = { query = it },
-                                placeholder = {
-                                    Text(
-                                        text = stringResource(R.string.search),
-                                        style = MaterialTheme.typography.titleLarge
-                                    )
-                                },
-                                singleLine = true,
-                                textStyle = MaterialTheme.typography.titleLarge,
-                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                                colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = Color.Transparent,
-                                    unfocusedContainerColor = Color.Transparent,
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent,
-                                    disabledIndicatorColor = Color.Transparent,
-                                ),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .focusRequester(focusRequester)
-                            )
-                        } else {
-                            // scanner icon
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(horizontal = 16.dp)
-                            ) {
-                                Icon(
-                                    Icons.Rounded.SdCard,
-                                    contentDescription = null
-                                )
+                            if (localLibEnable && showStoragePerm) {
                                 TextButton(
                                     onClick = {
-                                        navController.navigate("settings/local")
-                                    }
+                                        // allow user to hide error when clicked. This also makes the code a lot nicer too.
+                                        showStoragePerm = false
+                                        (context as MainActivity).permissionLauncher.launch(MEDIA_PERMISSION_LEVEL)
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(MaterialTheme.colorScheme.error)
                                 ) {
-                                    Text(text = stringResource(R.string.scanner_local_title))
+                                    Text(
+                                        text = stringResource(R.string.missing_media_permission_warning),
+                                        color = Color.White,
+                                        style = MaterialTheme.typography.bodyLarge
+                                    )
                                 }
                             }
+                        } else {
+                            libraryFilterContent()
                         }
 
-                        if (!isSearching) {
-                            // tree/list view
-                            ResizableIconButton(
-                                icon = if (flatSubfolders) Icons.AutoMirrored.Rounded.List else Icons.Rounded.AccountTree,
-                                onClick = {
-                                    onFlatSubfoldersChange(!flatSubfolders)
-                                }
-                            )
-                        }
-                    }
-
-                    filterContent?.let {
-                        var showStoragePerm by remember {
-                            mutableStateOf(context.checkSelfPermission(MEDIA_PERMISSION_LEVEL) != PackageManager.PERMISSION_GRANTED)
-                        }
-                        if (localLibEnable && showStoragePerm
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
                         ) {
-                            TextButton(
+                            // search
+                            IconButton(
                                 onClick = {
-                                    // allow user to hide error when clicked. This also makes the code a lot nicer too.
-                                    showStoragePerm = false
-                                    (context as MainActivity).permissionLauncher.launch(MEDIA_PERMISSION_LEVEL)
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.error)
+                                    isSearching = true
+                                }
                             ) {
-                                Text(
-                                    text = stringResource(R.string.missing_media_permission_warning),
-                                    color = Color.White,
-                                    style = MaterialTheme.typography.bodyLarge
+                                Icon(
+                                    Icons.Rounded.Search,
+                                    contentDescription = null
+                                )
+                            }
+                            if (isSearching) {
+                                TextField(
+                                    value = query,
+                                    onValueChange = { query = it },
+                                    placeholder = {
+                                        Text(
+                                            text = stringResource(R.string.search),
+                                            style = MaterialTheme.typography.titleLarge
+                                        )
+                                    },
+                                    singleLine = true,
+                                    textStyle = MaterialTheme.typography.titleLarge,
+                                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                                    colors = TextFieldDefaults.colors(
+                                        focusedContainerColor = Color.Transparent,
+                                        unfocusedContainerColor = Color.Transparent,
+                                        focusedIndicatorColor = Color.Transparent,
+                                        unfocusedIndicatorColor = Color.Transparent,
+                                        disabledIndicatorColor = Color.Transparent,
+                                    ),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .focusRequester(focusRequester)
+                                )
+                            } else {
+                                // scanner icon
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(horizontal = 16.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Rounded.SdCard,
+                                        contentDescription = null
+                                    )
+                                    TextButton(
+                                        onClick = {
+                                            navController.navigate("settings/local")
+                                        }
+                                    ) {
+                                        Text(text = stringResource(R.string.scanner_local_title))
+                                    }
+                                }
+                            }
+
+                            if (!isSearching) {
+                                // tree/list view
+                                ResizableIconButton(
+                                    icon = if (flatSubfolders) Icons.AutoMirrored.Rounded.List else Icons.Rounded.AccountTree,
+                                    onClick = {
+                                        onFlatSubfoldersChange(!flatSubfolders)
+                                    }
                                 )
                             }
                         }
-                        it()
                     }
 
                     Row(
@@ -429,7 +430,8 @@ fun FolderScreen(
                             subtitle = null,
                             modifier = Modifier
                                 .combinedClickable {
-                                    val route = Screens.Folders.route + "/" + folder.getFullSquashedDir().replace('/', ';')
+                                    val route =
+                                        Screens.Folders.route + "/" + folder.getFullSquashedDir().replace('/', ';')
                                     navController.navigate(route)
                                 }
                                 .animateItem(),
@@ -514,51 +516,51 @@ fun FolderScreen(
         )
 
         TopAppBar(title = {
-                Column {
-                    val title = currDir.currentDir.substringAfterLast('/')
-                    val subtitle = currDir.getFullPath().substringBeforeLast('/')
-                    Text(
-                        text = if (currDir.currentDir == "storage") {
-                            stringResource(R.string.local_player_settings_title)
-                        } else {
-                            title
-                        },
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1
-                    )
+            Column {
+                val title = currDir.currentDir.substringAfterLast('/')
+                val subtitle = currDir.getFullPath().substringBeforeLast('/')
+                Text(
+                    text = if (currDir.currentDir == "storage") {
+                        stringResource(R.string.local_player_settings_title)
+                    } else {
+                        title
+                    },
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
+                )
 
-                    if (!subtitle.isBlank()) {
-                        Text(
-                            text = subtitle,
-                            color = MaterialTheme.colorScheme.secondary,
-                            style = MaterialTheme.typography.bodyMedium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-            }, navigationIcon = {
-                IconButton(
-                    onClick = {
-                        if (isSearching) {
-                            isSearching = false
-                            query = TextFieldValue()
-                        } else {
-                            navController.navigateUp()
-                        }
-                    },
-                    onLongClick = {
-                        if (!isSearching) {
-                            navController.backToMain()
-                        }
-                    },
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = null
+                if (!subtitle.isBlank()) {
+                    Text(
+                        text = subtitle,
+                        color = MaterialTheme.colorScheme.secondary,
+                        style = MaterialTheme.typography.bodyMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
-            }, windowInsets = TopBarInsets, scrollBehavior = scrollBehavior)
+            }
+        }, navigationIcon = {
+            IconButton(
+                onClick = {
+                    if (isSearching) {
+                        isSearching = false
+                        query = TextFieldValue()
+                    } else {
+                        navController.navigateUp()
+                    }
+                },
+                onLongClick = {
+                    if (!isSearching) {
+                        navController.backToMain()
+                    }
+                },
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Rounded.ArrowBack,
+                    contentDescription = null
+                )
+            }
+        }, windowInsets = TopBarInsets, scrollBehavior = scrollBehavior)
 
         FloatingFooter(inSelectMode) {
             SelectHeader(
