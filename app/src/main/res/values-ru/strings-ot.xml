@@ -86,7 +86,7 @@
     <string name="local_library_enable_title">Включить локальные медиа</string>
     <string name="local_library_enable_description">Отключение скроет локальную медиатеку в приложении</string>
     <string name="flat_subfolders_description">Отключите, чтобы сохранить структуру папок как на диске</string>
-    <string name="m3u_import_playlist_failed">Не удалось импортировать плейлист</string>
+    <string name="m3u_import_playlist_failed">Не удалось импортировать</string>
     <string name="auto_scanner_title">Сканировать автоматически</string>
     <string name="scanner_progress_scanning">Сканирование…</string>
     <string name="scanner_warning">По умолчанию сканер НЕ будет обновлять метаданные существующих треков, если вы не укажете иное выше. В зависимости от размера вашей медиатеки, это может занять некоторое время.</string>
@@ -170,4 +170,19 @@
     <string name="playlist_missing_note">Не отображаются плейлисты? Нажмите здесь, чтобы переключить синхронизацию в режим чтения-записи в настройках</string>
     <string name="grp_behavior">Поведение</string>
     <string name="library_empty">Здесь появится содержимое вашей библиотеки</string>
+    <string name="oss_licenses_title">Лицензии открытого кода</string>
+    <string name="tablet_ui_title">Принудительно использовать UI планшета</string>
+    <string name="lyrics_karaoke_title">Слова песни в стиле караоке.</string>
+    <string name="lyrics_karaoke_description">Задействовать синхронизацию слов песни слово за словом. Требует поддержку формата слов песни.</string>
+    <string name="lyrics_karaoke_hz_title">Настроить скорость обновления слов песни в караоке</string>
+    <string name="speed_very_slow">Очень медленно</string>
+    <string name="speed_fast">Быстро</string>
+    <string name="speed_very_fast">Очень быстро</string>
+    <string name="m3u_export">Экспортировано как файл M3U</string>
+    <string name="m3u_ytm_lookup">Поиск в YouTube Music песен, не найденных в базе приложения</string>
+    <string name="attribution_title">Атрибуция</string>
+    <string name="speed_slow">Медленно</string>
+    <string name="speed_medium">Средне</string>
+    <string name="tablet_ui_title_description">Задействовать горизонтально ориентированный интерфейс, оптимизированный для больших экранов, независимо от текущего размера экрана</string>
+    <string name="import_success_songs">Успешно импортировано</string>
 </resources>
