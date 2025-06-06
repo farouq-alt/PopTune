@@ -170,4 +170,13 @@
     <string name="playlist_missing_note">Немає списків відтворення? Натисніть тут, щоб увімкнути режим синхронізації читання та запису в налаштуваннях</string>
     <string name="grp_behavior">Поведінка</string>
     <string name="library_empty">Вміст вашої бібліотеки відображатиметься тут</string>
+    <string name="tablet_ui_title">Примусово налаштовувати інтерфейс планшета</string>
+    <string name="import_success_songs">Успішно імпортовано</string>
+    <string name="lyrics_karaoke_hz_title">Налаштуйте швидкість оновлення текстів пісень караоке-пісень</string>
+    <string name="m3u_export">Експортувати як файл M3U</string>
+    <string name="lyrics_karaoke_title">Тексти пісень у стилі караоке.</string>
+    <string name="attribution_title">Атрибуція</string>
+    <string name="oss_licenses_title">Ліцензії з відкритим кодом</string>
+    <string name="lyrics_karaoke_description">Дозволяє синхронізувати тексти пісень послівно. Потрібна підтримка формату текстів пісень.</string>
+    <string name="tablet_ui_title_description">Увімкнути альбомний інтерфейс, оптимізований для більших екранів, незалежно від поточного розміру екрана</string>
 </resources>
