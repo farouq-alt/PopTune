@@ -60,7 +60,7 @@
     <string name="flat_subfolders_title">Зрівняти підтеки</string>
     <string name="flat_subfolders_description">Вимкніть, щоб зберегти структуру файлів як на диску</string>
     <string name="m3u_import_playlist">Імпортувати плейлист (m3u)</string>
-    <string name="m3u_import_playlist_failed">Не вдалося імпортувати плейлист</string>
+    <string name="m3u_import_playlist_failed">Не вдалося імпортувати</string>
     <string name="scan_paths_title">Налаштовуємо місця сканування…</string>
     <string name="scan_paths_tooltip">Всі підкаталоги також будуть змінені</string>
     <string name="scan_paths_add_folder">Додати нову теку</string>
