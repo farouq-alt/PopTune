@@ -232,7 +232,6 @@ import com.dd3boh.outertune.ui.theme.ColorSaver
 import com.dd3boh.outertune.ui.theme.DefaultThemeColor
 import com.dd3boh.outertune.ui.theme.OuterTuneTheme
 import com.dd3boh.outertune.ui.theme.extractThemeColor
-import com.dd3boh.outertune.ui.utils.DEFAULT_SCAN_PATH
 import com.dd3boh.outertune.ui.utils.MEDIA_PERMISSION_LEVEL
 import com.dd3boh.outertune.ui.utils.Updater
 import com.dd3boh.outertune.ui.utils.appBarScrollBehavior
@@ -408,7 +407,7 @@ class MainActivity : ComponentActivity() {
                 key = ScannerImplKey,
                 defaultValue = ScannerImpl.TAGLIB
             )
-            val (scanPaths) = rememberPreference(ScanPathsKey, defaultValue = DEFAULT_SCAN_PATH)
+            val (scanPaths) = rememberPreference(ScanPathsKey, defaultValue = "")
             val (excludedScanPaths) = rememberPreference(ExcludedScanPathsKey, defaultValue = "")
             val (strictExtensions) = rememberPreference(ScannerStrictExtKey, defaultValue = false)
             val (lookupYtmArtists) = rememberPreference(LookupYtmArtistsKey, defaultValue = true)
@@ -436,16 +435,8 @@ class MainActivity : ComponentActivity() {
                                 val scanner = LocalMediaScanner.getScanner(
                                     this@MainActivity, scannerImpl, SCANNER_OWNER_LM
                                 )
-                                val directoryStructure = scanner.scanLocal(
-                                    database,
-                                    scanPaths.split('\n'),
-                                    excludedScanPaths.split('\n'),
-                                    pathsOnly = true
-                                ).value
-                                scanner.quickSync(
-                                    database, directoryStructure.toList(), scannerSensitivity,
-                                    strictExtensions,
-                                )
+                                val uris = scanner.scanLocal(scanPaths, excludedScanPaths,)
+                                scanner.quickSync(database, uris, scannerSensitivity, strictExtensions)
 
                                 // start artist linking job
                                 if (lookupYtmArtists && !scannerActive.value) {
