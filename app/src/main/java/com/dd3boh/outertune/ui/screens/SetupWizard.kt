@@ -8,10 +8,15 @@
 
 package com.dd3boh.outertune.ui.screens
 
+import android.content.Intent
+import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +41,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
@@ -55,6 +61,7 @@ import androidx.compose.material.icons.rounded.RadioButtonChecked
 import androidx.compose.material.icons.rounded.RadioButtonUnchecked
 import androidx.compose.material.icons.rounded.SdCard
 import androidx.compose.material.icons.rounded.Sync
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -74,6 +81,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -94,6 +102,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.dd3boh.outertune.BuildConfig
+import com.dd3boh.outertune.LocalDownloadUtil
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.AutomaticScannerKey
 import com.dd3boh.outertune.constants.ContentCountryKey
@@ -102,6 +111,7 @@ import com.dd3boh.outertune.constants.CountryCodeToName
 import com.dd3boh.outertune.constants.DEFAULT_ENABLED_TABS
 import com.dd3boh.outertune.constants.DarkMode
 import com.dd3boh.outertune.constants.DarkModeKey
+import com.dd3boh.outertune.constants.DownloadPathKey
 import com.dd3boh.outertune.constants.EnabledTabsKey
 import com.dd3boh.outertune.constants.InnerTubeCookieKey
 import com.dd3boh.outertune.constants.LanguageCodeToName
@@ -112,8 +122,13 @@ import com.dd3boh.outertune.constants.OOBE_VERSION
 import com.dd3boh.outertune.constants.OobeStatusKey
 import com.dd3boh.outertune.constants.PureBlackKey
 import com.dd3boh.outertune.constants.SYSTEM_DEFAULT
+import com.dd3boh.outertune.constants.ScanPathsKey
+import com.dd3boh.outertune.constants.ThumbnailCornerRadius
+import com.dd3boh.outertune.ui.component.ActionPromptDialog
 import com.dd3boh.outertune.ui.component.EnumListPreference
+import com.dd3boh.outertune.ui.component.InfoLabel
 import com.dd3boh.outertune.ui.component.ListPreference
+import com.dd3boh.outertune.ui.component.PreferenceEntry
 import com.dd3boh.outertune.ui.component.PreferenceGroupTitle
 import com.dd3boh.outertune.ui.component.ResizableIconButton
 import com.dd3boh.outertune.ui.component.SettingsClickToReveal
@@ -124,8 +139,12 @@ import com.dd3boh.outertune.ui.screens.settings.fragments.LocalScannerExtraFrag
 import com.dd3boh.outertune.ui.screens.settings.fragments.LocalScannerFrag
 import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
+import com.dd3boh.outertune.utils.scanners.stringFromUriList
+import com.dd3boh.outertune.utils.scanners.uriListFromString
 import com.zionhuang.innertube.YouTube
 import com.zionhuang.innertube.utils.parseCookieString
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -134,6 +153,7 @@ fun SetupWizard(
     navController: NavController,
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
     val layoutDirection = LocalLayoutDirection.current
     val uriHandler = LocalUriHandler.current
@@ -575,6 +595,140 @@ fun SetupWizard(
 
                     // downloads
                     4 -> {
+                        val downloadUtil = LocalDownloadUtil.current
+                        val (downloadPath, onDownloadPathChange) = rememberPreference(DownloadPathKey, "")
+                        val (scanPaths, onScanPathsChange) = rememberPreference(ScanPathsKey, defaultValue = "")
+
+                        var showDlPathDialog: Boolean by remember {
+                            mutableStateOf(false)
+                        }
+
+                        Text(
+                            text = "Download location", //TODO: str resource
+                            style = MaterialTheme.typography.headlineLarge,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp, vertical = 8.dp)
+                        )
+
+                        PreferenceEntry(
+                            title = { Text(stringResource(R.string.dl_main_path_title)) },
+                            onClick = {
+                                showDlPathDialog = true
+                            },
+                        )
+                        //TODO: string res
+                        InfoLabel("Selecting a folder for song downloads is required for song downloading to work. If you wish to change this folder, or add additional folders, you can do so later on in settings")
+
+
+                        if (showDlPathDialog) {
+                            val (downloadPath, onDownloadPathChange) = rememberPreference(DownloadPathKey, "")
+                            var tempFilePath by remember {
+                                mutableStateOf<Uri?>(null)
+                            }
+                            LaunchedEffect(downloadPath) {
+                                tempFilePath = uriListFromString(downloadPath).firstOrNull()
+                            }
+
+                            ActionPromptDialog(
+                                titleBar = {
+                                    Text(
+                                        text = stringResource(R.string.dl_main_path_title),
+                                        style = MaterialTheme.typography.titleLarge,
+                                    )
+                                },
+                                onDismiss = {
+                                    showDlPathDialog = false
+                                    tempFilePath = null
+                                },
+                                onConfirm = {
+                                    tempFilePath?.let { f ->
+                                        val uris = stringFromUriList(listOfNotNull(f))
+                                        onDownloadPathChange(uris)
+                                    }
+
+                                    showDlPathDialog = false
+                                    tempFilePath = null
+
+                                    coroutineScope.launch {
+                                        delay(1000)
+                                        downloadUtil.cd()
+                                    }
+                                },
+                                onReset = {
+                                    tempFilePath = null
+                                },
+                                onCancel = {
+                                    showDlPathDialog = false
+                                    tempFilePath = null
+                                },
+                                isInputValid = uriListFromString(scanPaths).none {
+                                    // download path cannot a scan path, or a subdir of a scan path
+                                    tempFilePath.toString().length <= it.toString().length && tempFilePath.toString()
+                                        .contains(it.toString())
+                                }
+                            ) {
+
+                                val dirPickerLauncher = rememberLauncherForActivityResult(
+                                    ActivityResultContracts.OpenDocumentTree()
+                                ) { uri ->
+                                    if (uri?.path != null) {
+                                        // Take persistable URI permission
+                                        val contentResolver = context.contentResolver
+                                        val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                                        contentResolver.takePersistableUriPermission(uri, takeFlags)
+
+                                        tempFilePath = uri
+                                    }
+                                }
+
+                                val valid = uriListFromString(scanPaths).none {
+                                    // download path cannot a scan path, or a subdir of a scan path
+                                    tempFilePath.toString().length <= it.toString().length && tempFilePath.toString()
+                                        .contains(it.toString())
+                                }
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp)
+                                        .border(
+                                            2.dp,
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                                            RoundedCornerShape(ThumbnailCornerRadius)
+                                        )
+                                        .background(if (valid) Color.Transparent else MaterialTheme.colorScheme.errorContainer)
+                                ) {
+                                    tempFilePath?.let {
+                                        Text(
+                                            text = it.toString(),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            modifier = Modifier.padding(8.dp)
+                                        )
+                                    }
+                                }
+
+                                // add folder button
+                                Column {
+                                    Button(onClick = { dirPickerLauncher.launch(null) }) {
+                                        Text(stringResource(R.string.scan_paths_add_folder))
+                                    }
+
+                                    InfoLabel(
+                                        text = stringResource(R.string.scan_paths_tooltip),
+                                        modifier = Modifier.padding(vertical = 16.dp)
+                                    )
+
+                                    if (!valid) {
+                                        InfoLabel(
+                                            text = stringResource(R.string.scanner_rejected_dir),
+                                            isError = true,
+                                            modifier = Modifier.padding(top = 8.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     // exiting
