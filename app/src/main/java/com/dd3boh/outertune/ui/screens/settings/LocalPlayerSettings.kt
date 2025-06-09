@@ -8,6 +8,7 @@
 
 package com.dd3boh.outertune.ui.screens.settings
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -15,18 +16,23 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Autorenew
+import androidx.compose.material.icons.rounded.SdCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.dd3boh.outertune.LocalPlayerAwareWindowInsets
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.AutomaticScannerKey
+import com.dd3boh.outertune.constants.DEFAULT_ENABLED_TABS
+import com.dd3boh.outertune.constants.EnabledTabsKey
+import com.dd3boh.outertune.constants.LocalLibraryEnableKey
 import com.dd3boh.outertune.constants.TopBarInsets
 import com.dd3boh.outertune.ui.component.IconButton
 import com.dd3boh.outertune.ui.component.PreferenceGroupTitle
@@ -44,30 +50,52 @@ fun LocalPlayerSettings(
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
     val (autoScan, onAutoScanChange) = rememberPreference(AutomaticScannerKey, defaultValue = false)
+    val (enabledTabs, onEnabledTabsChange) = rememberPreference(EnabledTabsKey, defaultValue = DEFAULT_ENABLED_TABS)
+    val (localLibEnable, onLocalLibEnableChange) = rememberPreference(LocalLibraryEnableKey, defaultValue = true)
+
+    LaunchedEffect(localLibEnable) {
+        val containsFolders = enabledTabs.contains('F')
+        if (localLibEnable && !containsFolders) {
+            onEnabledTabsChange(enabledTabs + "F")
+        } else if (!localLibEnable && containsFolders) {
+            onEnabledTabsChange(enabledTabs.filterNot { it == 'F' })
+        }
+    }
 
     Column(
         Modifier
             .windowInsetsPadding(LocalPlayerAwareWindowInsets.current)
             .verticalScroll(rememberScrollState())
     ) {
-        // automatic scanner
         SwitchPreference(
-            title = { Text(stringResource(R.string.auto_scanner_title)) },
-            description = stringResource(R.string.auto_scanner_description),
-            icon = { Icon(Icons.Rounded.Autorenew, null) },
-            checked = autoScan,
-            onCheckedChange = onAutoScanChange
+            title = { Text(stringResource(R.string.local_library_enable_title)) },
+            description = stringResource(R.string.local_library_enable_description),
+            icon = { Icon(Icons.Rounded.SdCard, null) },
+            checked = localLibEnable,
+            onCheckedChange = onLocalLibEnableChange
         )
 
-        PreferenceGroupTitle(
-            title = stringResource(R.string.grp_manual_scanner)
-        )
-        LocalScannerFrag()
+        AnimatedVisibility(localLibEnable) {
 
-        PreferenceGroupTitle(
-            title = stringResource(R.string.grp_extra_scanner_settings)
-        )
-        LocalScannerExtraFrag()
+            // automatic scanner
+            SwitchPreference(
+                title = { Text(stringResource(R.string.auto_scanner_title)) },
+                description = stringResource(R.string.auto_scanner_description),
+                icon = { Icon(Icons.Rounded.Autorenew, null) },
+                checked = autoScan,
+                onCheckedChange = onAutoScanChange
+            )
+
+            PreferenceGroupTitle(
+                title = stringResource(R.string.grp_manual_scanner)
+            )
+            LocalScannerFrag()
+
+            PreferenceGroupTitle(
+                title = stringResource(R.string.grp_extra_scanner_settings)
+            )
+            LocalScannerExtraFrag()
+        }
     }
 
     TopAppBar(

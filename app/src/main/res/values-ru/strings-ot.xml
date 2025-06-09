@@ -130,11 +130,8 @@
     <string name="scan_paths_add_folder">Добавить новую папку</string>
     <string name="scanner_manual_btn">Синхронизировать вручную</string>
     <string name="scanner_ytm_link_fail">Не удалось связать с исполнителем на YouTube</string>
-    <string name="oobe_local_scan_tooltip">Нажмите здесь для сканирования песен</string>
-    <string name="oobe_ad_free_description">Проигрывание без рекламы</string>
     <string name="queues_empty">Нет очередей</string>
     <string name="scanner_progress_complete">Сканирование завершено</string>
-    <string name="oobe_local_playback_description">Воспроизведение локальной музыки</string>
     <string name="queues_title">Очереди</string>
     <string name="grp_general">Основные</string>
     <string name="tab_arrangement_home_required">Вкладка «Главная» обязательна.</string>
@@ -143,9 +140,7 @@
     <string name="import_innertune_tooltip">Восстановление резервных копий InnerTune поддерживается, однако возможны аномалии из-за технических ограничений</string>
     <string name="lyrics_prefer_local_description">Отдавать приоритет локальным файлам текстов песен перед использованием облачных источников. Отключите эту опцию, чтобы отдать приоритет облачным источникам</string>
     <string name="auto_scanner_description">Автоматически искать песни при открытии приложения. Метаданные существующих песен обновлены не будут.</string>
-    <string name="oobe_ytm_sync_description">Синхронизация с аккаунтом</string>
     <string name="scanner_btn_idle">Сканировать</string>
-    <string name="oobe_ytm_content_description">YouTube Music всегда под рукой</string>
     <string name="scan_paths_tooltip">Все подкаталоги также будут затронуты</string>
     <string name="scanner_strict_file_name_title">Точное соответствие имен файлов</string>
     <string name="swipe_to_skip_title">Переключение треков свайпом</string>

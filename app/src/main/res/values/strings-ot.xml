@@ -157,6 +157,7 @@ while also allowing users to translate our app as well. New, specific strings to
     <string name="auto_scanner_description">Automatically scan for songs when opening the app. This does not reload metadata of existing songs.</string>
 
     <string name="scan_paths_title">Configure scan locations…</string>
+    <string name="scan_paths_description">Select folders on your local storage to scan for songs</string>
     <string name="scan_paths_tooltip">All subdirectories will also be affected</string>
     <string name="scan_paths_add_folder">Add new folder</string>
     <string name="scan_paths_incl">Scan paths</string>
@@ -213,6 +214,8 @@ while also allowing users to translate our app as well. New, specific strings to
     <string name="dl_migrate_description">Move downloads from the app\'s internal storage to the device\'s external storage</string>
     <string name="dl_migrate_confirm">This will migrate ALL internal downloads to \"%s\", and this action cannot be undone. Continue?</string>
     <string name="dl_main_path_title">Configure download directory…</string>
+    <string name="dl_main_path_description">Select downloads storage location</string>
+    <string name="dl_oobe_tooltip">To download songs, you need to choose a folder first. You can change or add folders later in Settings. To turn disable song downloading, just remove all selected folders</string>
     <string name="dl_rescan_title">Rescan download folders…</string>
     <string name="dl_rescan_description">Update the database and refresh the download registry if any files or folders have changed</string>
 	<string name="dl_rescan_confirm">Rescan all download folders now? This can take a few minutes depending on the size of your library.</string>
@@ -234,13 +237,36 @@ while also allowing users to translate our app as well. New, specific strings to
 
 <!-- Setup wizard -->
     <string name="oobe_welcome_message">Welcome to OuterTune</string>
-    <string name="oobe_local_scan_tooltip">Click here to scan for songs</string>
-    <string name="oobe_complete">Setup complete</string>
-    <string name="oobe_ytm_content_description">YouTube Music at your fingertips</string>
-    <string name="oobe_ad_free_description">Ad-free playback</string>
-    <string name="oobe_ytm_sync_description">Account sync</string>
-    <string name="oobe_local_playback_description">Local music playback</string>
+
+    <!-- Landing -->
+    <string name="oobe_ytm_integration">YouTube Music Integration</string>
+    <string name="oobe_ytm_integration_description">Access your favorite tracks seamlessly</string>
+    <string name="oobe_ad_free_exp">AD-Free Experience</string>
+    <string name="oobe_ad_free_exp_description">Enjoy uninterrupted music playback</string>
+    <string name="oobe_local_music_support">Extensive Local Music Support</string>
+    <string name="oobe_local_music_support_description">Play your music files (ex. MP3, OGG, FLAC, etc.)</string>
+    <string name="oobe_cross_platform_sync">Cross-Platform Sync</string>
+    <string name="oobe_cross_platform_sync_description">Keep your music in harmony across devices</string>
     <string name="oobe_use_backup">I have a backup</string>
+
+    <!-- Interface setup page -->
+    <string name="oobe_interface_subtitle">Customize how OuterTune looks and what content it shows you.</string>
+
+    <!-- Account setup page -->
+    <string name="oobe_ytm_logon_title">Account</string>
+    <string name="oobe_ytm_logon_subtitle">Sign in to your YouTube Music account to sync and access private account content. This is optional.</string>
+
+    <!-- Local media setup -->
+    <string name="oobe_local_media_title">Local media</string>
+    <string name="oobe_local_media_subtitle">Choose folders that contain your music. We\'ll scan them for songs to import.</string>
+
+    <!-- Downloads -->
+    <string name="oobe_downloads_title">Song downloads</string>
+    <string name="oobe_downloads_subtitle">Choose a folder where downloaded songs will be saved.</string>
+
+    <!-- Setup complete -->
+    <string name="oobe_complete_title">You\'re All Set!</string>
+    <string name="oobe_complete">OuterTune is set up and ready to use. Explore your music, discover new tracks, and enjoy the experience!</string>
 
 <!-- M3U -->
     <string name="import_failed_songs">Could not import</string>

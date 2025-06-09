@@ -57,7 +57,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat.requestPermissions
-import androidx.core.net.toUri
 import com.dd3boh.outertune.LocalDatabase
 import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.R
@@ -147,6 +146,11 @@ fun ColumnScope.LocalScannerFrag() {
         LocalDateTime.now().atOffset(ZoneOffset.UTC).toEpochSecond()
     )
 
+    LaunchedEffect(scanPaths) {
+        if (scanPaths.isBlank()) {
+            showAddFolderDialog = true
+        }
+    }
 
     // scanner
     Row(
@@ -154,7 +158,6 @@ fun ColumnScope.LocalScannerFrag() {
             .fillMaxWidth()
             .padding(horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically, // WHY WON'T YOU CENTER
-
     ) {
         Button(
             onClick = {
@@ -503,6 +506,13 @@ fun ColumnScope.LocalScannerFrag() {
                 contentResolver.takePersistableUriPermission(uri, takeFlags)
                 tempScanPaths.add(uri)
             }
+
+            Text(
+                text = stringResource(R.string.scan_paths_description),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
+            Spacer(Modifier.padding(vertical = 8.dp))
 
             // folders list
             Column(
