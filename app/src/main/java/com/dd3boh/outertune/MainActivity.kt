@@ -146,7 +146,6 @@ import com.dd3boh.outertune.constants.DynamicThemeKey
 import com.dd3boh.outertune.constants.ENABLE_UPDATE_CHECKER
 import com.dd3boh.outertune.constants.EnabledTabsKey
 import com.dd3boh.outertune.constants.ExcludedScanPathsKey
-import com.dd3boh.outertune.constants.FirstSetupPassed
 import com.dd3boh.outertune.constants.LastVersionKey
 import com.dd3boh.outertune.constants.LibraryFilterKey
 import com.dd3boh.outertune.constants.LocalLibraryEnableKey
@@ -154,10 +153,13 @@ import com.dd3boh.outertune.constants.LookupYtmArtistsKey
 import com.dd3boh.outertune.constants.MiniPlayerHeight
 import com.dd3boh.outertune.constants.NavigationBarAnimationSpec
 import com.dd3boh.outertune.constants.NavigationBarHeight
+import com.dd3boh.outertune.constants.OOBE_VERSION
+import com.dd3boh.outertune.constants.OobeStatusKey
 import com.dd3boh.outertune.constants.PauseSearchHistoryKey
 import com.dd3boh.outertune.constants.PlayerBackgroundStyle
 import com.dd3boh.outertune.constants.PlayerBackgroundStyleKey
 import com.dd3boh.outertune.constants.PureBlackKey
+import com.dd3boh.outertune.constants.SCANNER_OWNER_LM
 import com.dd3boh.outertune.constants.ScanPathsKey
 import com.dd3boh.outertune.constants.ScannerImpl
 import com.dd3boh.outertune.constants.ScannerImplKey
@@ -216,9 +218,8 @@ import com.dd3boh.outertune.ui.screens.search.OnlineSearchScreen
 import com.dd3boh.outertune.ui.screens.settings.AboutScreen
 import com.dd3boh.outertune.ui.screens.settings.AccountSyncSettings
 import com.dd3boh.outertune.ui.screens.settings.AppearanceSettings
-import com.dd3boh.outertune.ui.screens.settings.BackupAndRestore
-import com.dd3boh.outertune.constants.SCANNER_OWNER_LM
 import com.dd3boh.outertune.ui.screens.settings.AttributionScreen
+import com.dd3boh.outertune.ui.screens.settings.BackupAndRestore
 import com.dd3boh.outertune.ui.screens.settings.ExperimentalSettings
 import com.dd3boh.outertune.ui.screens.settings.InterfaceSettings
 import com.dd3boh.outertune.ui.screens.settings.LibrariesScreen
@@ -395,7 +396,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            val (firstSetupPassed) = rememberPreference(FirstSetupPassed, defaultValue = false)
+            val (oobeStatus) = rememberPreference(OobeStatusKey, defaultValue = 0)
             val (localLibEnable) = rememberPreference(LocalLibraryEnableKey, defaultValue = true)
 
             // auto scanner
@@ -425,7 +426,7 @@ class MainActivity : ComponentActivity() {
                 CoroutineScope(Dispatchers.IO).launch {
                     val perms = checkSelfPermission(MEDIA_PERMISSION_LEVEL)
                     // Check if the permissions for local media access
-                    if (!scannerActive.value && autoScan && firstSetupPassed && localLibEnable) {
+                    if (!scannerActive.value && autoScan && oobeStatus >= OOBE_VERSION && localLibEnable) {
                         if (perms == PackageManager.PERMISSION_GRANTED) {
                             // equivalent to (quick scan)
                             try {
@@ -1496,7 +1497,7 @@ class MainActivity : ComponentActivity() {
                                 navHost()
                                 searchBar()
                                 navRail()
-                                if (firstSetupPassed) {
+                                if (oobeStatus >= OOBE_VERSION) {
                                     BottomSheetPlayer(
                                         state = playerBottomSheetState,
                                         navController = navController
@@ -1534,7 +1535,7 @@ class MainActivity : ComponentActivity() {
 
                             // Setup wizard
                             LaunchedEffect(Unit) {
-                                if (!firstSetupPassed) {
+                                if (oobeStatus < OOBE_VERSION) {
                                     navController.navigate("setup_wizard")
                                 }
                             }

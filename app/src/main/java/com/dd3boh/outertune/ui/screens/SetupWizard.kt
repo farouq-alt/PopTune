@@ -72,7 +72,6 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -100,15 +99,17 @@ import com.dd3boh.outertune.constants.AutomaticScannerKey
 import com.dd3boh.outertune.constants.ContentCountryKey
 import com.dd3boh.outertune.constants.ContentLanguageKey
 import com.dd3boh.outertune.constants.CountryCodeToName
+import com.dd3boh.outertune.constants.DEFAULT_ENABLED_TABS
 import com.dd3boh.outertune.constants.DarkMode
 import com.dd3boh.outertune.constants.DarkModeKey
 import com.dd3boh.outertune.constants.EnabledTabsKey
-import com.dd3boh.outertune.constants.FirstSetupPassed
 import com.dd3boh.outertune.constants.InnerTubeCookieKey
 import com.dd3boh.outertune.constants.LanguageCodeToName
 import com.dd3boh.outertune.constants.LibraryFilterKey
 import com.dd3boh.outertune.constants.LocalLibraryEnableKey
 import com.dd3boh.outertune.constants.LyricTrimKey
+import com.dd3boh.outertune.constants.OOBE_VERSION
+import com.dd3boh.outertune.constants.OobeStatusKey
 import com.dd3boh.outertune.constants.PureBlackKey
 import com.dd3boh.outertune.constants.SYSTEM_DEFAULT
 import com.dd3boh.outertune.ui.component.EnumListPreference
@@ -118,7 +119,6 @@ import com.dd3boh.outertune.ui.component.ResizableIconButton
 import com.dd3boh.outertune.ui.component.SettingsClickToReveal
 import com.dd3boh.outertune.ui.component.SwitchPreference
 import com.dd3boh.outertune.ui.screens.Screens.LibraryFilter
-import com.dd3boh.outertune.constants.DEFAULT_ENABLED_TABS
 import com.dd3boh.outertune.ui.screens.settings.fragments.AccountFrag
 import com.dd3boh.outertune.ui.screens.settings.fragments.LocalScannerExtraFrag
 import com.dd3boh.outertune.ui.screens.settings.fragments.LocalScannerFrag
@@ -138,7 +138,7 @@ fun SetupWizard(
     val layoutDirection = LocalLayoutDirection.current
     val uriHandler = LocalUriHandler.current
 
-    val (firstSetupPassed, onFirstSetupPassedChange) = rememberPreference(FirstSetupPassed, defaultValue = false)
+    var oobeStatus by rememberPreference(OobeStatusKey, defaultValue = 0)
 
     // theme & interface
     val (contentLanguage, onContentLanguageChange) = rememberPreference(
@@ -164,10 +164,6 @@ fun SetupWizard(
     val (autoScan, onAutoScanChange) = rememberPreference(AutomaticScannerKey, defaultValue = false)
     val (enabledTabs, onEnabledTabsChange) = rememberPreference(EnabledTabsKey, defaultValue = DEFAULT_ENABLED_TABS)
 
-    var position by remember {
-        mutableIntStateOf(0)
-    }
-
     LaunchedEffect(localLibEnable) {
         val containsFolders = enabledTabs.contains('F')
         if (localLibEnable && !containsFolders) {
@@ -177,15 +173,15 @@ fun SetupWizard(
         }
     }
 
-    val MAX_POS = 4
+    val MAX_POS = 5
 
-    if (position > 0) {
+    if (oobeStatus > 0) {
         BackHandler {
-            position -= 1
+            oobeStatus -= 1
         }
     }
 
-    if (firstSetupPassed) {
+    if (oobeStatus >= OOBE_VERSION) {
         navController.navigateUp()
     }
 
@@ -199,8 +195,8 @@ fun SetupWizard(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.clickable {
-                    if (position > 0) {
-                        position -= 1
+                    if (oobeStatus > 0) {
+                        oobeStatus -= 1
                     }
                     haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                 }
@@ -218,7 +214,7 @@ fun SetupWizard(
             }
 
             LinearProgressIndicator(
-                progress = { position.toFloat() / MAX_POS },
+                progress = { oobeStatus.toFloat() / MAX_POS },
 //                color = ProgressIndicatorDefaults.linearColor,
 //                trackColor = MaterialTheme.colorScheme.primary,
                 strokeCap = StrokeCap.Butt,
@@ -232,12 +228,12 @@ fun SetupWizard(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.clickable {
-                    if (position == 1) {
+                    if (oobeStatus == 1) {
                         filter = LibraryFilter.ALL // hax
                     }
 
-                    if (position < MAX_POS) {
-                        position += 1
+                    if (oobeStatus < MAX_POS) {
+                        oobeStatus += 1
                     }
 
                     haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
@@ -259,7 +255,7 @@ fun SetupWizard(
 
     Scaffold(
         bottomBar = {
-            if (position > 0 && position < MAX_POS) {
+            if (oobeStatus > 0 && oobeStatus < MAX_POS) {
                 Box(
                     Modifier
                         .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom))
@@ -297,7 +293,7 @@ fun SetupWizard(
             ) {
                 Spacer(Modifier.height(WindowInsets.systemBars.asPaddingValues().calculateTopPadding() + 16.dp))
 
-                when (position) {
+                when (oobeStatus) {
                     0 -> { // landing page
                         Image(
                             painter = painterResource(R.drawable.launcher_monochrome),
@@ -422,7 +418,7 @@ fun SetupWizard(
 
                             TextButton(
                                 onClick = {
-                                    onFirstSetupPassedChange(true)
+                                    oobeStatus = OOBE_VERSION
                                     navController.navigateUp()
                                 }
                             ) {
@@ -577,8 +573,12 @@ fun SetupWizard(
                         }
                     }
 
-                    // exiting
+                    // downloads
                     4 -> {
+                    }
+
+                    // exiting
+                    5 -> {
 
                         Column(verticalArrangement = Arrangement.Center) {
                             Text(
@@ -639,16 +639,16 @@ fun SetupWizard(
                 }
             }
 
-            if (position == 0 || position == MAX_POS) {
+            if (oobeStatus == 0 || oobeStatus == MAX_POS) {
                 FloatingActionButton(
                     modifier = Modifier
                         .padding(16.dp)
                         .align(Alignment.BottomEnd),
                     onClick = {
-                        if (position == 0) {
-                            position += 1
+                        if (oobeStatus == 0) {
+                            oobeStatus += 1
                         } else {
-                            onFirstSetupPassedChange(true)
+                            oobeStatus = OOBE_VERSION
                             navController.navigateUp()
                         }
                         haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
