@@ -152,6 +152,8 @@ import com.dd3boh.outertune.ui.component.SwitchPreference
 import com.dd3boh.outertune.ui.screens.Screens.LibraryFilter
 import com.dd3boh.outertune.ui.screens.settings.fragments.AccountFrag
 import com.dd3boh.outertune.ui.screens.settings.fragments.LocalScannerFrag
+import com.dd3boh.outertune.ui.screens.settings.fragments.LocalizationFrag
+import com.dd3boh.outertune.ui.screens.settings.fragments.ThemeAppFrag
 import com.dd3boh.outertune.ui.utils.backToMain
 import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
@@ -177,16 +179,7 @@ fun SetupWizard(
 
     var oobeStatus by rememberPreference(OobeStatusKey, defaultValue = 0)
 
-    // theme & interface
-    val (contentLanguage, onContentLanguageChange) = rememberPreference(
-        key = ContentLanguageKey,
-        defaultValue = "system"
-    )
-    val (contentCountry, onContentCountryChange) = rememberPreference(key = ContentCountryKey, defaultValue = "system")
-
     // content prefs
-    val (darkMode, onDarkModeChange) = rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
-    val (pureBlack, onPureBlackChange) = rememberPreference(PureBlackKey, defaultValue = false)
     var filter by rememberEnumPreference(LibraryFilterKey, LibraryFilter.ALL)
 
 
@@ -458,27 +451,7 @@ fun SetupWizard(
                         ElevatedCard(
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            // light/dark theme
-                            EnumListPreference(
-                                title = { Text(stringResource(R.string.dark_theme)) },
-                                icon = { Icon(Icons.Rounded.DarkMode, null) },
-                                selectedValue = darkMode,
-                                onValueSelected = onDarkModeChange,
-                                valueText = {
-                                    when (it) {
-                                        DarkMode.ON -> stringResource(R.string.dark_theme_on)
-                                        DarkMode.OFF -> stringResource(R.string.dark_theme_off)
-                                        DarkMode.AUTO -> stringResource(R.string.dark_theme_follow_system)
-                                    }
-                                }
-                            )
-
-                            SwitchPreference(
-                                title = { Text(stringResource(R.string.pure_black)) },
-                                icon = { Icon(Icons.Rounded.Contrast, null) },
-                                checked = pureBlack,
-                                onCheckedChange = onPureBlackChange
-                            )
+                          ThemeAppFrag()
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -486,52 +459,7 @@ fun SetupWizard(
                         ElevatedCard(
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            ListPreference(
-                                title = { Text(stringResource(R.string.content_language)) },
-                                icon = { Icon(Icons.Rounded.Language, null) },
-                                selectedValue = contentLanguage,
-                                values = listOf(SYSTEM_DEFAULT) + LanguageCodeToName.keys.toList(),
-                                valueText = {
-                                    LanguageCodeToName.getOrElse(it) {
-                                        stringResource(R.string.system_default)
-                                    }
-                                },
-                                onValueSelected = { newValue ->
-                                    val locale = Locale.getDefault()
-                                    val languageTag = locale.toLanguageTag().replace("-Hant", "")
-
-                                    YouTube.locale = YouTube.locale.copy(
-                                        hl = newValue.takeIf { it != SYSTEM_DEFAULT }
-                                            ?: locale.language.takeIf { it in LanguageCodeToName }
-                                            ?: languageTag.takeIf { it in LanguageCodeToName }
-                                            ?: "en"
-                                    )
-
-                                    onContentLanguageChange(newValue)
-                                }
-                            )
-                            ListPreference(
-                                title = { Text(stringResource(R.string.content_country)) },
-                                icon = { Icon(Icons.Rounded.LocationOn, null) },
-                                selectedValue = contentCountry,
-                                values = listOf(SYSTEM_DEFAULT) + CountryCodeToName.keys.toList(),
-                                valueText = {
-                                    CountryCodeToName.getOrElse(it) {
-                                        stringResource(R.string.system_default)
-                                    }
-                                },
-                                onValueSelected = { newValue ->
-                                    val locale = Locale.getDefault()
-
-                                    YouTube.locale = YouTube.locale.copy(
-                                        gl = newValue.takeIf { it != SYSTEM_DEFAULT }
-                                            ?: locale.country.takeIf { it in CountryCodeToName }
-                                            ?: "US"
-                                    )
-
-                                    onContentCountryChange(newValue)
-                                }
-                            )
+                            LocalizationFrag()
                         }
                     }
 
