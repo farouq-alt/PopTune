@@ -34,6 +34,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.AlertDialog
@@ -274,6 +275,7 @@ fun ActionPromptDialog(
     onConfirm: () -> Unit,
     onReset: (() -> Unit)? = null,
     onCancel: (() -> Unit)? = null,
+    isInputValid: Boolean = true,
     content: @Composable ColumnScope.() -> Unit = {}
 ) = BasicAlertDialog(
     onDismissRequest = { onDismiss() },
@@ -330,7 +332,8 @@ fun ActionPromptDialog(
                 }
 
                 TextButton(
-                    onClick = { onConfirm() }
+                    onClick = { onConfirm() },
+                    enabled = isInputValid
                 ) {
                     Text(stringResource(android.R.string.ok))
                 }
@@ -579,15 +582,16 @@ fun DetailsDialog(
 @Composable
 fun InfoLabel(
     text: String,
+    isError: Boolean = false,
     modifier: Modifier = Modifier
 ) = Row(
     verticalAlignment = Alignment.CenterVertically,
     modifier = modifier.padding(horizontal = 8.dp)
 ) {
     Icon(
-        Icons.Outlined.Info,
+        if (isError) Icons.Outlined.Error else Icons.Outlined.Info,
         contentDescription = null,
-        tint = MaterialTheme.colorScheme.secondary,
+        tint = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary,
         modifier = Modifier.padding(4.dp)
     )
     Text(

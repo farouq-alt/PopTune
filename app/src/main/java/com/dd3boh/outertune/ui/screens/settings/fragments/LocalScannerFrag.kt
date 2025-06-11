@@ -9,11 +9,13 @@
 package com.dd3boh.outertune.ui.screens.settings.fragments
 
 import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Looper
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -38,23 +40,28 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat.requestPermissions
+import androidx.core.net.toUri
 import com.dd3boh.outertune.LocalDatabase
 import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.R
+import com.dd3boh.outertune.constants.DownloadPathKey
 import com.dd3boh.outertune.constants.ExcludedScanPathsKey
 import com.dd3boh.outertune.constants.LastLocalScanKey
 import com.dd3boh.outertune.constants.LookupYtmArtistsKey
@@ -70,7 +77,6 @@ import com.dd3boh.outertune.ui.component.ActionPromptDialog
 import com.dd3boh.outertune.ui.component.IconButton
 import com.dd3boh.outertune.ui.component.InfoLabel
 import com.dd3boh.outertune.ui.component.PreferenceEntry
-import com.dd3boh.outertune.ui.utils.DEFAULT_SCAN_PATH
 import com.dd3boh.outertune.ui.utils.MEDIA_PERMISSION_LEVEL
 import com.dd3boh.outertune.ui.utils.clearDtCache
 import com.dd3boh.outertune.ui.utils.imageCache
@@ -78,15 +84,18 @@ import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.utils.scanners.LocalMediaScanner.Companion.destroyScanner
 import com.dd3boh.outertune.utils.scanners.LocalMediaScanner.Companion.getScanner
-import com.dd3boh.outertune.utils.scanners.LocalMediaScanner.Companion.scannerActive
-import com.dd3boh.outertune.utils.scanners.LocalMediaScanner.Companion.scannerFinished
+
 import com.dd3boh.outertune.utils.scanners.LocalMediaScanner.Companion.scannerProgressCurrent
 import com.dd3boh.outertune.utils.scanners.LocalMediaScanner.Companion.scannerProgressTotal
 import com.dd3boh.outertune.utils.scanners.LocalMediaScanner.Companion.scannerRequestCancel
-import com.dd3boh.outertune.utils.scanners.LocalMediaScanner.Companion.scannerShowLoading
+import com.dd3boh.outertune.utils.scanners.LocalMediaScanner.Companion.scannerState
 import com.dd3boh.outertune.utils.scanners.ScannerAbortException
+import com.dd3boh.outertune.utils.scanners.stringFromUriList
+import com.dd3boh.outertune.utils.scanners.uriListFromString
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
@@ -100,9 +109,7 @@ fun ColumnScope.LocalScannerFrag() {
     val playerConnection = LocalPlayerConnection.current
 
     // scanner vars
-    val isScannerActive by scannerActive.collectAsState()
-    val showLoading by scannerShowLoading.collectAsState()
-    val isScanFinished by scannerActive.collectAsState()
+    val scannerState by scannerState.collectAsState()
     val scannerProgressTotal by scannerProgressTotal.collectAsState()
     val scannerProgressCurrent by scannerProgressCurrent.collectAsState()
 
@@ -128,14 +135,13 @@ fun ColumnScope.LocalScannerFrag() {
         defaultValue = ScannerImpl.TAGLIB
     )
     val strictExtensions by rememberPreference(ScannerStrictExtKey, defaultValue = false)
-    val (scanPaths, onScanPathsChange) = rememberPreference(ScanPathsKey, defaultValue = DEFAULT_SCAN_PATH)
+    val downloadPath by rememberPreference(DownloadPathKey, "")
+    val (scanPaths, onScanPathsChange) = rememberPreference(ScanPathsKey, defaultValue = "")
     val (excludedScanPaths, onExcludedScanPathsChange) = rememberPreference(ExcludedScanPathsKey, defaultValue = "")
 
     var fullRescan by remember { mutableStateOf(false) }
-    val (lookupYtmArtists, onlookupYtmArtistsChange) = rememberPreference(LookupYtmArtistsKey, defaultValue = true)
+    val (lookupYtmArtists, onLookupYtmArtistsChange) = rememberPreference(LookupYtmArtistsKey, defaultValue = true)
 
-    // other vars
-    var tempScanPaths by remember { mutableStateOf("") }
     val (lastLocalScan, onLastLocalScanChange) = rememberPreference(
         LastLocalScanKey,
         LocalDateTime.now().atOffset(ZoneOffset.UTC).toEpochSecond()
@@ -153,7 +159,7 @@ fun ColumnScope.LocalScannerFrag() {
         Button(
             onClick = {
                 // cancel button
-                if (isScannerActive) {
+                if (scannerState > 0) {
                     scannerRequestCancel = true
                 }
 
@@ -181,7 +187,6 @@ fun ColumnScope.LocalScannerFrag() {
                     mediaPermission = true
                 }
 
-                scannerFinished.value = false
                 scannerFailure = false
 
                 playerConnection?.player?.pause()
@@ -191,51 +196,48 @@ fun ColumnScope.LocalScannerFrag() {
                     if (fullRescan) {
                         try {
                             val scanner = getScanner(context, scannerImpl, SCANNER_OWNER_LM)
-                            val directoryStructure =
-                                scanner.scanLocal(
-                                    database,
-                                    scanPaths.split('\n'),
-                                    excludedScanPaths.split('\n')
-                                ).value
+                            val uris = scanner.scanLocal(scanPaths, excludedScanPaths)
+                            scanner.fullSync(database, uris, scannerSensitivity, strictExtensions)
 
-                            scanner.fullSync(
-                                database, directoryStructure.toList(), scannerSensitivity,
-                                strictExtensions
-                            )
-
+                            delay(1000)
                             // start artist linking job
-                            if (lookupYtmArtists && !isScannerActive) {
+                            if (lookupYtmArtists && scannerState <= 0) {
                                 coroutineScope.launch(Dispatchers.IO) {
-                                    Looper.prepare()
                                     try {
-                                        Toast.makeText(
-                                            context, context.getString(R.string.scanner_ytm_link_start),
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        withContext(Dispatchers.Main) {
+                                            Toast.makeText(
+                                                context, context.getString(R.string.scanner_ytm_link_start),
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
                                         scanner.localToRemoteArtist(database)
-                                        Toast.makeText(
-                                            context, context.getString(R.string.scanner_ytm_link_success),
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        withContext(Dispatchers.Main) {
+                                            Toast.makeText(
+                                                context, context.getString(R.string.scanner_ytm_link_success),
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
                                     } catch (e: ScannerAbortException) {
-                                        Looper.prepare()
-                                        Toast.makeText(
-                                            context,
-                                            "${context.getString(R.string.scanner_ytm_link_success)}: ${e.message}",
-                                            Toast.LENGTH_LONG
-                                        ).show()
+                                        withContext(Dispatchers.Main) {
+                                            Toast.makeText(
+                                                context,
+                                                "${context.getString(R.string.scanner_ytm_link_success)}: ${e.message}",
+                                                Toast.LENGTH_LONG
+                                            ).show()
+                                        }
                                     }
                                 }
                             }
                         } catch (e: ScannerAbortException) {
                             scannerFailure = true
 
-                            Looper.prepare()
-                            Toast.makeText(
-                                context,
-                                "${context.getString(R.string.scanner_scan_fail)}: ${e.message}",
-                                Toast.LENGTH_LONG
-                            ).show()
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    context,
+                                    "${context.getString(R.string.scanner_scan_fail)}: ${e.message}",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
                         } finally {
                             destroyScanner(SCANNER_OWNER_LM)
                             clearDtCache()
@@ -244,21 +246,13 @@ fun ColumnScope.LocalScannerFrag() {
                         // quick scan
                         try {
                             val scanner = getScanner(context, scannerImpl, SCANNER_OWNER_LM)
-                            val directoryStructure = scanner.scanLocal(
-                                database,
-                                scanPaths.split('\n'),
-                                excludedScanPaths.split('\n'),
-                                pathsOnly = true
-                            ).value
-                            scanner.quickSync(
-                                database, directoryStructure.toList(), scannerSensitivity,
-                                strictExtensions
-                            )
+                            val uris = scanner.scanLocal(scanPaths, excludedScanPaths)
+                            scanner.quickSync(database, uris, scannerSensitivity, strictExtensions)
 
+                            delay(1000)
                             // start artist linking job
-                            if (lookupYtmArtists && !isScannerActive) {
+                            if (lookupYtmArtists && scannerState <= 0) {
                                 coroutineScope.launch(Dispatchers.IO) {
-                                    Looper.prepare()
                                     try {
                                         Toast.makeText(
                                             context,
@@ -283,12 +277,13 @@ fun ColumnScope.LocalScannerFrag() {
                         } catch (e: ScannerAbortException) {
                             scannerFailure = true
 
-                            Looper.prepare()
-                            Toast.makeText(
-                                context,
-                                "${context.getString(R.string.scanner_scan_fail)}: ${e.message}",
-                                Toast.LENGTH_LONG
-                            ).show()
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    context,
+                                    "${context.getString(R.string.scanner_scan_fail)}: ${e.message}",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
                         } finally {
                             destroyScanner(SCANNER_OWNER_LM)
                             clearDtCache()
@@ -300,16 +295,15 @@ fun ColumnScope.LocalScannerFrag() {
                     playerConnection?.service?.initQueue()
 
                     onLastLocalScanChange(LocalDateTime.now().atOffset(ZoneOffset.UTC).toEpochSecond())
-                    scannerFinished.value = true
                 }
             }
         ) {
             Text(
-                text = if (isScannerActive || showLoading) {
+                text = if ((scannerState > 0 && scannerState < 4) || scannerState == 5) {
                     stringResource(R.string.action_cancel)
                 } else if (scannerFailure) {
                     stringResource(R.string.scanner_scan_fail)
-                } else if (isScanFinished) {
+                } else if (scannerState >= 4) {
                     stringResource(R.string.scanner_progress_complete)
                 } else if (!mediaPermission) {
                     stringResource(R.string.scanner_missing_storage_perm)
@@ -321,7 +315,7 @@ fun ColumnScope.LocalScannerFrag() {
 
 
         // progress indicator
-        if (!showLoading) {
+        if (scannerState <= 0) {
             return@Row
         }
 
@@ -336,30 +330,37 @@ fun ColumnScope.LocalScannerFrag() {
 
         Spacer(Modifier.width(8.dp))
 
-        if (scannerProgressTotal != -1) {
-            Column {
-                val isSyncing = scannerProgressCurrent > -1
-                Text(
-                    text = if (isSyncing) {
-                        stringResource(R.string.scanner_progress_syncing)
+        Column {
+//            val isSyncing = scannerState > 3
+            Text(
+                text = when (scannerState) {
+                    1 -> stringResource(R.string.scanner_progress_discovering)
+                    3 -> stringResource(R.string.scanner_progress_syncing)
+                    5 -> stringResource(R.string.scanner_ytm_link_start)
+                    else -> stringResource(R.string.scanner_progress_processing)
+                },
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 12.sp
+            )
+            Text(
+                text = "${if (scannerProgressCurrent >= 0) "$scannerProgressCurrent" else "—"}/${
+                    if (scannerProgressTotal >= 0) {
+                        if (scannerState == 1) {
+                            pluralStringResource(
+                                R.plurals.scanner_n_song_found, scannerProgressTotal, scannerProgressTotal
+                            )
+                        } else {
+                            pluralStringResource(
+                                R.plurals.scanner_n_song_processed, scannerProgressTotal, scannerProgressTotal
+                            )
+                        }
                     } else {
-                        stringResource(R.string.scanner_progress_scanning)
-                    },
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontSize = 12.sp
-                )
-                Text(
-                    text = "${if (isSyncing) scannerProgressCurrent else "—"}/${
-                        pluralStringResource(
-                            if (isSyncing) R.plurals.scanner_n_song_processed else R.plurals.scanner_n_song_found,
-                            scannerProgressTotal,
-                            scannerProgressTotal
-                        )
-                    }",
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontSize = 12.sp
-                )
-            }
+                        "—"
+                    }
+                }",
+                color = MaterialTheme.colorScheme.secondary,
+                fontSize = 12.sp
+            )
         }
     }
     // scanner checkboxes
@@ -386,7 +387,7 @@ fun ColumnScope.LocalScannerFrag() {
         ) {
             Checkbox(
                 checked = lookupYtmArtists,
-                onCheckedChange = onlookupYtmArtistsChange,
+                onCheckedChange = onLookupYtmArtistsChange,
             )
             Text(
                 stringResource(R.string.scanner_online_artist_linking), color = MaterialTheme.colorScheme.secondary,
@@ -430,8 +431,11 @@ fun ColumnScope.LocalScannerFrag() {
 
 
     if (showAddFolderDialog != null) {
-        if (tempScanPaths.isEmpty()) {
-            tempScanPaths = if (showAddFolderDialog == true) scanPaths else excludedScanPaths
+        var tempScanPaths = remember { mutableStateListOf<Uri>() }
+        LaunchedEffect(showAddFolderDialog, scanPaths, excludedScanPaths) {
+            tempScanPaths.addAll(
+                uriListFromString(if (showAddFolderDialog == true) scanPaths else excludedScanPaths)
+            )
         }
 
         ActionPromptDialog(
@@ -456,8 +460,6 @@ fun ColumnScope.LocalScannerFrag() {
                             checked = showAddFolderDialog!!,
                             onCheckedChange = {
                                 showAddFolderDialog = !showAddFolderDialog!!
-                                tempScanPaths =
-                                    if (showAddFolderDialog == true) scanPaths else excludedScanPaths
                             },
                         )
                     }
@@ -465,37 +467,41 @@ fun ColumnScope.LocalScannerFrag() {
             },
             onDismiss = {
                 showAddFolderDialog = null
-                tempScanPaths = ""
+                tempScanPaths.clear()
             },
             onConfirm = {
                 if (showAddFolderDialog as Boolean) {
-                    onScanPathsChange(tempScanPaths)
+                    onScanPathsChange(stringFromUriList(tempScanPaths.toList()))
                 } else {
-                    onExcludedScanPathsChange(tempScanPaths)
+                    onExcludedScanPathsChange(stringFromUriList(tempScanPaths.toList()))
                 }
 
                 showAddFolderDialog = null
-                tempScanPaths = ""
+                tempScanPaths.clear()
             },
             onReset = {
-                // reset to whitespace so not empty
-                tempScanPaths = if (showAddFolderDialog as Boolean) DEFAULT_SCAN_PATH else " "
+                // clear all, let user select a new path on their own will
+                tempScanPaths.clear()
             },
             onCancel = {
                 showAddFolderDialog = null
-                tempScanPaths = ""
+                tempScanPaths.clear()
+            },
+            isInputValid = tempScanPaths.toList().any {
+                val dlUri = uriListFromString(downloadPath).firstOrNull()
+                if ((dlUri) == null) return@any true
+                // scan path cannot be the download directory or subdir of download directory
+                !it.toString().contains(dlUri.toString())
             }
         ) {
             val dirPickerLauncher = rememberLauncherForActivityResult(
                 ActivityResultContracts.OpenDocumentTree()
             ) { uri ->
-                if (uri?.path != null && !("$tempScanPaths\u200B").contains(uri.path!! + "\u200B")) {
-                    if (tempScanPaths.isBlank()) {
-                        tempScanPaths = "${uri.path}\n"
-                    } else {
-                        tempScanPaths += "${uri.path}\n"
-                    }
-                }
+                if (uri == null) return@rememberLauncherForActivityResult
+                val contentResolver = context.contentResolver
+                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                contentResolver.takePersistableUriPermission(uri, takeFlags)
+                tempScanPaths.add(uri)
             }
 
             // folders list
@@ -508,44 +514,32 @@ fun ColumnScope.LocalScannerFrag() {
                         RoundedCornerShape(ThumbnailCornerRadius)
                     )
             ) {
-                tempScanPaths.split('\n').forEach {
-                    if (it.isNotBlank())
-                        Row(
+                tempScanPaths.forEach {
+                    val valid = it.toString() != uriListFromString(downloadPath).firstOrNull().toString()
+                    Row(
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .background(if (valid) Color.Transparent else MaterialTheme.colorScheme.errorContainer)
+                            .clickable { }) {
+                        Text(
+                            text = it.toString(),
+                            style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier
-                                .padding(horizontal = 8.dp)
-                                .clickable { }) {
-                            Text(
-                                // I hate this but I'll do it properly... eventually
-                                text = if (it.substringAfter("tree/")
-                                        .substringBefore(':') == "primary"
-                                ) {
-                                    "Internal Storage/${it.substringAfter(':')}"
-                                } else {
-                                    "External (${
-                                        it.substringAfter("tree/").substringBefore(':')
-                                    })/${it.substringAfter(':')}"
-                                },
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .align(Alignment.CenterVertically)
+                                .weight(1f)
+                                .align(Alignment.CenterVertically)
+                        )
+                        IconButton(
+                            onClick = {
+                                tempScanPaths.remove(it)
+                            },
+                            onLongClick = {}
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Close,
+                                contentDescription = null,
                             )
-                            IconButton(
-                                onClick = {
-                                    tempScanPaths = if (tempScanPaths.substringAfter("\n").contains("\n")) {
-                                        tempScanPaths.replace("$it\n", "")
-                                    } else {
-                                        " " // cursed bug
-                                    }
-                                },
-                                onLongClick = {}
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.Close,
-                                    contentDescription = null,
-                                )
-                            }
                         }
+                    }
                 }
             }
 
@@ -559,6 +553,16 @@ fun ColumnScope.LocalScannerFrag() {
                     text = stringResource(R.string.scan_paths_tooltip),
                     modifier = Modifier.padding(top = 8.dp)
                 )
+
+                if (tempScanPaths.toList().any {
+                        it.toString() == uriListFromString(downloadPath).firstOrNull().toString()
+                    }) {
+                    InfoLabel(
+                        text = stringResource(R.string.scanner_rejected_dir),
+                        isError = true,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
             }
         }
     }
