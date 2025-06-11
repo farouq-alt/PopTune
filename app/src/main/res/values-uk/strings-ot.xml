@@ -60,7 +60,7 @@
     <string name="flat_subfolders_title">Зрівняти підтеки</string>
     <string name="flat_subfolders_description">Вимкніть, щоб зберегти структуру файлів як на диску</string>
     <string name="m3u_import_playlist">Імпортувати плейлист (m3u)</string>
-    <string name="m3u_import_playlist_failed">Не вдалося імпортувати плейлист</string>
+    <string name="m3u_import_playlist_failed">Не вдалося імпортувати</string>
     <string name="scan_paths_title">Налаштовуємо місця сканування…</string>
     <string name="scan_paths_tooltip">Всі підкаталоги також будуть змінені</string>
     <string name="scan_paths_add_folder">Додати нову теку</string>
@@ -75,7 +75,7 @@
     <string name="scanner_type_title">Витягувач метаданих</string>
     <string name="scanner_type_taglib">Використовути вбудований витягувач метаданих TagLib</string>
     <string name="scanner_variant_rescan">Пересканувати всю бібліотеку та перезавантажити метадані всіх пісень</string>
-    <string name="import_failed_songs">Не вдалось імпортувати:</string>
+    <string name="import_failed_songs">Не вдалось імпортувати</string>
     <string name="oobe_use_backup">У мене є резервна копія</string>
     <string name="sort_by_play_count">Кількість відтворень</string>
     <string name="auto_playlist">Автоматичний плейлист</string>
@@ -170,4 +170,19 @@
     <string name="playlist_missing_note">Немає списків відтворення? Натисніть тут, щоб увімкнути режим синхронізації читання та запису в налаштуваннях</string>
     <string name="grp_behavior">Поведінка</string>
     <string name="library_empty">Вміст вашої бібліотеки відображатиметься тут</string>
+    <string name="tablet_ui_title">Примусово налаштовувати інтерфейс планшета</string>
+    <string name="import_success_songs">Успішно імпортовано</string>
+    <string name="lyrics_karaoke_hz_title">Налаштуйте швидкість оновлення текстів пісень караоке-пісень</string>
+    <string name="m3u_export">Експортувати як файл M3U</string>
+    <string name="lyrics_karaoke_title">Тексти пісень у стилі караоке.</string>
+    <string name="attribution_title">Атрибуція</string>
+    <string name="oss_licenses_title">Ліцензії з відкритим кодом</string>
+    <string name="lyrics_karaoke_description">Дозволяє синхронізувати тексти пісень послівно. Потрібна підтримка формату текстів пісень.</string>
+    <string name="tablet_ui_title_description">Увімкнути альбомний інтерфейс, оптимізований для більших екранів, незалежно від поточного розміру екрана</string>
+    <string name="m3u_ytm_lookup">Пошук у YouTube Music пісень, яких немає в базі даних програми</string>
+    <string name="speed_very_slow">Дуже повільно</string>
+    <string name="speed_slow">Повільно</string>
+    <string name="speed_medium">Середній</string>
+    <string name="speed_fast">Швидкий</string>
+    <string name="speed_very_fast">Дуже швидко</string>
 </resources>

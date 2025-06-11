@@ -92,7 +92,7 @@
     <string name="lyrics_font_Size">Taille de la police</string>
     <string name="scanner_strict_file_name_description">Lorsque cette option est activée, les noms de fichiers ne seront pas ignorés. Par exemple, Song.ogg sera une chanson différente de Song.flac. La préférence de sensibilité du scanner s\'appliquera toujours</string>
     <string name="flat_subfolders_title">Aplatir les sous-dossiers</string>
-    <string name="m3u_import_playlist_failed">Échec de l\'importation de la playlist</string>
+    <string name="m3u_import_playlist_failed">Échec de l\'importation</string>
     <string name="local_player_settings_title">Médias Locaux</string>
     <string name="flat_subfolders_description">Désactiver pour conserver la structure du fichier telle qu\'elle se trouve sur le disque</string>
     <string name="import_innertune_tooltip">La restauration des sauvegardes InnerTune est prise en charge, bien qu\'il existe une possibilité d\'anomalies en raison de limitations techniques</string>
@@ -168,4 +168,19 @@
     <string name="check_for_update">Vérifier les mises à jour</string>
     <string name="grp_behavior">Comportement</string>
     <string name="library_empty">Le contenu de votre bibliothèque s\'affichera ici</string>
+    <string name="tablet_ui_title">Forcer l\'interface utilisateur de la tablette</string>
+    <string name="lyrics_karaoke_hz_title">Ajuster la vitesse de mise à jour des paroles du karaoké</string>
+    <string name="import_success_songs">Importé avec succès</string>
+    <string name="m3u_export">Exporter en tant que fichier M3U</string>
+    <string name="speed_very_slow">Très lent</string>
+    <string name="speed_slow">Lent</string>
+    <string name="speed_medium">Moyen</string>
+    <string name="speed_fast">Rapide</string>
+    <string name="speed_very_fast">Très rapide</string>
+    <string name="lyrics_karaoke_description">Permet la synchronisation mot à mot des paroles. Nécessite la prise en charge du format des paroles.</string>
+    <string name="m3u_ytm_lookup">Rechercher sur YouTube Music des titres non trouvées dans la base de données de l\'application</string>
+    <string name="tablet_ui_title_description">Activer une interface paysage optimisée pour les écrans plus grands, quelle que soit la taille actuelle de l\'écran</string>
+    <string name="attribution_title">Attribution</string>
+    <string name="oss_licenses_title">Licences open source</string>
+    <string name="lyrics_karaoke_title">Paroles de style karaoké.</string>
 </resources>
