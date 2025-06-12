@@ -62,6 +62,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -76,6 +78,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.DialogCornerRadius
+import com.dd3boh.outertune.constants.MenuCornerRadius
 import com.dd3boh.outertune.db.entities.FormatEntity
 import com.dd3boh.outertune.models.MediaMetadata
 import kotlinx.coroutines.delay
@@ -535,7 +538,8 @@ fun DetailsDialog(
                     details.add(stringResource(R.string.loudness) to currentFormat?.loudnessDb?.let { "$it dB" })
                 }
 
-                details.addAll(mutableListOf(
+                details.addAll(
+                    mutableListOf(
                     stringResource(R.string.volume) to "${(volume * 100).toInt()}%",
                     stringResource(R.string.file_size) to currentFormat?.contentLength?.let {
                         // TODO: This should 1024 sized not 1000
@@ -582,8 +586,8 @@ fun DetailsDialog(
 @Composable
 fun InfoLabel(
     text: String,
+    modifier: Modifier = Modifier,
     isError: Boolean = false,
-    modifier: Modifier = Modifier
 ) = Row(
     verticalAlignment = Alignment.CenterVertically,
     modifier = modifier.padding(horizontal = 8.dp)
@@ -592,6 +596,34 @@ fun InfoLabel(
         if (isError) Icons.Outlined.Error else Icons.Outlined.Info,
         contentDescription = null,
         tint = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary,
+        modifier = Modifier.padding(4.dp)
+    )
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodySmall,
+        modifier = Modifier.padding(horizontal = 4.dp)
+    )
+}
+
+@Composable
+fun IconLabelButton(
+    text: String,
+    icon: ImageVector,
+    background: Color = MaterialTheme.colorScheme.secondaryContainer,
+    tint: Color = MaterialTheme.colorScheme.onSecondaryContainer,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) = Row(
+    verticalAlignment = Alignment.CenterVertically,
+    modifier = modifier
+        .background(background, RoundedCornerShape(MenuCornerRadius))
+        .padding(horizontal = 8.dp)
+        .clickable { onClick() }
+) {
+    Icon(
+        imageVector = icon,
+        contentDescription = null,
+        tint = tint,
         modifier = Modifier.padding(4.dp)
     )
     Text(

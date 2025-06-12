@@ -66,7 +66,24 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ColumnScope.SyncFrag() {
+fun ColumnScope.SyncAutoFrag() {
+    val (innerTubeCookie, onInnerTubeCookieChange) = rememberPreference(InnerTubeCookieKey, "")
+    val isLoggedIn = remember(innerTubeCookie) {
+        "SAPISID" in parseCookieString(innerTubeCookie)
+    }
+    val (ytmSync, onYtmSyncChange) = rememberPreference(YtmSyncKey, defaultValue = true)
+
+    SwitchPreference(
+        title = { Text(stringResource(R.string.ytm_sync)) },
+        icon = { Icon(Icons.Rounded.Sync, null) },
+        checked = ytmSync,
+        onCheckedChange = onYtmSyncChange,
+        isEnabled = isLoggedIn
+    )
+}
+
+@Composable
+fun ColumnScope.SyncManualFrag() {
     val context = LocalContext.current
     val isNetworkConnected = LocalNetworkConnected.current
     val syncUtils = LocalSyncUtils.current
@@ -77,21 +94,9 @@ fun ColumnScope.SyncFrag() {
     val isLoggedIn = remember(innerTubeCookie) {
         "SAPISID" in parseCookieString(innerTubeCookie)
     }
-    val (ytmSync, onYtmSyncChange) = rememberPreference(YtmSyncKey, defaultValue = true)
     val (syncContent, onSyncContentChange) = rememberPreference(
         YtmSyncContentKey,
         defaultValue = SyncUtils.DEFAULT_SYNC_CONTENT
-    )
-    val (syncConflict, onSyncConflictChange) = rememberEnumPreference(key = YtmSyncConflictKey, defaultValue = SyncConflictResolution.ADD_ONLY)
-    val (syncMode, onSyncModeChange) = rememberEnumPreference(key = YtmSyncModeKey, defaultValue = SyncMode.RO)
-    val pauseListenHistory by rememberPreference(key = PauseListenHistoryKey, defaultValue = false)
-    val (pauseRemoteListenHistory, onPauseRemoteListenHistoryChange) = rememberPreference(
-        key = PauseRemoteListenHistoryKey,
-        defaultValue = false
-    )
-    val (likedAutoDownload, onLikedAutoDownload) = rememberEnumPreference(
-        LikedAutoDownloadKey,
-        LikedAutodownloadMode.OFF
     )
 
     val isSyncingRemotePlaylists by syncUtils.isSyncingRemotePlaylists.collectAsState()
@@ -100,16 +105,6 @@ fun ColumnScope.SyncFrag() {
     val isSyncingRemoteSongs by syncUtils.isSyncingRemoteSongs.collectAsState()
     val isSyncingRemoteLikedSongs by syncUtils.isSyncingRemoteLikedSongs.collectAsState()
     val isSyncingRecentActivity by syncUtils.isSyncingRecentActivity.collectAsState()
-    // TODO: move to home screen as button?
-    // TODO: rename scanner_manual_btn to sync_manual_btn
-
-    SwitchPreference(
-        title = { Text(stringResource(R.string.ytm_sync)) },
-        icon = { Icon(Icons.Rounded.Sync, null) },
-        checked = ytmSync,
-        onCheckedChange = onYtmSyncChange,
-        isEnabled = isLoggedIn
-    )
 
     PreferenceEntry(
         title = { Text(stringResource(R.string.scanner_manual_btn)) },
@@ -178,6 +173,15 @@ fun ColumnScope.SyncFrag() {
             )
         }
     }
+}
+
+@Composable
+fun ColumnScope.SyncParamsFrag() {
+    val (syncConflict, onSyncConflictChange) = rememberEnumPreference(
+        key = YtmSyncConflictKey,
+        defaultValue = SyncConflictResolution.ADD_ONLY
+    )
+    val (syncMode, onSyncModeChange) = rememberEnumPreference(key = YtmSyncModeKey, defaultValue = SyncMode.RO)
 
     EnumListPreference(
         title = { Text(stringResource(R.string.sync_mode)) },
@@ -203,6 +207,25 @@ fun ColumnScope.SyncFrag() {
             }
         },
     )
+}
+
+@Composable
+fun ColumnScope.SyncExtrasFrag() {
+    val (innerTubeCookie, onInnerTubeCookieChange) = rememberPreference(InnerTubeCookieKey, "")
+    val isLoggedIn = remember(innerTubeCookie) {
+        "SAPISID" in parseCookieString(innerTubeCookie)
+    }
+
+    val pauseListenHistory by rememberPreference(key = PauseListenHistoryKey, defaultValue = false)
+    val (pauseRemoteListenHistory, onPauseRemoteListenHistoryChange) = rememberPreference(
+        key = PauseRemoteListenHistoryKey,
+        defaultValue = false
+    )
+    val (likedAutoDownload, onLikedAutoDownload) = rememberEnumPreference(
+        LikedAutoDownloadKey,
+        LikedAutodownloadMode.OFF
+    )
+
     SwitchPreference(
         title = { Text(stringResource(R.string.pause_remote_listen_history)) },
         icon = { Icon(Icons.Rounded.History, null) },

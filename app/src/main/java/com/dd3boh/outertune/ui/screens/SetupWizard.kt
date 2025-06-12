@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -47,14 +48,23 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.automirrored.rounded.NavigateBefore
 import androidx.compose.material.icons.automirrored.rounded.NavigateNext
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.ArrowDownward
 import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.material.icons.rounded.Autorenew
+import androidx.compose.material.icons.rounded.Block
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.Contrast
 import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Language
+import androidx.compose.material.icons.rounded.LibraryMusic
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Lyrics
+import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.MusicVideo
 import androidx.compose.material.icons.rounded.NotInterested
 import androidx.compose.material.icons.rounded.RadioButtonChecked
@@ -64,7 +74,9 @@ import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -90,14 +102,17 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -118,6 +133,7 @@ import com.dd3boh.outertune.constants.LanguageCodeToName
 import com.dd3boh.outertune.constants.LibraryFilterKey
 import com.dd3boh.outertune.constants.LocalLibraryEnableKey
 import com.dd3boh.outertune.constants.LyricTrimKey
+import com.dd3boh.outertune.constants.MenuCornerRadius
 import com.dd3boh.outertune.constants.OOBE_VERSION
 import com.dd3boh.outertune.constants.OobeStatusKey
 import com.dd3boh.outertune.constants.PureBlackKey
@@ -126,21 +142,24 @@ import com.dd3boh.outertune.constants.ScanPathsKey
 import com.dd3boh.outertune.constants.ThumbnailCornerRadius
 import com.dd3boh.outertune.ui.component.ActionPromptDialog
 import com.dd3boh.outertune.ui.component.EnumListPreference
+import com.dd3boh.outertune.ui.component.IconLabelButton
 import com.dd3boh.outertune.ui.component.InfoLabel
 import com.dd3boh.outertune.ui.component.ListPreference
 import com.dd3boh.outertune.ui.component.PreferenceEntry
 import com.dd3boh.outertune.ui.component.PreferenceGroupTitle
 import com.dd3boh.outertune.ui.component.ResizableIconButton
-import com.dd3boh.outertune.ui.component.SettingsClickToReveal
 import com.dd3boh.outertune.ui.component.SwitchPreference
 import com.dd3boh.outertune.ui.screens.Screens.LibraryFilter
 import com.dd3boh.outertune.ui.screens.settings.fragments.AccountFrag
-import com.dd3boh.outertune.ui.screens.settings.fragments.LocalScannerExtraFrag
 import com.dd3boh.outertune.ui.screens.settings.fragments.LocalScannerFrag
+import com.dd3boh.outertune.ui.screens.settings.fragments.LocalizationFrag
+import com.dd3boh.outertune.ui.screens.settings.fragments.ThemeAppFrag
+import com.dd3boh.outertune.ui.utils.backToMain
 import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.utils.scanners.stringFromUriList
 import com.dd3boh.outertune.utils.scanners.uriListFromString
+import com.google.common.base.internal.Finalizer
 import com.zionhuang.innertube.YouTube
 import com.zionhuang.innertube.utils.parseCookieString
 import kotlinx.coroutines.delay
@@ -160,16 +179,7 @@ fun SetupWizard(
 
     var oobeStatus by rememberPreference(OobeStatusKey, defaultValue = 0)
 
-    // theme & interface
-    val (contentLanguage, onContentLanguageChange) = rememberPreference(
-        key = ContentLanguageKey,
-        defaultValue = "system"
-    )
-    val (contentCountry, onContentCountryChange) = rememberPreference(key = ContentCountryKey, defaultValue = "system")
-
     // content prefs
-    val (darkMode, onDarkModeChange) = rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
-    val (pureBlack, onPureBlackChange) = rememberPreference(PureBlackKey, defaultValue = false)
     var filter by rememberEnumPreference(LibraryFilterKey, LibraryFilter.ALL)
 
 
@@ -193,16 +203,21 @@ fun SetupWizard(
         }
     }
 
-    val MAX_POS = 5
 
-    if (oobeStatus > 0) {
-        BackHandler {
-            oobeStatus -= 1
+    LaunchedEffect(oobeStatus) {
+        if (oobeStatus >= OOBE_VERSION) {
+            navController.backToMain()
         }
     }
 
-    if (oobeStatus >= OOBE_VERSION) {
-        navController.navigateUp()
+    val MAX_POS = 5
+
+    BackHandler {
+        if (oobeStatus > 0) {
+            oobeStatus -= 1
+        } else {
+            // user may not dismiss via back
+        }
     }
 
     val navBar = @Composable {
@@ -259,15 +274,15 @@ fun SetupWizard(
                     haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                 }
             ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.NavigateNext,
+                    contentDescription = null
+                )
                 Text(
                     text = stringResource(R.string.action_next),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
-                )
-                Icon(
-                    imageVector = Icons.AutoMirrored.Rounded.NavigateNext,
-                    contentDescription = null
                 )
             }
         }
@@ -308,6 +323,7 @@ fun SetupWizard(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(horizontal = 16.dp)
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -326,104 +342,58 @@ fun SetupWizard(
                                         NavigationBarDefaults.Elevation
                                     )
                                 )
-                                .clickable { }
+                                .clickable {
+                                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                                }
                         )
-                        Column(verticalArrangement = Arrangement.Center) {
-                            Text(
-                                text = stringResource(R.string.oobe_welcome_message),
-                                style = MaterialTheme.typography.headlineLarge,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 24.dp, vertical = 8.dp)
+
+                        Text(
+                            text = stringResource(R.string.oobe_welcome_message),
+                            style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp),
+                            textAlign = TextAlign.Center
+                        )
+
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 16.dp, top = 48.dp, end = 16.dp, bottom = 16.dp)
+                        ) {
+                            OobeFeatureRow(
+                                title = stringResource(R.string.oobe_ytm_integration),
+                                description = stringResource(R.string.oobe_ytm_integration_description),
+                                icon = Icons.Rounded.MusicNote,
+                                MaterialTheme.colorScheme.secondary
+                            )
+                            OobeFeatureRow(
+                                title = stringResource(R.string.oobe_ad_free_exp),
+                                description = stringResource(R.string.oobe_ad_free_exp_description),
+                                icon = Icons.Rounded.Block,
+                                Color.Red
+                            )
+                            OobeFeatureRow(
+                                title = stringResource(R.string.oobe_cross_platform_sync),
+                                description = stringResource(R.string.oobe_cross_platform_sync_description),
+                                icon = Icons.Rounded.Sync,
+                                MaterialTheme.colorScheme.tertiary
+                            )
+                            OobeFeatureRow(
+                                title = stringResource(R.string.oobe_local_music_support),
+                                description = stringResource(R.string.oobe_local_music_support_description),
+                                icon = Icons.Rounded.SdCard,
+                                MaterialTheme.colorScheme.onSurface
                             )
                         }
 
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 48.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.MusicVideo,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.secondary
-                                )
-                                Text(
-                                    text = stringResource(R.string.oobe_ytm_content_description),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier
-                                        .padding(horizontal = 8.dp, vertical = 8.dp)
-                                )
-                            }
 
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.NotInterested,
-                                    tint = Color.Red,
-                                    contentDescription = null
-                                )
-                                Text(
-                                    text = stringResource(R.string.oobe_ad_free_description),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    modifier = Modifier
-                                        .padding(horizontal = 8.dp, vertical = 8.dp)
-                                )
-                            }
-
-
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.Sync,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.tertiary
-                                )
-                                Text(
-                                    text = stringResource(R.string.oobe_ytm_sync_description),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier
-                                        .padding(horizontal = 8.dp, vertical = 8.dp)
-                                )
-                            }
-
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.SdCard,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                )
-                                Text(
-                                    text = stringResource(R.string.oobe_local_playback_description),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier
-                                        .padding(horizontal = 8.dp, vertical = 8.dp)
-                                )
-                            }
-                        }
-
-
-                        // maybe add quick restore from backup here
                         Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 48.dp)
+                                .padding(horizontal = 48.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             TextButton(
                                 onClick = {
@@ -432,7 +402,7 @@ fun SetupWizard(
                             ) {
                                 Text(
                                     text = stringResource(R.string.oobe_use_backup),
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
                             }
 
@@ -444,7 +414,7 @@ fun SetupWizard(
                             ) {
                                 Text(
                                     text = stringResource(R.string.action_skip),
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
                             }
                         }
@@ -452,144 +422,162 @@ fun SetupWizard(
 
                     // appearance
                     1 -> {
+                        Icon(
+                            imageVector = Icons.Rounded.DarkMode,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(80.dp)
+                                .padding(16.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+
                         Text(
                             text = stringResource(R.string.grp_interface),
-                            style = MaterialTheme.typography.headlineLarge,
+                            style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 24.dp, vertical = 8.dp)
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
                         )
 
-                        // light/dark theme
-                        EnumListPreference(
-                            title = { Text(stringResource(R.string.dark_theme)) },
-                            icon = { Icon(Icons.Rounded.DarkMode, null) },
-                            selectedValue = darkMode,
-                            onValueSelected = onDarkModeChange,
-                            valueText = {
-                                when (it) {
-                                    DarkMode.ON -> stringResource(R.string.dark_theme_on)
-                                    DarkMode.OFF -> stringResource(R.string.dark_theme_off)
-                                    DarkMode.AUTO -> stringResource(R.string.dark_theme_follow_system)
-                                }
-                            }
-                        )
-                        SwitchPreference(
-                            title = { Text(stringResource(R.string.pure_black)) },
-                            icon = { Icon(Icons.Rounded.Contrast, null) },
-                            checked = pureBlack,
-                            onCheckedChange = onPureBlackChange
+                        Text(
+                            text = stringResource(R.string.oobe_interface_subtitle),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 32.dp)
                         )
 
-                        ListPreference(
-                            title = { Text(stringResource(R.string.content_language)) },
-                            icon = { Icon(Icons.Rounded.Language, null) },
-                            selectedValue = contentLanguage,
-                            values = listOf(SYSTEM_DEFAULT) + LanguageCodeToName.keys.toList(),
-                            valueText = {
-                                LanguageCodeToName.getOrElse(it) {
-                                    stringResource(R.string.system_default)
-                                }
-                            },
-                            onValueSelected = { newValue ->
-                                val locale = Locale.getDefault()
-                                val languageTag = locale.toLanguageTag().replace("-Hant", "")
 
-                                YouTube.locale = YouTube.locale.copy(
-                                    hl = newValue.takeIf { it != SYSTEM_DEFAULT }
-                                        ?: locale.language.takeIf { it in LanguageCodeToName }
-                                        ?: languageTag.takeIf { it in LanguageCodeToName }
-                                        ?: "en"
-                                )
+                        ElevatedCard(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                          ThemeAppFrag()
+                        }
 
-                                onContentLanguageChange(newValue)
-                            }
-                        )
-                        ListPreference(
-                            title = { Text(stringResource(R.string.content_country)) },
-                            icon = { Icon(Icons.Rounded.LocationOn, null) },
-                            selectedValue = contentCountry,
-                            values = listOf(SYSTEM_DEFAULT) + CountryCodeToName.keys.toList(),
-                            valueText = {
-                                CountryCodeToName.getOrElse(it) {
-                                    stringResource(R.string.system_default)
-                                }
-                            },
-                            onValueSelected = { newValue ->
-                                val locale = Locale.getDefault()
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                                YouTube.locale = YouTube.locale.copy(
-                                    gl = newValue.takeIf { it != SYSTEM_DEFAULT }
-                                        ?: locale.country.takeIf { it in CountryCodeToName }
-                                        ?: "US"
-                                )
-
-                                onContentCountryChange(newValue)
-                            }
-                        )
+                        ElevatedCard(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            LocalizationFrag()
+                        }
                     }
 
                     // account
                     2 -> {
-                        Text(
-                            text = stringResource(R.string.account),
-                            style = MaterialTheme.typography.headlineLarge,
-                            fontWeight = FontWeight.Bold,
+                        Icon(
+                            imageVector = Icons.Rounded.AccountCircle,
+                            contentDescription = null,
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 24.dp, vertical = 8.dp)
+                                .size(80.dp)
+                                .padding(16.dp),
+                            tint = MaterialTheme.colorScheme.primary
                         )
 
-                        AccountFrag(navController)
-
-                        SwitchPreference(
-                            title = { Text(stringResource(R.string.ytm_sync)) },
-                            icon = { Icon(Icons.Rounded.Lyrics, null) },
-                            checked = ytmSync,
-                            onCheckedChange = onYtmSyncChange,
-                            isEnabled = isLoggedIn
+                        Text(
+                            text = stringResource(R.string.oobe_ytm_logon_title),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
                         )
+
+                        Text(
+                            text = stringResource(R.string.oobe_ytm_logon_subtitle),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 32.dp)
+                        )
+
+
+                        ElevatedCard(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            AccountFrag(navController)
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        ElevatedCard(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            SwitchPreference(
+                                title = { Text(stringResource(R.string.ytm_sync)) },
+                                icon = { Icon(Icons.Rounded.Lyrics, null) },
+                                checked = ytmSync,
+                                onCheckedChange = onYtmSyncChange,
+                                isEnabled = isLoggedIn
+                            )
+                        }
                     }
 
                     // local media
                     3 -> {
-                        Text(
-                            text = stringResource(R.string.local_player_settings_title),
-                            style = MaterialTheme.typography.headlineLarge,
-                            fontWeight = FontWeight.Bold,
+                        Icon(
+                            imageVector = Icons.Rounded.LibraryMusic,
+                            contentDescription = null,
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 24.dp, vertical = 8.dp)
+                                .size(80.dp)
+                                .padding(16.dp),
+                            tint = MaterialTheme.colorScheme.primary
                         )
 
-
-                        SwitchPreference(
-                            title = { Text(stringResource(R.string.local_library_enable_title)) },
-                            description = stringResource(R.string.local_library_enable_description),
-                            icon = { Icon(Icons.Rounded.SdCard, null) },
-                            checked = localLibEnable,
-                            onCheckedChange = onLocalLibEnableChange
+                        Text(
+                            text = stringResource(R.string.oobe_local_media_title),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
                         )
+
+                        Text(
+                            text = stringResource(R.string.oobe_local_media_subtitle),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 32.dp)
+                        )
+
+                        ElevatedCard(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            SwitchPreference(
+                                title = { Text(stringResource(R.string.local_library_enable_title)) },
+                                description = stringResource(R.string.local_library_enable_description),
+                                icon = { Icon(Icons.Rounded.SdCard, null) },
+                                checked = localLibEnable,
+                                onCheckedChange = onLocalLibEnableChange
+                            )
+                        }
 
                         AnimatedVisibility(localLibEnable) {
                             Column {
-                                SwitchPreference(
-                                    title = { Text(stringResource(R.string.auto_scanner_title)) },
-                                    description = stringResource(R.string.auto_scanner_description),
-                                    icon = { Icon(Icons.Rounded.Autorenew, null) },
-                                    checked = autoScan,
-                                    onCheckedChange = onAutoScanChange
-                                )
-                                PreferenceGroupTitle(
-                                    title = stringResource(R.string.grp_manual_scanner)
-                                )
-                                LocalScannerFrag()
+                                Spacer(modifier = Modifier.height(16.dp))
+                                ElevatedCard(
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    SwitchPreference(
+                                        title = { Text(stringResource(R.string.auto_scanner_title)) },
+                                        description = stringResource(R.string.auto_scanner_description),
+                                        icon = { Icon(Icons.Rounded.Autorenew, null) },
+                                        checked = autoScan,
+                                        onCheckedChange = onAutoScanChange
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                                ElevatedCard(
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    PreferenceGroupTitle(
+                                        title = stringResource(R.string.grp_manual_scanner)
+                                    )
 
-                                SettingsClickToReveal(stringResource(R.string.grp_extra_scanner_settings)) {
-                                    LocalScannerExtraFrag()
+
+                                    LocalScannerFrag()
                                 }
                             }
+
                         }
                     }
 
@@ -603,27 +591,47 @@ fun SetupWizard(
                             mutableStateOf(false)
                         }
 
-                        Text(
-                            text = "Download location", //TODO: str resource
-                            style = MaterialTheme.typography.headlineLarge,
-                            fontWeight = FontWeight.Bold,
+
+                        Icon(
+                            imageVector = Icons.Rounded.Download,
+                            contentDescription = null,
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 24.dp, vertical = 8.dp)
+                                .size(80.dp)
+                                .padding(16.dp),
+                            tint = MaterialTheme.colorScheme.primary
                         )
 
-                        PreferenceEntry(
-                            title = { Text(stringResource(R.string.dl_main_path_title)) },
-                            onClick = {
-                                showDlPathDialog = true
-                            },
+                        Text(
+                            text = stringResource(R.string.oobe_downloads_title),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
                         )
-                        //TODO: string res
-                        InfoLabel("Selecting a folder for song downloads is required for song downloading to work. If you wish to change this folder, or add additional folders, you can do so later on in settings")
+
+                        Text(
+                            text = stringResource(R.string.oobe_downloads_subtitle),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 32.dp)
+                        )
+
+                        ElevatedCard(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            PreferenceEntry(
+                                title = { Text(stringResource(R.string.dl_main_path_title)) },
+                                onClick = {
+                                    showDlPathDialog = true
+                                },
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        InfoLabel(stringResource(R.string.dl_oobe_tooltip))
 
 
                         if (showDlPathDialog) {
-                            val (downloadPath, onDownloadPathChange) = rememberPreference(DownloadPathKey, "")
                             var tempFilePath by remember {
                                 mutableStateOf<Uri?>(null)
                             }
@@ -676,7 +684,8 @@ fun SetupWizard(
                                     if (uri?.path != null) {
                                         // Take persistable URI permission
                                         val contentResolver = context.contentResolver
-                                        val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                                        val takeFlags: Int =
+                                            Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                                         contentResolver.takePersistableUriPermission(uri, takeFlags)
 
                                         tempFilePath = uri
@@ -688,6 +697,14 @@ fun SetupWizard(
                                     tempFilePath.toString().length <= it.toString().length && tempFilePath.toString()
                                         .contains(it.toString())
                                 }
+
+                                Text(
+                                    text = stringResource(R.string.dl_main_path_description),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    modifier = Modifier.padding(horizontal = 4.dp)
+                                )
+                                Spacer(Modifier.padding(vertical = 8.dp))
+
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -731,62 +748,58 @@ fun SetupWizard(
                         }
                     }
 
-                    // exiting
+                    // exit page
                     5 -> {
-
-                        Column(verticalArrangement = Arrangement.Center) {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Check,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(80.dp)
+                                    .padding(16.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
                             Text(
-                                text = stringResource(R.string.oobe_complete),
+                                text = stringResource(R.string.oobe_complete_title),
                                 style = MaterialTheme.typography.headlineLarge,
                                 fontWeight = FontWeight.Bold,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 24.dp, vertical = 8.dp)
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
                             )
-                        }
-
-
-
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(vertical = 20.dp)
-                        ) {
+                            Text(
+                                text = stringResource(R.string.oobe_complete),
+                                style = MaterialTheme.typography.bodyLarge,
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                            )
                             Row(
-                                verticalAlignment = Alignment.Top,
+                                horizontalArrangement = Arrangement.Center,
+                                modifier = Modifier.padding(vertical = 16.dp)
                             ) {
-                                Text(
-                                    text = stringResource(R.string.info),
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                                IconLabelButton(
+                                    text = "GitHub",
+                                    icon = Icons.Rounded.Code,
+                                    onClick = { uriHandler.openUri("https://github.com/OuterTune/OuterTune") },
+                                    modifier = Modifier.padding(horizontal = 8.dp)
+                                )
+
+                                IconLabelButton(
+                                    text = "Wiki",
+                                    icon = Icons.Outlined.Info,
+                                    onClick = { uriHandler.openUri("https://github.com/OuterTune/OuterTune/wiki") },
+                                    modifier = Modifier.padding(horizontal = 8.dp)
                                 )
                             }
-
-                            Spacer(Modifier.height(4.dp))
-
-
-                            Row {
-                                IconButton(
-                                    onClick = { uriHandler.openUri("https://github.com/OuterTune/OuterTune") }
-                                ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.github),
-                                        contentDescription = null
-                                    )
-                                }
-                            }
-
-                            Spacer(Modifier.height(8.dp))
-                        }
-
-
-                        Row {
                             Text(
                                 text = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) | ${BuildConfig.FLAVOR}",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.secondary
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 8.dp)
                             )
                         }
                     }
@@ -820,68 +833,55 @@ fun SetupWizard(
 
 
 @Composable
-private fun SortHeaderDummy(
-    modifier: Modifier = Modifier,
-) {
-    var menuExpanded by remember { mutableStateOf(false) }
-    var sortDescending by remember { mutableStateOf(false) }
+private fun OobeFeatureRow(title: String, description: String?, icon: ImageVector, tint: Color) {
+    val haptic = LocalHapticFeedback.current
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.padding(vertical = 8.dp)
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
+            },
     ) {
-        Text(
-            text = stringResource(R.string.sort_by_name),
-            color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.labelLarge,
+        Row(
             modifier = Modifier
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = ripple(bounded = false)
-                ) {
-                    menuExpanded = !menuExpanded
-                }
-                .padding(horizontal = 4.dp, vertical = 8.dp)
-        )
-
-        val dummyOptions = listOf("Artist", "Name", "Date added", "Date modified", "Date released")
-        DropdownMenu(
-            expanded = menuExpanded,
-            onDismissRequest = { menuExpanded = false },
-            modifier = Modifier.widthIn(min = 172.dp)
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
         ) {
-
-            dummyOptions.forEach { type ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = type,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Normal
-                        )
-                    },
-                    trailingIcon = {
-                        Icon(
-                            imageVector = if (type == "Name") Icons.Rounded.RadioButtonChecked else Icons.Rounded.RadioButtonUnchecked,
-                            contentDescription = null
-                        )
-                    },
-                    onClick = {
-                        menuExpanded = false
-                    }
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .padding(4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(32.dp)
                 )
             }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                description?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
-
-
-        ResizableIconButton(
-            icon = if (sortDescending) Icons.Rounded.ArrowDownward else Icons.Rounded.ArrowUpward,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .size(32.dp)
-                .padding(8.dp),
-            onClick = { sortDescending = !sortDescending }
-        )
-
     }
 }
