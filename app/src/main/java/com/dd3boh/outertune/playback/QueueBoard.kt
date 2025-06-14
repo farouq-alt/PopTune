@@ -10,7 +10,6 @@ package com.dd3boh.outertune.playback
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.util.fastFirst
 import androidx.compose.ui.util.fastFirstOrNull
@@ -30,7 +29,6 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -172,7 +170,6 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
                     match.queuePos = match.queue.indexOf(match.queue.find { it.shuffleIndex == 0 })
                 }
 
-                bubbleUp(match)  // move queue to end of list so it shows as most recent
                 return match
             }
 
@@ -193,7 +190,6 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
                     match.queuePos = match.queue.indexOf(match.queue.find { it.shuffleIndex == 0 })
                 }
 
-                bubbleUp(match)  // move queue to end of list so it shows as most recent
                 return match
             } else if (delta) {
                 if (QUEUE_DEBUG)
@@ -217,7 +213,6 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
                 }
 
                 saveQueueSongs(match)
-                bubbleUp(match) // move queue to end of list so it shows as most recent
                 return match
             } else if (match.title.endsWith("+\u200B") || anyExts != null) { // this queue is an already an extension queue
                 if (QUEUE_DEBUG)
@@ -240,7 +235,6 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
                 // rewrite queue
                 saveQueueSongs(anyExts ?: match)
 
-                bubbleUp(match) // move queue to end of list so it shows as most recent
                 return match
             } else { // make new extension queue
                 if (QUEUE_DEBUG)
@@ -273,7 +267,6 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
                 }
 
                 saveQueueSongs(newQueue)
-                bubbleUp(newQueue) // move queue to end of list so it shows as most recent
                 return newQueue
             }
         } else {
@@ -303,7 +296,6 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
             }
 
             saveQueueSongs(newQueue)
-            bubbleUp(newQueue) // move queue to end of list so it shows as most recent
             return newQueue
         }
     }
@@ -830,7 +822,7 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
      */
 
     class PriorityJob(val priority: Int, val job: Job) : Comparable<PriorityJob> {
-        override fun compareTo(other: PriorityJob): Int = other.priority - priority
+        override fun compareTo(other: PriorityJob): Int = this.priority - other.priority
     }
 
     var queueEntity = PriorityQueue<PriorityJob>()
@@ -910,7 +902,7 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
     private fun saveAllQueues(mq: MutableList<MultiQueueObject>) {
         if (player.dataStore.get(PersistentQueueKey, true)) {
             queueEntity.add(
-                // we select most recent task, therefore "lower" priority works out to be "higher" priority
+                // we select most recent task, therefore "lowest" numeric priority at the end of the list == "highest" priority
                 PriorityJob(1,
                     coroutineScope.launch(start = CoroutineStart.LAZY) {
                         player.database.updateAllQueues(mq)
