@@ -142,6 +142,7 @@ import com.dd3boh.outertune.ui.menu.QueueMenu
 import com.dd3boh.outertune.utils.makeTimeString
 import com.dd3boh.outertune.utils.rememberPreference
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import sh.calvin.reorderable.ReorderableItem
@@ -383,10 +384,27 @@ fun BoxScope.QueueContent(
     }
 
 
-    LaunchedEffect(queueWindows) { // add to queue windows
+    LaunchedEffect(queueWindows, detachedQueue) { // add to songs list & scroll
+        if (detachedQueue != null) {
+            mutableSongs.apply {
+                clear()
+                addAll(detachedQueue!!.getCurrentQueueShuffled())
+            }
+
+            if (isSearching) return@LaunchedEffect
+            detachedQueue?.let {
+                lazySongsListState.animateScrollToItem(it.getQueuePosShuffled())
+            }
+            return@LaunchedEffect
+        }
+
         mutableSongs.apply {
             clear()
             addAll(queueWindows.mapIndexedNotNull { index, w -> w.mediaItem.metadata?.copy(composeUidWorkaround = index.toDouble()) })
+        }
+
+        if (currentWindowIndex != -1 && !isSearching) {
+            lazySongsListState.animateScrollToItem(currentWindowIndex)
         }
 
         selectedItems.fastForEachReversed { uidHash ->
@@ -397,26 +415,16 @@ fun BoxScope.QueueContent(
     }
 
     LaunchedEffect(mutableSongs) { // scroll to song
-        if (detachedHead) {
-            detachedQueue?.let {
-                lazySongsListState.scrollToItem(it.getQueuePosShuffled())
-            }
-            return@LaunchedEffect
+        if (isSearching) return@LaunchedEffect
+        if (currentWindowIndex != -1) {
+            lazySongsListState.animateScrollToItem(currentWindowIndex)
         }
-        if (currentWindowIndex != -1)
-            lazySongsListState.scrollToItem(currentWindowIndex)
     }
 
-    fun scrollToQueue() {
+    LaunchedEffect(mqExpand) { // scroll to queue
         if (mqExpand) {
-            runBlocking {
-                lazyQueuesListState.scrollToItem(playingQueue)
-            }
+            lazyQueuesListState.animateScrollToItem(playingQueue)
         }
-    }
-
-    LaunchedEffect(mutableQueues, mqExpand) { // scroll to queue
-        scrollToQueue()
     }
 
     LaunchedEffect(Unit) {
@@ -426,7 +434,6 @@ fun BoxScope.QueueContent(
                 mutableQueues.clear()
                 mutableQueues.addAll(qb.getAllQueues())
                 playingQueue = updatedList.indexOf(qb.getCurrentQueue())
-                scrollToQueue()
             }
     }
 
@@ -544,12 +551,6 @@ fun BoxScope.QueueContent(
                                             detachedHead = false
                                             if (remainingQueues < 1) {
                                                 onTerminate.invoke()
-                                            } else {
-                                                coroutineScope.launch {
-                                                    lazyQueuesListState.animateScrollToItem(
-                                                        playerConnection.player.currentMediaItemIndex
-                                                    )
-                                                }
                                             }
                                         },
                                     )
@@ -634,11 +635,8 @@ fun BoxScope.QueueContent(
                 }
             }
 
-            val items: List<MediaMetadata> = if (isSearching) {
-                filteredSongs
-            } else detachedQueue?.getCurrentQueueShuffled() ?: mutableSongs
             itemsIndexed(
-                items = items,
+                items = if (isSearching) filteredSongs else mutableSongs,
                 key = { _, item -> item.hashCode() }
             ) { index, window ->
                 ReorderableItem(
@@ -688,8 +686,8 @@ fun BoxScope.QueueContent(
                     val content = @Composable {
                         MediaMetadataListItem(
                             mediaMetadata = window,
-                            isActive = index == currentWindowIndex && !detachedHead,
-                            isPlaying = isPlaying,
+                            isActive = (index == currentWindowIndex && !detachedHead) || index == detachedQueue?.getQueuePosShuffled(),
+                            isPlaying = isPlaying && !detachedHead,
                             trailingContent = {
                                 if (inSelectMode) {
                                     Checkbox(
