@@ -40,7 +40,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.CloudOff
-import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.EditOff
@@ -95,7 +94,6 @@ import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.Download.STATE_COMPLETED
 import androidx.media3.exoplayer.offline.Download.STATE_DOWNLOADING
 import androidx.media3.exoplayer.offline.Download.STATE_QUEUED
-import androidx.media3.exoplayer.offline.Download.STATE_STOPPED
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.dd3boh.outertune.BuildConfig
@@ -121,7 +119,6 @@ import com.dd3boh.outertune.models.DirectoryTree
 import com.dd3boh.outertune.models.MediaMetadata
 import com.dd3boh.outertune.models.MultiQueueObject
 import com.dd3boh.outertune.models.toMediaMetadata
-import com.dd3boh.outertune.playback.DownloadUtil
 import com.dd3boh.outertune.playback.queues.ListQueue
 import com.dd3boh.outertune.ui.component.Icon.FolderCopy
 import com.dd3boh.outertune.ui.menu.FolderMenu
@@ -140,10 +137,10 @@ import com.zionhuang.innertube.models.YTItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.any
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.time.LocalDateTime
 
 const val ActiveBoxAlpha = 0.6f
 
@@ -405,9 +402,14 @@ fun SongListItem(
                     Icon.Library()
                 }
                 if (showDownloadIcon) {
-                    val download by LocalDownloadUtil.current.getDownload(song.id)
-                        .collectAsState(initial = null)
-                    Icon.Download(download?.song?.dateDownload)
+                    val downloadUtil = LocalDownloadUtil.current
+                    if (downloadUtil.getCustomDownload(song.id)) {
+                        Icon.Download(STATE_COMPLETED)
+                    } else {
+                        val download by downloadUtil.getDownload(song.id)
+                            .collectAsState(initial = null)
+                        Icon.Download(download?.state)
+                    }
                 }
                 if (showLocalIcon && song.song.isLocal) {
                     FolderCopy()
@@ -622,22 +624,23 @@ fun SongGridItem(
         }
         if (showDownloadIcon) {
             val download by LocalDownloadUtil.current.getDownload(song.id).collectAsState(initial = null)
-            val state = download?.song?.dateDownload
-            if (state != null) {
-                Icon(
+            when (download?.state) {
+                STATE_COMPLETED -> Icon(
                     imageVector = Icons.Rounded.OfflinePin,
                     contentDescription = null,
                     modifier = Modifier
                         .size(18.dp)
                         .padding(end = 2.dp)
                 )
-            } else if (state == DownloadUtil.DL_IN_PROGRESS) {
-                CircularProgressIndicator(
+
+                STATE_QUEUED, STATE_DOWNLOADING -> CircularProgressIndicator(
                     strokeWidth = 2.dp,
                     modifier = Modifier
                         .size(16.dp)
                         .padding(end = 2.dp)
                 )
+
+                else -> {}
             }
         }
     },
@@ -815,12 +818,16 @@ fun AlbumListItem(
             if (songs.isEmpty()) return@LaunchedEffect
             downloadUtil.downloads.collect { downloads ->
                 downloadState = when {
-                    songs.all { downloads[it.id]?.second != null && downloads[it.id] != LocalDateTime.MIN } -> STATE_COMPLETED
+                    songs.all { s -> downloads[s.id]?.state == STATE_COMPLETED || downloadUtil.customDownloads.value.any { s.id == it.key } } -> STATE_COMPLETED
                     songs.all {
-                        downloads[it.id] == LocalDateTime.MIN
+                        downloads[it.id]?.state in listOf(
+                            STATE_QUEUED,
+                            STATE_DOWNLOADING,
+                            STATE_COMPLETED
+                        )
                     } -> STATE_DOWNLOADING
 
-                    else -> STATE_STOPPED
+                    else -> Download.STATE_STOPPED
                 }
             }
         }
@@ -876,19 +883,23 @@ fun AlbumGridItem(
         }
 
         var downloadState by remember {
-            mutableIntStateOf(STATE_STOPPED)
+            mutableIntStateOf(Download.STATE_STOPPED)
         }
 
         LaunchedEffect(songs) {
             if (songs.isEmpty()) return@LaunchedEffect
             downloadUtil.downloads.collect { downloads ->
                 downloadState = when {
-                    songs.all { downloads[it.id] != null && downloads[it.id] != DownloadUtil.DL_IN_PROGRESS } -> STATE_COMPLETED
+                    songs.all { downloads[it.id]?.state == STATE_COMPLETED } -> STATE_COMPLETED
                     songs.all {
-                        downloads[it.id] == DownloadUtil.DL_IN_PROGRESS
+                        downloads[it.id]?.state in listOf(
+                            STATE_QUEUED,
+                            STATE_DOWNLOADING,
+                            STATE_COMPLETED
+                        )
                     } -> STATE_DOWNLOADING
 
-                    else -> STATE_STOPPED
+                    else -> Download.STATE_STOPPED
                 }
             }
         }
@@ -1187,7 +1198,7 @@ fun YouTubeListItem(
         }
         if (item is SongItem) {
             val downloads by LocalDownloadUtil.current.downloads.collectAsState()
-            Icon.Download(downloads[item.id])
+            Icon.Download(downloads[item.id]?.state)
         }
     },
     isActive: Boolean = false,
@@ -1253,7 +1264,7 @@ fun YouTubeGridItem(
         }
         if (item is SongItem) {
             val downloads by LocalDownloadUtil.current.downloads.collectAsState()
-            Icon.Download(downloads[item.id])
+            Icon.Download(downloads[item.id]?.state)
         }
     },
     thumbnailRatio: Float = if (item is SongItem) 16f / 9 else 1f,
@@ -1658,17 +1669,6 @@ private object Icon {
     }
 
     @Composable
-    fun Download(state: LocalDateTime?) {
-        if (state == DownloadUtil.DL_IN_PROGRESS) {
-            Download(STATE_DOWNLOADING)
-        } else if (state != null) {
-            Download(STATE_COMPLETED)
-        } else {
-            Download(STATE_STOPPED)
-        }
-    }
-
-    @Composable
     fun Download(state: Int?) {
         when (state) {
             STATE_COMPLETED -> Icon(
@@ -1685,6 +1685,8 @@ private object Icon {
                     .size(16.dp)
                     .padding(end = 2.dp)
             )
+
+            else -> {}
         }
     }
 
