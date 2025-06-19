@@ -662,6 +662,7 @@ fun SetupWizard(
                                     coroutineScope.launch {
                                         delay(1000)
                                         downloadUtil.cd()
+                                        downloadUtil.scanDownloads()
                                     }
                                 },
                                 onReset = {
