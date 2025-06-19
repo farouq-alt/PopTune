@@ -12,7 +12,9 @@ import android.net.ConnectivityManager
 import android.util.Log
 import androidx.media3.common.PlaybackException
 import com.dd3boh.outertune.constants.AudioQuality
-import com.dd3boh.outertune.db.entities.FormatEntity
+import com.dd3boh.outertune.utils.YTPlayerUtils.validateStatus
+import com.dd3boh.outertune.utils.potoken.PoTokenGenerator
+import com.dd3boh.outertune.utils.potoken.PoTokenResult
 import com.zionhuang.innertube.NewPipeUtils
 import com.zionhuang.innertube.YouTube
 import com.zionhuang.innertube.models.YouTubeClient
@@ -20,8 +22,6 @@ import com.zionhuang.innertube.models.YouTubeClient.Companion.IOS
 import com.zionhuang.innertube.models.YouTubeClient.Companion.TVHTML5_SIMPLY_EMBEDDED_PLAYER
 import com.zionhuang.innertube.models.YouTubeClient.Companion.WEB_REMIX
 import com.zionhuang.innertube.models.response.PlayerResponse
-import com.dd3boh.outertune.utils.potoken.PoTokenGenerator
-import com.dd3boh.outertune.utils.potoken.PoTokenResult
 import okhttp3.OkHttpClient
 
 object YTPlayerUtils {

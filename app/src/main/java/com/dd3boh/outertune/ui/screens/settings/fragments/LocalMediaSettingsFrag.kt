@@ -37,7 +37,6 @@ import androidx.compose.material.icons.rounded.WarningAmber
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -89,7 +88,6 @@ import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.utils.scanners.LocalMediaScanner.Companion.destroyScanner
 import com.dd3boh.outertune.utils.scanners.LocalMediaScanner.Companion.getScanner
-
 import com.dd3boh.outertune.utils.scanners.LocalMediaScanner.Companion.scannerProgressCurrent
 import com.dd3boh.outertune.utils.scanners.LocalMediaScanner.Companion.scannerProgressTotal
 import com.dd3boh.outertune.utils.scanners.LocalMediaScanner.Companion.scannerRequestCancel

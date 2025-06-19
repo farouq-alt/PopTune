@@ -21,7 +21,6 @@ import androidx.compose.material.icons.rounded.Person
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.dd3boh.outertune.R
-import kotlin.collections.forEach
 
 @Immutable
 sealed class Screens(
