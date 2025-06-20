@@ -784,14 +784,12 @@ class MusicService : MediaLibraryService(),
             Log.d(TAG, "PLAYING: song id = $mediaId")
 
             val song = queueBoard.getCurrentQueue()?.findSong(dataSpec.key ?: "")
-            if (song?.isLocal == true) {
-                Log.d(TAG, "PLAYING: local song")
-                if (song.localPath == null) {
-                    throw PlaybackException(
-                        "Invalid local song. Please run scanner with full rescan enabled",
-                        Throwable(),
-                        PlaybackException.ERROR_CODE_BAD_VALUE
-                    )
+            // local song
+            if (song?.localPath != null) {
+                if (song.isLocal) {
+                    Log.d(TAG, "PLAYING: local song")
+                } else {
+                    Log.d(TAG, "PLAYING: Custom downloaded song")
                 }
 
                 val file = File(song.localPath)
@@ -804,14 +802,6 @@ class MusicService : MediaLibraryService(),
                 }
 
                 return@Factory dataSpec.withUri(Uri.fromFile(file))
-            }
-
-            val isDownloadNew = downloadUtil.localMgr.getFilePathIfExists(mediaId)
-            if (isDownloadNew != null) {
-                Log.d(TAG, "PLAYING: Downloaded remote song")
-                val songPath = isDownloadNew
-
-                return@Factory dataSpec.withUri(songPath)
             }
 
             val isDownload =
