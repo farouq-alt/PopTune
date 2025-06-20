@@ -799,6 +799,7 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
 
         bubbleUp(item)
         player.queueTitle = item.title
+        player.player.shuffleModeEnabled = item.shuffled
         return queuePos
     }
 
