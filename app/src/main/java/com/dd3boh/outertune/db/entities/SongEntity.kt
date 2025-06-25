@@ -40,6 +40,7 @@ data class SongEntity(
     val inLibrary: LocalDateTime? = null, // doubles as "date added"
     @ColumnInfo(name = "isLocal", defaultValue = false.toString())
     val isLocal: Boolean = false,
+    @ColumnInfo(index = true)
     val localPath: String?,
     val dateDownload: LocalDateTime? = null, // doubles as "isDownloaded"
 ) {
