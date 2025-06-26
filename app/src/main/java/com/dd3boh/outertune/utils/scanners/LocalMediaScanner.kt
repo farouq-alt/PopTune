@@ -12,8 +12,6 @@ import android.content.Context
 import android.media.MediaPlayer
 import android.net.Uri
 import android.util.Log
-import androidx.compose.ui.util.fastFirstOrNull
-import androidx.compose.ui.util.fastForEach
 import androidx.datastore.preferences.core.edit
 import androidx.documentfile.provider.DocumentFile
 import com.dd3boh.outertune.constants.AutomaticScannerKey
@@ -22,6 +20,7 @@ import com.dd3boh.outertune.constants.SCANNER_DEBUG
 import com.dd3boh.outertune.constants.SYNC_SCANNER
 import com.dd3boh.outertune.constants.ScannerImpl
 import com.dd3boh.outertune.constants.ScannerImplKey
+import com.dd3boh.outertune.constants.ScannerM3uMatchCriteria
 import com.dd3boh.outertune.constants.ScannerMatchCriteria
 import com.dd3boh.outertune.db.MusicDatabase
 import com.dd3boh.outertune.db.entities.Artist
@@ -1017,6 +1016,26 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
             }
 
             return matchingArtists.size == a.size
+        }
+
+        /**
+         * Check the similarity of a song
+         *
+         * @param a
+         * @param b
+         * @param matchStrength How lax should the scanner be
+         */
+        fun compareM3uSong(
+            a: Song,
+            b: Song,
+            matchStrength: ScannerM3uMatchCriteria = ScannerM3uMatchCriteria.LEVEL_1,
+        ): Boolean {
+            val matchStrength = when (matchStrength) {
+                ScannerM3uMatchCriteria.LEVEL_1 -> ScannerMatchCriteria.LEVEL_1
+                ScannerM3uMatchCriteria.LEVEL_2 -> ScannerMatchCriteria.LEVEL_2
+                else -> ScannerMatchCriteria.LEVEL_1
+            }
+            return compareSong(a, b, matchStrength)
         }
 
         /**
