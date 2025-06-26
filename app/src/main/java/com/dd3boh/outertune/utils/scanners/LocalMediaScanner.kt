@@ -23,9 +23,11 @@ import com.dd3boh.outertune.constants.ScannerImplKey
 import com.dd3boh.outertune.constants.ScannerM3uMatchCriteria
 import com.dd3boh.outertune.constants.ScannerMatchCriteria
 import com.dd3boh.outertune.db.MusicDatabase
+import com.dd3boh.outertune.db.entities.AlbumEntity
 import com.dd3boh.outertune.db.entities.Artist
 import com.dd3boh.outertune.db.entities.ArtistEntity
 import com.dd3boh.outertune.db.entities.Song
+import com.dd3boh.outertune.db.entities.SongAlbumMap
 import com.dd3boh.outertune.db.entities.SongArtistMap
 import com.dd3boh.outertune.db.entities.SongEntity
 import com.dd3boh.outertune.db.entities.SongGenreMap
@@ -35,6 +37,7 @@ import com.dd3boh.outertune.models.MediaMetadata
 import com.dd3boh.outertune.models.SongTempData
 import com.dd3boh.outertune.models.toMediaMetadata
 import com.dd3boh.outertune.ui.utils.scannerSession
+import com.dd3boh.outertune.utils.closestAlbumMatch
 import com.dd3boh.outertune.utils.closestMatch
 import com.dd3boh.outertune.utils.dataStore
 import com.dd3boh.outertune.utils.reportException
@@ -80,7 +83,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
     fun advancedScan(
         uri: Uri,
     ): SongTempData {
-        val file = fileFromUri(context, uri)?: throw IOException("Could not access file")
+        val file = fileFromUri(context, uri) ?: throw IOException("Could not access file")
         try {
             // test if system can play
             val testPlayer = MediaPlayer()
@@ -314,10 +317,10 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                             }
                         }
                     }
-                    /*
+
                     song.song.album?.let {
                         val dbQuery =
-                            database.searchAlbums(it.title).firstOrNull()?.sortedBy { item -> item.album.title.length }
+                            database.localAlbumsByName(it.title).firstOrNull()?.sortedBy { item -> item.title.length }
                         val dbAlbum = dbQuery?.let { item -> closestAlbumMatch(it.title, item) }
 
                         database.transaction {
@@ -327,11 +330,11 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                                 insert(SongAlbumMap(songToUpdate.id, it.id, 0))
                             } else {
                                 // album does  exist in db, link to it
-                                insert(SongAlbumMap(songToUpdate.id, dbAlbum.album.id, dbAlbum.album.songCount))
+                                insert(SongAlbumMap(songToUpdate.id, dbAlbum.id, dbAlbum.songCount))
                             }
                         }
                     }
-                     */
+
                     // update format
                     if (song.format != null) {
                         database.query {
@@ -786,6 +789,25 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                     tmp.forEach { swapArtists(it.artist, oldestArtist.artist, database) }
                 }
             }
+
+            // remove duplicated local albums
+            val dbAlbums: MutableList<AlbumEntity> = database.allLocalAlbumsByName().first().toMutableList()
+            while (dbAlbums.isNotEmpty()) {
+                // gather same artists (precondition: artists are ordered by name
+                val tmp = ArrayList<AlbumEntity>()
+                val oldestAlbum: AlbumEntity = dbAlbums.removeAt(0)
+                tmp.add(oldestAlbum)
+                while (dbAlbums.isNotEmpty() && dbAlbums.first().title == tmp.first().title) {
+                    tmp.add(dbAlbums.removeAt(0))
+                }
+
+                if (tmp.size > 1) {
+                    // merge all duplicate artists into the oldest one
+                    tmp.removeAt(0)
+                    tmp.sortBy { it.bookmarkedAt }
+                    tmp.forEach { swapAlbums(it, oldestAlbum, database) }
+                }
+            }
         }
     }
 
@@ -1181,6 +1203,24 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
 
                 // nuke old artist
                 database.safeDeleteArtist(old.id)
+            }
+        }
+
+        fun swapAlbums(old: AlbumEntity, new: AlbumEntity, database: MusicDatabase) {
+            if (database.albumById(old.id) == null) {
+                throw Exception("Attempting to swap with non-existent old album in database with id: ${old.id}")
+            }
+            if (database.albumById(new.id) == null) {
+                throw Exception("Attempting to swap with non-existent new album in database with id: ${new.id}")
+            }
+
+            database.transaction {
+                // update participation(s)
+                database.updateSongAlbumMap(old.id, new.id)
+                database.updateArtistAlbumMap(old.id, new.id)
+
+                // nuke old artist
+                database.safeDeleteAlbum(old.id)
             }
         }
     }

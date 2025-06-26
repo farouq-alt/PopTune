@@ -249,7 +249,7 @@ class LibraryAlbumsViewModel @Inject constructor(
             allAlbums.collect { albums ->
                 albums
                     ?.filter {
-                        it.album.songCount == 0
+                        !it.album.isLocal && it.album.songCount == 0
                     }?.forEach { album ->
                         YouTube.album(album.id).onSuccess { albumPage ->
                             database.query {
