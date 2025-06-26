@@ -679,7 +679,6 @@ fun LocalPlaylistHeader(
                 if (playlist.thumbnails[0].startsWith("/storage")) {
                     AsyncImageLocal(
                         image = { imageCache.getLocalThumbnail(playlist.thumbnails[0], true) },
-                        contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(AlbumThumbnailSize)
@@ -710,7 +709,6 @@ fun LocalPlaylistHeader(
                         if (playlist.thumbnails.getOrNull(index)?.startsWith("/storage") == true) {
                             AsyncImageLocal(
                                 image = { imageCache.getLocalThumbnail(playlist.thumbnails[index], true) },
-                                contentDescription = null,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .align(alignment)
