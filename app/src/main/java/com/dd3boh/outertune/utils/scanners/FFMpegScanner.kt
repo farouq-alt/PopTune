@@ -163,6 +163,8 @@ class FFMpegScanner() : MetadataScanner {
              * Parse the more complicated structures
              */
 
+            val timeNow = LocalDateTime.now()
+
             var year: Int? = null
             var date: LocalDateTime? = null
 
@@ -217,7 +219,7 @@ class FFMpegScanner() : MetadataScanner {
                         date = date,
                         dateModified = dateModified,
                         isLocal = true,
-                        inLibrary = LocalDateTime.now(),
+                        inLibrary = timeNow,
                         localPath = uri
                     ),
                     artists = artistList,
