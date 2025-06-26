@@ -142,6 +142,7 @@ import androidx.window.core.layout.WindowWidthSizeClass
 import com.dd3boh.outertune.constants.AppBarHeight
 import com.dd3boh.outertune.constants.AutomaticScannerKey
 import com.dd3boh.outertune.constants.DEFAULT_ENABLED_TABS
+import com.dd3boh.outertune.constants.DEFAULT_PLAYER_BACKGROUND
 import com.dd3boh.outertune.constants.DarkMode
 import com.dd3boh.outertune.constants.DarkModeKey
 import com.dd3boh.outertune.constants.DefaultOpenTabKey
@@ -373,7 +374,7 @@ class MainActivity : ComponentActivity() {
 
             val playerBackground by rememberEnumPreference(
                 key = PlayerBackgroundStyleKey,
-                defaultValue = PlayerBackgroundStyle.DEFAULT
+                defaultValue = DEFAULT_PLAYER_BACKGROUND
             )
 
             try {
@@ -847,7 +848,7 @@ class MainActivity : ComponentActivity() {
                             LaunchedEffect(playerBottomSheetState.isExpanded) {
                                 setSystemBarAppearance(
                                     (playerBottomSheetState.isExpanded
-                                            && playerBackground != PlayerBackgroundStyle.DEFAULT) || useDarkTheme
+                                            && playerBackground != PlayerBackgroundStyle.FOLLOW_THEME) || useDarkTheme
                                 )
                             }
 
