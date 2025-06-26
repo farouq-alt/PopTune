@@ -9,6 +9,7 @@
 
 package com.dd3boh.outertune.ui.component
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandIn
@@ -1436,6 +1437,7 @@ fun YouTubeCardItem(
     }
 }
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun ItemThumbnail(
     thumbnailUrl: String?,
@@ -1454,18 +1456,7 @@ fun ItemThumbnail(
     ) {
         var isRectangularImage by remember { mutableStateOf(false) }
 
-        if (albumIndex != null) {
-            AnimatedVisibility(
-                visible = !isActive,
-                enter = fadeIn() + expandIn(expandFrom = Alignment.Center),
-                exit = shrinkOut(shrinkTowards = Alignment.Center) + fadeOut()
-            ) {
-                Text(
-                    text = albumIndex.toString(),
-                    style = MaterialTheme.typography.labelLarge
-                )
-            }
-        } else if (thumbnailUrl?.startsWith("/storage") == true) {
+        if (thumbnailUrl?.startsWith("/storage") == true) {
             // local thumbnail arts
             AsyncImageLocal(
                 image = { imageCache.getLocalThumbnail(thumbnailUrl, true) },
@@ -1490,6 +1481,31 @@ fun ItemThumbnail(
                     .fillMaxSize()
                     .clip(shape)
             )
+        }
+
+        if (albumIndex != null) {
+            AnimatedVisibility(
+                visible = !isActive,
+                enter = fadeIn() + expandIn(expandFrom = Alignment.Center),
+                exit = shrinkOut(shrinkTowards = Alignment.Center) + fadeOut()
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(shape)
+                ) {
+                    Text(
+                        text = albumIndex.toString(),
+                        color = MaterialTheme.colorScheme.surface,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .background(Color.Black.copy(0.6f))
+                            .padding(horizontal = 4.dp)
+                    )
+                }
+            }
         }
 
         if (isRectangularImage) {
