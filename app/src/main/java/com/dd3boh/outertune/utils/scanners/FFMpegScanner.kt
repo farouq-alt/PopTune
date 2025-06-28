@@ -58,7 +58,7 @@ class FFMpegScanner() : MetadataScanner {
         val ffmpeg = FFMpegWrapper()
 
         ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY).use { fd ->
-            val data: AudioMetadata? = ffmpeg.getFullAudioMetadata(fd)
+            val data: AudioMetadata? = ffmpeg.getFullAudioMetadata(fd.dup().detachFd())
 
             if (data == null) {
                 Log.e(EXTRACTOR_TAG, "Fatal extraction error")
@@ -68,7 +68,7 @@ class FFMpegScanner() : MetadataScanner {
                 throw RuntimeException("Fatal FFmpeg scanner extraction error. Status: ${data.status}")
             }
             if (EXTRACTOR_DEBUG && DEBUG_SAVE_OUTPUT) {
-                Log.v(EXTRACTOR_TAG, "Full output for: $uri \n $data")
+                Log.v(EXTRACTOR_TAG, "Full output for: ${file.absolutePath} \n $data")
             }
 
             val songId = SongEntity.generateSongId()
@@ -146,12 +146,12 @@ class FFMpegScanner() : MetadataScanner {
                 if (rawTitle != null && rawTitle.isBlank() == false) { // songs with no title tag
                     rawTitle.trim()
                 } else {
-                    uri.substringAfterLast('/').substringBeforeLast('.')
+                    file.absolutePath.substringAfterLast('/').substringBeforeLast('.')
                 }
 
             // should never be invalid if scanner even gets here fine...
             val dateModified =
-                LocalDateTime.ofInstant(Instant.ofEpochMilli(File(uri).lastModified()), ZoneOffset.UTC)
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(file.lastModified()), ZoneOffset.UTC)
             val albumId = if (albumName != null) AlbumEntity.generateAlbumId() else null
             val mime = if (type != null) {
                 "${type.trim()}/${file.extension}"
@@ -220,7 +220,7 @@ class FFMpegScanner() : MetadataScanner {
                         dateModified = dateModified,
                         isLocal = true,
                         inLibrary = timeNow,
-                        localPath = uri
+                        localPath = file.absolutePath
                     ),
                     artists = artistList,
                     // album not working
