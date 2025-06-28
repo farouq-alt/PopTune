@@ -78,7 +78,7 @@ class FFMpegScanner() : MetadataScanner {
             var genres: String? = data.genre
             var rawDate: String? = null
             var codec: String? = data.codec
-            var type: String? = data.codecType
+            var type: String? = data.codecType?.lowercase()
             var bitrate: Long = data.bitrate
             var sampleRate: Int = data.sampleRate
             var channels: Int = data.channels
@@ -153,10 +153,10 @@ class FFMpegScanner() : MetadataScanner {
             val dateModified =
                 LocalDateTime.ofInstant(Instant.ofEpochMilli(File(uri).lastModified()), ZoneOffset.UTC)
             val albumId = if (albumName != null) AlbumEntity.generateAlbumId() else null
-            val mime = if (type != null && codec != null) {
-                "${type.trim()}/${codec.trim()}"
+            val mime = if (type != null) {
+                "${type.trim()}/${file.extension}"
             } else {
-                "Unknown"
+                "—"
             }
 
             /**
@@ -231,7 +231,7 @@ class FFMpegScanner() : MetadataScanner {
                     id = songId,
                     itag = -1,
                     mimeType = mime,
-                    codecs = codec?.trim() ?: "Unknown",
+                    codecs = codec?.trim() ?: "—",
                     bitrate = bitrate.toInt(),
                     sampleRate = sampleRate,
                     contentLength = duration,

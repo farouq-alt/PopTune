@@ -195,11 +195,11 @@ class TagLibScanner : MetadataScanner {
                 FormatEntity(
                     id = songId,
                     itag = -1,
-                    mimeType = "audio/$codec",
+                    mimeType = "audio/${file.extension}",
                     codecs = codec,
                     bitrate = bitrate,
                     sampleRate = sampleRate,
-                    contentLength = duration.toLong(),
+                    contentLength = duration,
                     loudnessDb = replayGain,
                     playbackTrackingUrl = null
                 )
