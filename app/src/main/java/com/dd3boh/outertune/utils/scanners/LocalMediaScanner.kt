@@ -1229,11 +1229,3 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
 class InvalidAudioFileException(message: String) : Throwable(message)
 class ScannerAbortException(message: String) : Throwable(message)
 class ScannerCriticalFailureException(message: String) : Throwable(message)
-
-// remove if building with the submodule
-class FFMpegScanner() : MetadataScanner {
-
-    override fun getAllMetadataFromFile(file: File): SongTempData {
-        throw NotImplementedError()
-    }
-}
