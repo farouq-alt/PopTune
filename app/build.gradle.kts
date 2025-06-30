@@ -107,9 +107,7 @@ android {
             .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
             .forEach { output ->
                 // do not write universal twice
-                var outputFileName = "OuterTune" +
-                        if (output.baseName == "universal") "-${variant.versionName}" else "" +
-                                "-${output.baseName}-${output.versionCode}.apk"
+                var outputFileName = "OuterTune-${variant.versionName}-${output.baseName}-${output.versionCode}.apk"
                 output.outputFileName = outputFileName
             }
     }
