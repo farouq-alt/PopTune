@@ -369,7 +369,7 @@ fun SongListItem(
     showDownloadIcon: Boolean = true,
     showLocalIcon: Boolean = true,
     playlistSong: PlaylistSong? = null,
-    playlistBrowseId: String? = null,
+    playlist: Playlist? = null,
     showDragHandle: Boolean = false,
     dragHandleModifier: Modifier? = null,
     disableShowMenu: Boolean = false,
@@ -439,7 +439,7 @@ fun SongListItem(
                                     SongMenu(
                                         originalSong = song,
                                         playlistSong = playlistSong,
-                                        playlistBrowseId = playlistBrowseId,
+                                        playlist = playlist,
                                         navController = navController,
                                         onDismiss = menuState::dismiss
                                     )

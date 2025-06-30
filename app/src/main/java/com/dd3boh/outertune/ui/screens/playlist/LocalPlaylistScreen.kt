@@ -516,7 +516,7 @@ fun LocalPlaylistScreen(
                         inSelectMode = inSelectMode,
                         isSelected = selection.contains(song.song.id),
                         playlistSong = song,
-                        playlistBrowseId = playlist?.id,
+                        playlist = playlist,
                         navController = navController,
                         snackbarHostState = snackbarHostState,
                         modifier = Modifier
