@@ -40,7 +40,7 @@ class TagLibScanner : MetadataScanner {
      */
     override fun getAllMetadataFromFile(file: File): SongTempData {
         if (EXTRACTOR_DEBUG)
-            Log.v(EXTRACTOR_TAG, "Starting Full Extractor session on: ${file.path}")
+            Log.v(EXTRACTOR_TAG, "Starting Full Extractor session on: ${file.absolutePath}")
 
         ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY).use { fd ->
             val songId = SongEntity.generateSongId()
@@ -131,7 +131,7 @@ class TagLibScanner : MetadataScanner {
             }
 
             if (EXTRACTOR_DEBUG && DEBUG_SAVE_OUTPUT) {
-                Log.v(EXTRACTOR_TAG,"Full output for: ${file.path} \n $allData")
+                Log.v(EXTRACTOR_TAG,"Full output for: ${file.absolutePath} \n $allData")
             }
 
 
@@ -144,7 +144,7 @@ class TagLibScanner : MetadataScanner {
             val title: String = if (rawTitle != null && rawTitle.isBlank() == false) { // songs with no title tag
                 rawTitle.trim()
             } else {
-                file.path.substringAfterLast('/').substringBeforeLast('.')
+                file.absolutePath.substringAfterLast('/').substringBeforeLast('.')
             }
 
             val duration: Long = (rawDuration / 1000).toLong()
@@ -185,7 +185,7 @@ class TagLibScanner : MetadataScanner {
                         dateModified = dateModified,
                         isLocal = true,
                         inLibrary = timeNow,
-                        localPath = file.path
+                        localPath = file.absolutePath
                     ),
                     artists = artistList,
                     // album not working
