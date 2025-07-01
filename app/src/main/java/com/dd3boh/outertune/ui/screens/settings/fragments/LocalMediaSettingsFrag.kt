@@ -62,6 +62,7 @@ import androidx.core.app.ActivityCompat.requestPermissions
 import com.dd3boh.outertune.LocalDatabase
 import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.R
+import com.dd3boh.outertune.constants.DownloadExtraPathKey
 import com.dd3boh.outertune.constants.DownloadPathKey
 import com.dd3boh.outertune.constants.ENABLE_FFMETADATAEX
 import com.dd3boh.outertune.constants.ExcludedScanPathsKey
@@ -141,6 +142,7 @@ fun ColumnScope.LocalScannerFrag() {
     val downloadPath by rememberPreference(DownloadPathKey, "")
     val (scanPaths, onScanPathsChange) = rememberPreference(ScanPathsKey, defaultValue = "")
     val (excludedScanPaths, onExcludedScanPathsChange) = rememberPreference(ExcludedScanPathsKey, defaultValue = "")
+    val dlPathExtra by rememberPreference(DownloadExtraPathKey, "")
 
     var fullRescan by remember { mutableStateOf(false) }
     val (lookupYtmArtists, onLookupYtmArtistsChange) = rememberPreference(LookupYtmArtistsKey, defaultValue = false)
@@ -495,11 +497,10 @@ fun ColumnScope.LocalScannerFrag() {
                 showAddFolderDialog = null
                 tempScanPaths.clear()
             },
-            isInputValid = tempScanPaths.toList().any {
-                val dlUri = uriListFromString(downloadPath).firstOrNull()
-                if ((dlUri) == null) return@any true
+            isInputValid = tempScanPaths.toList().all {
                 // scan path cannot be the download directory or subdir of download directory
-                !it.toString().contains(dlUri.toString())
+                !it.toString().contains(uriListFromString(downloadPath).firstOrNull().toString())
+                        && uriListFromString(dlPathExtra).none { f -> it.toString().contains(f.toString()) }
             } || tempScanPaths.isEmpty()
         ) {
             val dirPickerLauncher = rememberLauncherForActivityResult(
@@ -532,7 +533,10 @@ fun ColumnScope.LocalScannerFrag() {
                     )
             ) {
                 tempScanPaths.forEach {
-                    val valid = it.toString() != uriListFromString(downloadPath).firstOrNull().toString()
+                    !it.toString().contains(uriListFromString(downloadPath).firstOrNull().toString())
+                            && uriListFromString(dlPathExtra).none { f -> it.toString().contains(f.toString()) }
+                    val valid = !it.toString().contains(uriListFromString(downloadPath).firstOrNull().toString())
+                            && uriListFromString(dlPathExtra).none { f -> it.toString().contains(f.toString()) }
                     Row(
                         modifier = Modifier
                             .padding(horizontal = 8.dp)

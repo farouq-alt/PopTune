@@ -951,7 +951,9 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
             val files = dir.listFiles()
             for (file in files) {
                 if (!scanHidden && file.name?.startsWith(".") == true) continue
-                if (file.isDirectory && (scanHidden || !file.listFiles().any { it.name == ".nomedia" })) {
+                if (file.isDirectory) {
+                    // TODO: .nomedia for downloads folder (permission denied)
+//                if (file.isDirectory && (scanHidden || !file.listFiles().any { it.name == ".nomedia" })) {
                     // look into subdirs
                     scanDfRecursive(file, result, scanHidden, validator)
                 } else {
