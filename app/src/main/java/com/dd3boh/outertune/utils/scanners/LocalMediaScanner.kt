@@ -12,6 +12,9 @@ import android.content.Context
 import android.media.MediaPlayer
 import android.net.Uri
 import android.util.Log
+import androidx.compose.ui.util.fastAny
+import androidx.compose.ui.util.fastDistinctBy
+import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastMapNotNull
 import androidx.datastore.preferences.core.edit
 import androidx.documentfile.provider.DocumentFile
@@ -221,16 +224,23 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
         scannerProgressTotal.value = finalSongs.size
         scannerProgressCurrent.value = 0
         scannerProgressProbe = 0
+        val mod = if (newSongs.size < 20) {
+            2
+        } else if (newSongs.size < 50) {
+            8
+        } else {
+            20
+        }
 
         // sync
         var runs = 0
         finalSongs.forEach { song ->
             runs++
-            if (SCANNER_DEBUG && runs % 20 == 0) {
+            if (SCANNER_DEBUG && runs % mod == 0) {
                 Log.d(TAG, "------------ SYNC: Local Library Sync: $runs/${finalSongs.size} processed ------------")
             }
-            if (runs % 20 == 0) {
-                scannerProgressCurrent.value += 20
+            if (runs % mod == 0) {
+                scannerProgressCurrent.value += mod
             }
 
             if (scannerRequestCancel) {
@@ -365,6 +375,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
             }
         }
 
+        scannerProgressCurrent.value = scannerProgressTotal.value
         // do not delete songs from database automatically, we just disable them
         if (!noDisable) {
             finalize(database)
@@ -408,6 +419,13 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
             val converted = newSongs.fastMapNotNull { fileFromUri(context, it)?.absolutePath }
             val delta = converted.minus(allSongs)
             Log.d(TAG, "Songs found: ${delta.size}")
+            val mod = if (newSongs.size < 20) {
+                2
+            } else if (newSongs.size < 50) {
+                8
+            } else {
+                20
+            }
 
             val finalSongs = ArrayList<SongTempData>()
             val scannerJobs = ArrayList<Deferred<SongTempData?>>()
@@ -440,13 +458,13 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                                 try {
                                     ret = advancedScan(File(s))
                                     scannerProgressProbe++
-                                    if (SCANNER_DEBUG && scannerProgressProbe % 20 == 0) {
+                                    if (SCANNER_DEBUG && scannerProgressProbe % mod == 0) {
                                         Log.d(
                                             TAG,
                                             "------------ SCAN: Full Scanner: $scannerProgressProbe discovered ------------"
                                         )
                                     }
-                                    if (scannerProgressProbe % 20 == 0) {
+                                    if (scannerProgressProbe % mod == 0) {
                                         scannerProgressCurrent.value = scannerProgressProbe
                                     }
                                 } catch (e: InvalidAudioFileException) {
@@ -491,10 +509,11 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                 Log.i(TAG, "Not syncing, no valid songs found!")
             }
 
+            scannerProgressCurrent.value = scannerProgressProbe
             // we handle disabling songs here instead
             scannerState.value = 3
             finalize(database)
-            disableSongsByUri(newSongs, database)
+            disableSongsByPath(converted, database)
         }
 
         scannerState.value = 0
@@ -527,6 +546,13 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
         scannerProgressTotal.value = newSongs.size
         scannerProgressCurrent.value = 0
         scannerProgressProbe = 0
+        val mod = if (newSongs.size < 20) {
+            2
+        } else if (newSongs.size < 50) {
+            8
+        } else {
+            20
+        }
 
         runBlocking(Dispatchers.IO) {
             val finalSongs = ArrayList<SongTempData>()
@@ -558,13 +584,13 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                                 try {
                                     val ret = advancedScan(uri)
                                     scannerProgressProbe++
-                                    if (SCANNER_DEBUG && scannerProgressProbe % 20 == 0) {
+                                    if (SCANNER_DEBUG && scannerProgressProbe % mod == 0) {
                                         Log.d(
                                             TAG,
                                             "------------ SCAN: Full Scanner: $scannerProgressProbe discovered ------------"
                                         )
                                     }
-                                    if (scannerProgressProbe % 20 == 0) {
+                                    if (scannerProgressProbe % mod == 0) {
                                         scannerProgressCurrent.value = scannerProgressProbe
                                     }
                                     ret
@@ -591,6 +617,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                 song?.song?.let { finalSongs.add(song) }
             }
 
+            scannerProgressCurrent.value = scannerProgressProbe
             if (finalSongs.isNotEmpty()) {
                 /**
                  * TODO: Delete all local format entity before scan
@@ -625,6 +652,13 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
             scannerProgressTotal.value = allLocal.size
             scannerProgressCurrent.value = 0
             scannerProgressProbe = 0
+            val mod = if (allLocal.size < 20) {
+                2
+            } else if (allLocal.size < 50) {
+                8
+            } else {
+                20
+            }
 
             allLocal.forEach { element ->
                 val artistVal = element.name.trim()
@@ -672,10 +706,10 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                 }
 
                 scannerProgressProbe++
-                if (scannerProgressProbe % 20 == 0) {
+                if (scannerProgressProbe % mod == 0) {
                     scannerProgressCurrent.value = scannerProgressProbe
                 }
-                if (SCANNER_DEBUG && scannerProgressProbe % 20 == 0) {
+                if (SCANNER_DEBUG && scannerProgressProbe % mod == 0) {
                     Log.v(
                         TAG,
                         "------------ SYNC: youtubeArtistLookup job: $ scannerProgressCurrent.value/${scannerProgressTotal.value} artists processed ------------"
