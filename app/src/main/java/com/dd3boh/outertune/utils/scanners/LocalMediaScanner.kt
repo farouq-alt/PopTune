@@ -12,6 +12,7 @@ import android.content.Context
 import android.media.MediaPlayer
 import android.net.Uri
 import android.util.Log
+import androidx.compose.ui.util.fastMapNotNull
 import androidx.datastore.preferences.core.edit
 import androidx.documentfile.provider.DocumentFile
 import com.dd3boh.outertune.constants.AutomaticScannerKey
@@ -76,18 +77,26 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
         )
     }
 
+    fun advancedScan(
+        uri: Uri,
+    ): SongTempData {
+        val file = fileFromUri(context, uri) ?: throw IOException("Could not access file")
+        return advancedScan(file)
+    }
+
     /**
      * Compiles a song with all it's necessary metadata. Unlike MediaStore,
      * this also supports multiple artists, multiple genres (TBD), and a few extra details (TBD).
      */
     fun advancedScan(
-        uri: Uri,
+        file: File,
     ): SongTempData {
-        val file = fileFromUri(context, uri) ?: throw IOException("Could not access file")
+        if (!file.exists()) throw IOException("File not found")
+        val path = file.absolutePath
         try {
             // test if system can play
             val testPlayer = MediaPlayer()
-            testPlayer.setDataSource(file.absolutePath)
+            testPlayer.setDataSource(path)
             testPlayer.prepare()
             testPlayer.release()
 
@@ -106,12 +115,12 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                     if (SCANNER_DEBUG) {
                         e.printStackTrace()
                     }
-                    throw InvalidAudioFileException("Failed to access file or not in a playable format: ${e.message} for: $uri")
+                    throw InvalidAudioFileException("Failed to access file or not in a playable format: ${e.message} for: $path")
                 }
 
                 else -> {
                     if (SCANNER_DEBUG) {
-                        Log.w(TAG, "ERROR READING METADATA: ${e.message} for: $uri")
+                        Log.w(TAG, "ERROR READING METADATA: ${e.message} for: $path")
                         e.printStackTrace()
                     }
 
@@ -120,11 +129,11 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                         Song(
                             SongEntity(
                                 SongEntity.generateSongId(),
-                                file.absolutePath.substringAfterLast('/'),
+                                path.substringAfterLast('/'),
                                 thumbnailUrl = null,
                                 isLocal = true,
                                 inLibrary = LocalDateTime.now(),
-                                localPath = file.absolutePath
+                                localPath = path
                             ),
                             artists = ArrayList()
                         ),
@@ -395,14 +404,9 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
         runBlocking(Dispatchers.IO) {
             Log.d(TAG, "Scanning for files...")
             // get list of all songs in db, then get songs unknown to the database
-            val allSongs = database.allLocalSongs().first()
-            val delta = newSongs.filterNot {
-                allSongs.any { dbSong ->
-                    val file = fileFromUri(context, it)?.absolutePath
-                    if (file == null) return@any false
-                    file == dbSong.song.localPath
-                } // ignore user strictFileNames prefs for initial matching
-            }
+            val allSongs = database.allLocalSongs().first().fastMapNotNull { it.song.localPath }.toSet()
+            val converted = newSongs.fastMapNotNull { fileFromUri(context, it)?.absolutePath }
+            val delta = converted.minus(allSongs)
             Log.d(TAG, "Songs found: ${delta.size}")
 
             val finalSongs = ArrayList<SongTempData>()
@@ -415,12 +419,10 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                         scannerRequestCancel = false
                         throw ScannerAbortException("Scanner canceled during Quick (additive delta) Library Sync")
                     }
-                    val sUri = fileFromUri(context, s)
-                    if (sUri == null) throw ScannerCriticalFailureException("why null.")
 
-                    val path = sUri
-                    if (SCANNER_DEBUG)
-                        Log.v(TAG, "PATH: $path")
+                    if (SCANNER_DEBUG) {
+                        Log.v(TAG, "PATH: $s")
+                    }
 
                     /**
                      * TODO: do not link album (and whatever song id) with youtube yet, figure that out later
@@ -436,7 +438,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                                     throw ScannerAbortException("")
                                 }
                                 try {
-                                    ret = advancedScan(s)
+                                    ret = advancedScan(File(s))
                                     scannerProgressProbe++
                                     if (SCANNER_DEBUG && scannerProgressProbe % 20 == 0) {
                                         Log.d(
@@ -455,7 +457,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                         )
                     } else {
                         // force synchronous scanning of songs. Do not catch errors
-                        finalSongs.add(advancedScan(s))
+                        finalSongs.add(advancedScan(File(s)))
                         scannerProgressProbe++
                         if (SCANNER_DEBUG && scannerProgressProbe % 5 == 0) {
                             Log.d(
@@ -691,7 +693,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
         Log.i(TAG, "------------ SYNC: youtubeArtistLookup job ended------------")
     }
 
-    private fun disableSongsByUri(newSongs: List<Uri>, database: MusicDatabase) {
+    private fun disableSongsByPath(newSongs: List<String>, database: MusicDatabase) {
         Log.i(TAG, "Start finalize (disable songs) job. Number of valid songs: ${newSongs.size}")
         runBlocking(Dispatchers.IO) {
             // get list of all local songs in db
@@ -706,7 +708,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
 
                 // new songs is all songs that are known to be valid
                 // delete all songs in the DB that do not match a path
-                if (newSongs.none { fileFromUri(context, it)?.absolutePath == song.song.localPath }) {
+                if (newSongs.none { it == song.song.localPath }) {
                     if (SCANNER_DEBUG)
                         Log.v(TAG, "Disabling song ${song.song.localPath}")
                     database.transaction {
@@ -927,8 +929,8 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                             !(ext == "lrc" || ext == "ttml")
                         }
 
-                        allSongs.addAll(songsHere.filterNot { incl ->
-                            excludedScanPaths.any {
+                        allSongs.addAll(songsHere.fastFilter { incl ->
+                            !excludedScanPaths.any {
                                 incl.uri.path?.startsWith(it.path.toString()) == true
                             }
                         }.map { it.uri })
@@ -939,7 +941,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                 }
             }
 
-            return allSongs.distinctBy { it.toString() }
+            return allSongs.fastDistinctBy { it.toString() }
         }
 
         fun scanDfRecursive(
