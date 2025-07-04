@@ -8,7 +8,7 @@ import android.os.storage.StorageManager
 import android.provider.DocumentsContract
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
-import androidx.documentfile.provider.TreeDocumentFile
+import androidx.documentfile.provider.TreeDocumentFileOt
 import java.io.File
 
 fun documentFileFromUri(context: Context, uris: List<Uri>): List<DocumentFile> {
@@ -90,7 +90,7 @@ fun absoluteFilePathFromUri(context: Context, uri: Uri): String? {
     return fileFromUri(context, dfUri)?.absolutePath
 }
 
-private fun customDocFileFromTreeTreeUri(context: Context, uri: Uri) = TreeDocumentFile(
+private fun customDocFileFromTreeTreeUri(context: Context, uri: Uri) = TreeDocumentFileOt(
     null, context, DocumentsContract.buildDocumentUriUsingTree(
         uri, DocumentsContract.getTreeDocumentId(uri)
     )

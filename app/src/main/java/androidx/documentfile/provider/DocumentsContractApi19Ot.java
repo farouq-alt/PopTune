@@ -26,7 +26,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 @RequiresApi(19)
-class DocumentsContractApi19 {
+class DocumentsContractApi19Ot {
     private static final String TAG = "DocumentFile";
     // DocumentsContract API level 24.
     private static final int FLAG_VIRTUAL_DOCUMENT = 1 << 9;
@@ -177,6 +177,6 @@ class DocumentsContractApi19 {
             }
         }
     }
-    private DocumentsContractApi19() {
+    private DocumentsContractApi19Ot() {
     }
 }

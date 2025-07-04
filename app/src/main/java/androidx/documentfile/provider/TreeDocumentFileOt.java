@@ -27,17 +27,17 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import java.util.ArrayList;
 @RequiresApi(21)
-public class TreeDocumentFile extends DocumentFile {
+public class TreeDocumentFileOt extends DocumentFile {
     private static final String TAG = "DocumentFile";
     private Context mContext;
     private Uri mUri;
     private String mName;
-    public TreeDocumentFile(@Nullable DocumentFile parent, Context context, Uri uri) {
+    public TreeDocumentFileOt(@Nullable DocumentFile parent, Context context, Uri uri) {
         super(parent);
         mContext = context;
         mUri = uri;
     }
-    public TreeDocumentFile(@Nullable DocumentFile parent, Context context, Uri uri, String name) {
+    public TreeDocumentFileOt(@Nullable DocumentFile parent, Context context, Uri uri, String name) {
         super(parent);
         mContext = context;
         mUri = uri;
@@ -46,8 +46,8 @@ public class TreeDocumentFile extends DocumentFile {
     @Override
     public @Nullable DocumentFile createFile(@NonNull String mimeType,
                                              @NonNull String displayName) {
-        final Uri result = TreeDocumentFile.createFile(mContext, mUri, mimeType, displayName);
-        return (result != null) ? new TreeDocumentFile(this, mContext, result) : null;
+        final Uri result = TreeDocumentFileOt.createFile(mContext, mUri, mimeType, displayName);
+        return (result != null) ? new TreeDocumentFileOt(this, mContext, result) : null;
     }
     private static @Nullable Uri createFile(Context context, Uri self, String mimeType,
                                             String displayName) {
@@ -60,9 +60,9 @@ public class TreeDocumentFile extends DocumentFile {
     }
     @Override
     public @Nullable DocumentFile createDirectory(@NonNull String displayName) {
-        final Uri result = TreeDocumentFile.createFile(
+        final Uri result = TreeDocumentFileOt.createFile(
                 mContext, mUri, DocumentsContract.Document.MIME_TYPE_DIR, displayName);
-        return (result != null) ? new TreeDocumentFile(this, mContext, result) : null;
+        return (result != null) ? new TreeDocumentFileOt(this, mContext, result) : null;
     }
     @Override
     public @NonNull Uri getUri() {
@@ -73,40 +73,40 @@ public class TreeDocumentFile extends DocumentFile {
         if (mName != null) {
             return mName;
         } else {
-            return DocumentsContractApi19.getName(mContext, mUri);
+            return DocumentsContractApi19Ot.getName(mContext, mUri);
         }
     }
     @Override
     public @Nullable String getType() {
-        return DocumentsContractApi19.getType(mContext, mUri);
+        return DocumentsContractApi19Ot.getType(mContext, mUri);
     }
     @Override
     public boolean isDirectory() {
-        return DocumentsContractApi19.isDirectory(mContext, mUri);
+        return DocumentsContractApi19Ot.isDirectory(mContext, mUri);
     }
     @Override
     public boolean isFile() {
-        return DocumentsContractApi19.isFile(mContext, mUri);
+        return DocumentsContractApi19Ot.isFile(mContext, mUri);
     }
     @Override
     public boolean isVirtual() {
-        return DocumentsContractApi19.isVirtual(mContext, mUri);
+        return DocumentsContractApi19Ot.isVirtual(mContext, mUri);
     }
     @Override
     public long lastModified() {
-        return DocumentsContractApi19.lastModified(mContext, mUri);
+        return DocumentsContractApi19Ot.lastModified(mContext, mUri);
     }
     @Override
     public long length() {
-        return DocumentsContractApi19.length(mContext, mUri);
+        return DocumentsContractApi19Ot.length(mContext, mUri);
     }
     @Override
     public boolean canRead() {
-        return DocumentsContractApi19.canRead(mContext, mUri);
+        return DocumentsContractApi19Ot.canRead(mContext, mUri);
     }
     @Override
     public boolean canWrite() {
-        return DocumentsContractApi19.canWrite(mContext, mUri);
+        return DocumentsContractApi19Ot.canWrite(mContext, mUri);
     }
     @Override
     public boolean delete() {
@@ -118,7 +118,7 @@ public class TreeDocumentFile extends DocumentFile {
     }
     @Override
     public boolean exists() {
-        return DocumentsContractApi19.exists(mContext, mUri);
+        return DocumentsContractApi19Ot.exists(mContext, mUri);
     }
     @Override
     public DocumentFile @NonNull [] listFiles() {
@@ -150,7 +150,7 @@ public class TreeDocumentFile extends DocumentFile {
         final String[] name = resultNames.toArray(new String[0]);
         final DocumentFile[] resultFiles = new DocumentFile[result.length];
         for (int i = 0; i < result.length; i++) {
-            resultFiles[i] = new TreeDocumentFile(this, mContext, result[i], name[i]);
+            resultFiles[i] = new TreeDocumentFileOt(this, mContext, result[i], name[i]);
         }
         return resultFiles;
     }
