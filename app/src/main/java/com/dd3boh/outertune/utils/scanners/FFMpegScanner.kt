@@ -43,7 +43,7 @@ class FFMpegScanner() : MetadataScanner {
 //        System.loadLibrary("avutil")
 //        System.loadLibrary("swresample")
 //        System.loadLibrary("swscale")
-        System.loadLibrary("ffmetaexjni")
+        System.loadLibrary("ffMetadataEx")
     }
 
     /**

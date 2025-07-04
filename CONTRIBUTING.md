@@ -7,16 +7,12 @@ For most users, we recommend importing and building through Android Studio.
 There are the following build flavours
 
 ```
-universal (all architectures)
-arm64 (arm64-v8a)
-x86_64
-github (all architectures)
+universal
+github
 ```
 
 | Flavour   | Architecture support                              | Version update checker | FFMpeg tag extractor |
 |-----------|---------------------------------------------------|------------------------|----------------------|
-| arm64     | arm64-v8a                                         | ❌                      | ❌                    |
-| x86_64    | x86_64                                            | ❌                      | ❌                    |
 | universal | arm64-v8a, armeabi-v7a, x86, x84_64 (with splits) | ❌                      | ❌                    |
 | github    | arm64-v8a, armeabi-v7a, x86, x84_64 (with splits) | ✅                      | ✅                    |
 

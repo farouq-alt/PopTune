@@ -1,30 +1,29 @@
 [versions]
-aboutLibraries = "12.2.0"
 adaptive = "1.1.0"
-androidGradlePlugin = "8.10.1"
+androidGradlePlugin = "8.11.0"
 annotation = "1.9.1"
-kotlin = "2.1.21"
-compose = "1.8.2"
+kotlin = "2.2.0"
+compose = "1.8.3"
 lifecycle = "2.9.1"
 material3 = "1.3.2"
 media3 = "1.6.1"
-room = "2.7.1"
+room = "2.7.2"
 hilt = "2.56.2"
-ktor = "3.1.3"
-ksp = "2.1.21-2.0.1"
+ktor = "3.2.1"
+ksp = "2.2.0-2.0.2"
 taglib = "1.0.0"
 
 [libraries]
 adaptive = { module = "androidx.compose.material3.adaptive:adaptive", version.ref = "adaptive" }
 annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
-error-prone-core = { module = "com.google.errorprone:error_prone_core", version = "2.38.0" }
+error-prone-core = { module = "com.google.errorprone:error_prone_core", version = "2.39.0" }
 guava = { group = "com.google.guava", name = "guava", version = "33.4.8-android" }
 coroutines-guava = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-guava", version = "1.10.2" }
 concurrent-futures = { group = "androidx.concurrent", name = "concurrent-futures-ktx", version = "1.2.0" }
 
 gradle = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
 activity = { group = "androidx.activity", name = "activity-compose", version = "1.10.1" }
-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.9.0" }
+navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.9.1" }
 hilt-navigation = { group = "androidx.hilt", name = "hilt-navigation-compose", version = "1.2.0" }
 datastore = { group = "androidx.datastore", name = "datastore-preferences", version = "1.1.7" }
 
@@ -34,7 +33,7 @@ compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "compos
 compose-ui-util = { group = "androidx.compose.ui", name = "ui-util", version.ref = "compose" }
 compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling", version.ref = "compose" }
 compose-animation = { group = "androidx.compose.animation", name = "animation-graphics", version.ref = "compose" }
-compose-reorderable = { module = "sh.calvin.reorderable:reorderable", version = "2.4.3" }
+compose-reorderable = { module = "sh.calvin.reorderable:reorderable", version = "2.5.1" }
 compose-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended", version = "1.7.8" }
 
 viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
@@ -80,13 +79,8 @@ taglib = { group = "com.github.Kyant0", name = "taglib", version.ref = "taglib" 
 newpipe-extractor = { group = "com.github.libre-tube", name = "NewPipeExtractor", version = "bcb7705" }
 
 
-aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutLibraries" }
-aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutLibraries" }
-
 [plugins]
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
-
-aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }

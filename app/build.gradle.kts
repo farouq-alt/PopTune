@@ -1,6 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
-import com.android.utils.cxx.io.filenameStartsWithIgnoreCase
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 
@@ -10,8 +10,6 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.compose.compiler)
-
-    alias(libs.plugins.aboutlibraries)
 }
 
 android {
@@ -56,48 +54,24 @@ android {
             isEnable = true
             reset()
 
-            isUniversalApk = false
+            include("x86_64", "x86", "armeabi-v7a", "arm64-v8a")
+            isUniversalApk = true
         }
     }
 
     flavorDimensions.add("abi")
 
-    // build split + universal apks for universal and github
     productFlavors {
+        // TODO: Change name -> here, github actions, version info tables in github
         // universal
         create("universal") {
             isDefault = true
             dimension = "abi"
-            ndk {
-                abiFilters.addAll(listOf("x86", "x86_64", "armeabi-v7a", "arm64-v8a"))
-            }
-
-            splits.abi.include("x86_64", "x86", "armeabi-v7a", "arm64-v8a")
-            splits.abi.isUniversalApk = true
-        }
-        // arm64 only
-        create("arm64") {
-            dimension = "abi"
-            ndk {
-                abiFilters.add("arm64-v8a")
-            }
-        }
-        // x86_64 only
-        create("x86_64") {
-            dimension = "abi"
-            ndk {
-                abiFilters.add("x86_64")
-            }
         }
 
+        // fully featured version, large file size
         create("github") {
             dimension = "abi"
-            ndk {
-                abiFilters.addAll(listOf("x86", "x86_64", "armeabi-v7a", "arm64-v8a"))
-            }
-
-            splits.abi.include("x86_64", "x86", "armeabi-v7a", "arm64-v8a")
-            splits.abi.isUniversalApk = true
         }
     }
 
@@ -119,13 +93,15 @@ android {
     }
     kotlin {
         jvmToolchain(21)
-    }
-    kotlinOptions {
-        freeCompilerArgs = freeCompilerArgs + "-Xcontext-receivers"
-        jvmTarget = "21"
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_21)
+            freeCompilerArgs.add("-Xannotation-default-target=param-property")
+
+        }
     }
 
     tasks.withType<KotlinCompile> {
+        exclude("**/*LibrariesScreen.kt")
         if (!name.substringAfter("compile").lowercase().startsWith("github")) {
             exclude("**/*FFMpegScanner.kt")
         } else {
@@ -214,9 +190,6 @@ dependencies {
 
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.serialization.json)
-
-    implementation(libs.aboutlibraries.core)
-    implementation(libs.aboutlibraries.compose.m3)
 
     /*
     "JitPack builds are broken with the latest CMake version.
