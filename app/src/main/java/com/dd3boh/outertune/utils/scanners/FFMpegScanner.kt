@@ -58,7 +58,7 @@ class FFMpegScanner() : MetadataScanner {
         val ffmpeg = FFMpegWrapper()
 
         ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY).use { fd ->
-            val data: AudioMetadata? = ffmpeg.getFullAudioMetadata(fd)
+            val data: AudioMetadata? = ffmpeg.getFullAudioMetadata(fd.dup().detachFd())
 
             if (data == null) {
                 Log.e(EXTRACTOR_TAG, "Fatal extraction error")
@@ -68,7 +68,7 @@ class FFMpegScanner() : MetadataScanner {
                 throw RuntimeException("Fatal FFmpeg scanner extraction error. Status: ${data.status}")
             }
             if (EXTRACTOR_DEBUG && DEBUG_SAVE_OUTPUT) {
-                Log.v(EXTRACTOR_TAG, "Full output for: $uri \n $data")
+                Log.v(EXTRACTOR_TAG, "Full output for: ${file.absolutePath} \n $data")
             }
 
             val songId = SongEntity.generateSongId()
@@ -78,7 +78,7 @@ class FFMpegScanner() : MetadataScanner {
             var genres: String? = data.genre
             var rawDate: String? = null
             var codec: String? = data.codec
-            var type: String? = data.codecType
+            var type: String? = data.codecType?.lowercase()
             var bitrate: Long = data.bitrate
             var sampleRate: Int = data.sampleRate
             var channels: Int = data.channels
@@ -146,22 +146,24 @@ class FFMpegScanner() : MetadataScanner {
                 if (rawTitle != null && rawTitle.isBlank() == false) { // songs with no title tag
                     rawTitle.trim()
                 } else {
-                    uri.substringAfterLast('/').substringBeforeLast('.')
+                    file.absolutePath.substringAfterLast('/').substringBeforeLast('.')
                 }
 
             // should never be invalid if scanner even gets here fine...
             val dateModified =
-                LocalDateTime.ofInstant(Instant.ofEpochMilli(File(uri).lastModified()), ZoneOffset.UTC)
+                LocalDateTime.ofInstant(Instant.ofEpochMilli(file.lastModified()), ZoneOffset.UTC)
             val albumId = if (albumName != null) AlbumEntity.generateAlbumId() else null
-            val mime = if (type != null && codec != null) {
-                "${type.trim()}/${codec.trim()}"
+            val mime = if (type != null) {
+                "${type.trim()}/${file.extension}"
             } else {
-                "Unknown"
+                "—"
             }
 
             /**
              * Parse the more complicated structures
              */
+
+            val timeNow = LocalDateTime.now()
 
             var year: Int? = null
             var date: LocalDateTime? = null
@@ -217,8 +219,8 @@ class FFMpegScanner() : MetadataScanner {
                         date = date,
                         dateModified = dateModified,
                         isLocal = true,
-                        inLibrary = LocalDateTime.now(),
-                        localPath = uri
+                        inLibrary = timeNow,
+                        localPath = file.absolutePath
                     ),
                     artists = artistList,
                     // album not working
@@ -229,7 +231,7 @@ class FFMpegScanner() : MetadataScanner {
                     id = songId,
                     itag = -1,
                     mimeType = mime,
-                    codecs = codec?.trim() ?: "Unknown",
+                    codecs = codec?.trim() ?: "—",
                     bitrate = bitrate.toInt(),
                     sampleRate = sampleRate,
                     contentLength = duration,

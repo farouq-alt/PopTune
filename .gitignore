@@ -94,6 +94,7 @@ lint/tmp/
 /app/arm64
 /app/uncommon_abi
 /app/x86_64
+/app/github
 
 # misc
 .DS_Store

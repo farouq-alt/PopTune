@@ -1,5 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
+import com.android.utils.cxx.io.filenameStartsWithIgnoreCase
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 
@@ -21,8 +22,8 @@ android {
         applicationId = "com.dd3boh.outertune"
         minSdk = 26
         targetSdk = 36
-        versionCode = 60
-        versionName = "0.9.0-alpha3"
+        versionCode = 61
+        versionName = "0.9.0-beta1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -55,14 +56,13 @@ android {
             isEnable = true
             reset()
 
-            // all common abis
-            // include("x86_64", "x86", "armeabi-v7a", "arm64-v8a") // universal
             isUniversalApk = false
         }
     }
 
     flavorDimensions.add("abi")
 
+    // build split + universal apks for universal and github
     productFlavors {
         // universal
         create("universal") {
@@ -71,6 +71,9 @@ android {
             ndk {
                 abiFilters.addAll(listOf("x86", "x86_64", "armeabi-v7a", "arm64-v8a"))
             }
+
+            splits.abi.include("x86_64", "x86", "armeabi-v7a", "arm64-v8a")
+            splits.abi.isUniversalApk = true
         }
         // arm64 only
         create("arm64") {
@@ -86,6 +89,16 @@ android {
                 abiFilters.add("x86_64")
             }
         }
+
+        create("github") {
+            dimension = "abi"
+            ndk {
+                abiFilters.addAll(listOf("x86", "x86_64", "armeabi-v7a", "arm64-v8a"))
+            }
+
+            splits.abi.include("x86_64", "x86", "armeabi-v7a", "arm64-v8a")
+            splits.abi.isUniversalApk = true
+        }
     }
 
     applicationVariants.all {
@@ -93,7 +106,8 @@ android {
         variant.outputs
             .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
             .forEach { output ->
-                val outputFileName = "OuterTune-${variant.versionName}-${variant.baseName}.apk"
+                // do not write universal twice
+                var outputFileName = "OuterTune-${variant.versionName}-${output.baseName}-${output.versionCode}.apk"
                 output.outputFileName = outputFileName
             }
     }
@@ -112,8 +126,13 @@ android {
     }
 
     tasks.withType<KotlinCompile> {
-        exclude("**/*FFMpegScanner.kt")
+        if (!name.substringAfter("compile").lowercase().startsWith("github")) {
+            exclude("**/*FFMpegScanner.kt")
+        } else {
+            exclude("**/*FFMpegScannerDud.kt")
+        }
     }
+
 
     // for IzzyOnDroid
     dependenciesInfo {
@@ -206,4 +225,10 @@ dependencies {
 //    implementation(libs.taglib) // jitpack
     implementation(files("../prebuilt/taglib-1.0.2-outertune-universal-release.aar")) // prebuilt
 //    implementation("com.kyant:taglib") // custom
+}
+
+afterEvaluate {
+    dependencies {
+        add("githubImplementation", project(":ffMetadataEx"))
+    }
 }

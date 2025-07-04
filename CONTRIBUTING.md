@@ -2,18 +2,26 @@
 
 For most users, we recommend importing and building through Android Studio.
 
-## Build variants
+## Build flavors/variants
 
-There are the following build variants
+There are the following build flavours
 
 ```
 universal (all architectures)
 arm64 (arm64-v8a)
 x86_64
+github (all architectures)
 ```
 
-**For most users, the `universal` variant is sufficient.** The other build variants may reduce file size, however at the
-cost of compatibility.
+| Flavour   | Architecture support                              | Version update checker | FFMpeg tag extractor |
+|-----------|---------------------------------------------------|------------------------|----------------------|
+| arm64     | arm64-v8a                                         | ❌                      | ❌                    |
+| x86_64    | x86_64                                            | ❌                      | ❌                    |
+| universal | arm64-v8a, armeabi-v7a, x86, x84_64 (with splits) | ❌                      | ❌                    |
+| github    | arm64-v8a, armeabi-v7a, x86, x84_64 (with splits) | ✅                      | ✅                    |
+
+**Extra setup is required for the `github` variant.** Please
+see https://github.com/OuterTune/ffMetadataEx/blob/main/README.md#building
 
 <br/><br/>
 

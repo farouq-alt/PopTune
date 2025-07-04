@@ -22,6 +22,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.PlaylistPlay
+import androidx.compose.material.icons.automirrored.outlined.QueueMusic
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.Download
@@ -31,6 +33,7 @@ import androidx.compose.material.icons.rounded.LockOpen
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.OfflinePin
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Shuffle
 import androidx.compose.material.icons.rounded.Sync
@@ -649,6 +652,7 @@ fun LocalPlaylistHeader(
     }
 
     LaunchedEffect(songs) {
+        val songs = songs.filterNot { it.song.song.isLocal }
         if (songs.isEmpty()) return@LaunchedEffect
         downloadUtil.downloads.collect { downloads ->
             val remaining = songs.filterNot { downloads[it.song.id]?.state == Download.STATE_COMPLETED }
@@ -679,7 +683,6 @@ fun LocalPlaylistHeader(
                 if (playlist.thumbnails[0].startsWith("/storage")) {
                     AsyncImageLocal(
                         image = { imageCache.getLocalThumbnail(playlist.thumbnails[0], true) },
-                        contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(AlbumThumbnailSize)
@@ -710,7 +713,6 @@ fun LocalPlaylistHeader(
                         if (playlist.thumbnails.getOrNull(index)?.startsWith("/storage") == true) {
                             AsyncImageLocal(
                                 image = { imageCache.getLocalThumbnail(playlist.thumbnails[index], true) },
-                                contentDescription = null,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .align(alignment)
@@ -728,6 +730,15 @@ fun LocalPlaylistHeader(
                         }
                     }
                 }
+            } else {
+                AsyncImageLocal(
+                    image = { null },
+                    placeholderIcon = Icons.AutoMirrored.Outlined.QueueMusic,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(AlbumThumbnailSize)
+                        .clip(RoundedCornerShape(ThumbnailCornerRadius))
+                )
             }
 
             Column(

@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Album
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.OfflinePin
@@ -83,12 +84,14 @@ import com.dd3boh.outertune.LocalPlayerAwareWindowInsets
 import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.AlbumThumbnailSize
+import com.dd3boh.outertune.constants.ListThumbnailSize
 import com.dd3boh.outertune.constants.ThumbnailCornerRadius
 import com.dd3boh.outertune.constants.TopBarInsets
 import com.dd3boh.outertune.db.entities.Album
 import com.dd3boh.outertune.models.toMediaMetadata
 import com.dd3boh.outertune.playback.ExoDownloadService
 import com.dd3boh.outertune.playback.queues.ListQueue
+import com.dd3boh.outertune.ui.component.AsyncImageLocal
 import com.dd3boh.outertune.ui.component.AutoResizeText
 import com.dd3boh.outertune.ui.component.FloatingFooter
 import com.dd3boh.outertune.ui.component.FontSizeRange
@@ -106,6 +109,7 @@ import com.dd3boh.outertune.ui.menu.AlbumMenu
 import com.dd3boh.outertune.ui.menu.YouTubeAlbumMenu
 import com.dd3boh.outertune.ui.utils.backToMain
 import com.dd3boh.outertune.ui.utils.getNSongsString
+import com.dd3boh.outertune.ui.utils.imageCache
 import com.dd3boh.outertune.utils.joinByBullet
 import com.dd3boh.outertune.viewmodels.AlbumViewModel
 
@@ -154,7 +158,8 @@ fun AlbumScreen(
     }
 
     LaunchedEffect(albumWithSongs) {
-        val songs = albumWithSongs?.songs?.map { it.id }
+        if (albumWithSongs?.album?.isLocal != false) return@LaunchedEffect
+        val songs = albumWithSongs?.songs?.filterNot { it.song.isLocal }?.map { it.id }
         if (songs.isNullOrEmpty()) return@LaunchedEffect
         downloadUtil.downloads.collect { downloads ->
             val remaining = songs.filterNot { downloads[it]?.state == Download.STATE_COMPLETED }
@@ -186,13 +191,23 @@ fun AlbumScreen(
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        AsyncImage(
-                            model = albumWithSongsLocal.album.thumbnailUrl,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(AlbumThumbnailSize)
-                                .clip(RoundedCornerShape(ThumbnailCornerRadius))
-                        )
+                        if (albumWithSongsLocal.album.thumbnailUrl != null) {
+                            AsyncImage(
+                                model = albumWithSongsLocal.album.thumbnailUrl,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(AlbumThumbnailSize)
+                                    .clip(RoundedCornerShape(ThumbnailCornerRadius))
+                            )
+                        } else {
+                            AsyncImageLocal(
+                                image = { null },
+                                placeholderIcon = Icons.Rounded.Album,
+                                modifier = Modifier
+                                    .size(AlbumThumbnailSize)
+                                    .clip(RoundedCornerShape(ThumbnailCornerRadius))
+                            )
+                        }
 
                         Spacer(Modifier.width(16.dp))
 
@@ -230,10 +245,20 @@ fun AlbumScreen(
                             Text(annotatedString)
 
                             Text(
-                                text = joinByBullet(
-                                    getNSongsString(albumWithSongsLocal.album.songCount, albumWithSongsLocal.downloadCount),
-                                    albumWithSongsLocal.album.year.toString()
-                                ),
+                                text = if (albumWithSongsLocal.album.year != null) {
+                                    joinByBullet(
+                                        getNSongsString(
+                                            albumWithSongsLocal.album.songCount,
+                                            albumWithSongsLocal.downloadCount
+                                        ),
+                                        albumWithSongsLocal.album.year.toString()
+                                    )
+                                } else {
+                                    getNSongsString(
+                                        albumWithSongsLocal.album.songCount,
+                                        albumWithSongsLocal.downloadCount
+                                    )
+                                },
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Normal
                             )
@@ -253,58 +278,60 @@ fun AlbumScreen(
                                     )
                                 }
 
-                                when (downloadState) {
-                                    Download.STATE_COMPLETED -> {
-                                        IconButton(
-                                            onClick = {
-                                                albumWithSongsLocal.songs.forEach { song ->
-                                                    DownloadService.sendRemoveDownload(
-                                                        context,
-                                                        ExoDownloadService::class.java,
-                                                        song.id,
-                                                        false
-                                                    )
+                                if (albumWithSongsLocal.album.isLocal == false) {
+                                    when (downloadState) {
+                                        Download.STATE_COMPLETED -> {
+                                            IconButton(
+                                                onClick = {
+                                                    albumWithSongsLocal.songs.forEach { song ->
+                                                        DownloadService.sendRemoveDownload(
+                                                            context,
+                                                            ExoDownloadService::class.java,
+                                                            song.id,
+                                                            false
+                                                        )
+                                                    }
                                                 }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Rounded.OfflinePin,
+                                                    contentDescription = null
+                                                )
                                             }
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Rounded.OfflinePin,
-                                                contentDescription = null
-                                            )
                                         }
-                                    }
 
-                                    Download.STATE_DOWNLOADING -> {
-                                        IconButton(
-                                            onClick = {
-                                                albumWithSongsLocal.songs.forEach { song ->
-                                                    DownloadService.sendRemoveDownload(
-                                                        context,
-                                                        ExoDownloadService::class.java,
-                                                        song.id,
-                                                        false
-                                                    )
+                                        Download.STATE_DOWNLOADING -> {
+                                            IconButton(
+                                                onClick = {
+                                                    albumWithSongsLocal.songs.forEach { song ->
+                                                        DownloadService.sendRemoveDownload(
+                                                            context,
+                                                            ExoDownloadService::class.java,
+                                                            song.id,
+                                                            false
+                                                        )
+                                                    }
                                                 }
+                                            ) {
+                                                CircularProgressIndicator(
+                                                    strokeWidth = 2.dp,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
                                             }
-                                        ) {
-                                            CircularProgressIndicator(
-                                                strokeWidth = 2.dp,
-                                                modifier = Modifier.size(24.dp)
-                                            )
                                         }
-                                    }
 
-                                    else -> {
-                                        IconButton(
-                                            onClick = {
-                                                val songs = albumWithSongsLocal.songs.map{ it.toMediaMetadata() }
-                                                downloadUtil.download(songs)
+                                        else -> {
+                                            IconButton(
+                                                onClick = {
+                                                    val songs = albumWithSongsLocal.songs.map { it.toMediaMetadata() }
+                                                    downloadUtil.download(songs)
+                                                }
+                                            ) {
+                                                Icon(
+                                                    Icons.Rounded.Download,
+                                                    contentDescription = null
+                                                )
                                             }
-                                        ) {
-                                            Icon(
-                                                Icons.Rounded.Download,
-                                                contentDescription = null
-                                            )
                                         }
                                     }
                                 }
@@ -313,7 +340,11 @@ fun AlbumScreen(
                                     onClick = {
                                         menuState.show {
                                             AlbumMenu(
-                                                originalAlbum = Album(albumWithSongsLocal.album, albumWithSongsLocal.downloadCount, albumWithSongsLocal.artists),
+                                                originalAlbum = Album(
+                                                    albumWithSongsLocal.album,
+                                                    albumWithSongsLocal.downloadCount,
+                                                    albumWithSongsLocal.artists
+                                                ),
                                                 navController = navController,
                                                 onDismiss = menuState::dismiss,
                                             )
@@ -337,7 +368,8 @@ fun AlbumScreen(
                                 playerConnection.playQueue(
                                     ListQueue(
                                         title = albumWithSongsLocal.album.title,
-                                        items = albumWithSongs?.songs?.mapNotNull { it.toMediaMetadata() }?.toList()?: emptyList(),
+                                        items = albumWithSongs?.songs?.mapNotNull { it.toMediaMetadata() }?.toList()
+                                            ?: emptyList(),
                                         playlistId = albumWithSongsLocal.album.playlistId
                                     )
                                 )
@@ -361,7 +393,8 @@ fun AlbumScreen(
                                 playerConnection.playQueue(
                                     ListQueue(
                                         title = albumWithSongsLocal.album.title,
-                                        items = albumWithSongs?.songs?.mapNotNull { it.toMediaMetadata() }?.toList()?: emptyList(),
+                                        items = albumWithSongs?.songs?.mapNotNull { it.toMediaMetadata() }?.toList()
+                                            ?: emptyList(),
                                         playlistId = albumWithSongsLocal.album.playlistId,
                                         startShuffled = true,
                                     )
@@ -411,7 +444,9 @@ fun AlbumScreen(
                     isSelected = selection.contains(song.id),
                     navController = navController,
                     snackbarHostState = snackbarHostState,
-                    modifier = Modifier.fillMaxWidth().animateItem()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .animateItem()
                 )
             }
 

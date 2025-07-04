@@ -40,7 +40,7 @@ class TagLibScanner : MetadataScanner {
      */
     override fun getAllMetadataFromFile(file: File): SongTempData {
         if (EXTRACTOR_DEBUG)
-            Log.v(EXTRACTOR_TAG, "Starting Full Extractor session on: ${file.path}")
+            Log.v(EXTRACTOR_TAG, "Starting Full Extractor session on: ${file.absolutePath}")
 
         ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY).use { fd ->
             val songId = SongEntity.generateSongId()
@@ -131,7 +131,7 @@ class TagLibScanner : MetadataScanner {
             }
 
             if (EXTRACTOR_DEBUG && DEBUG_SAVE_OUTPUT) {
-                Log.v(EXTRACTOR_TAG,"Full output for: ${file.path} \n $allData")
+                Log.v(EXTRACTOR_TAG,"Full output for: ${file.absolutePath} \n $allData")
             }
 
 
@@ -139,10 +139,12 @@ class TagLibScanner : MetadataScanner {
              * These vars need a bit more parsing
              */
 
+            val timeNow = LocalDateTime.now()
+
             val title: String = if (rawTitle != null && rawTitle.isBlank() == false) { // songs with no title tag
                 rawTitle.trim()
             } else {
-                file.path.substringAfterLast('/').substringBeforeLast('.')
+                file.absolutePath.substringAfterLast('/').substringBeforeLast('.')
             }
 
             val duration: Long = (rawDuration / 1000).toLong()
@@ -182,8 +184,8 @@ class TagLibScanner : MetadataScanner {
                         date = date,
                         dateModified = dateModified,
                         isLocal = true,
-                        inLibrary = LocalDateTime.now(),
-                        localPath = file.path
+                        inLibrary = timeNow,
+                        localPath = file.absolutePath
                     ),
                     artists = artistList,
                     // album not working
@@ -193,11 +195,11 @@ class TagLibScanner : MetadataScanner {
                 FormatEntity(
                     id = songId,
                     itag = -1,
-                    mimeType = "audio/$codec",
+                    mimeType = "audio/${file.extension}",
                     codecs = codec,
                     bitrate = bitrate,
                     sampleRate = sampleRate,
-                    contentLength = duration.toLong(),
+                    contentLength = duration,
                     loudnessDb = replayGain,
                     playbackTrackingUrl = null
                 )
