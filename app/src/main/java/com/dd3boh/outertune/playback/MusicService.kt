@@ -788,20 +788,23 @@ class MusicService : MediaLibraryService(),
             if (song?.localPath != null) {
                 if (song.isLocal) {
                     Log.d(TAG, "PLAYING: local song")
+                    val file = File(song.localPath)
+                    if (!file.exists()) {
+                        throw PlaybackException(
+                            "File not found",
+                            Throwable(),
+                            PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND
+                        )
+                    }
+
+                    return@Factory dataSpec.withUri(file.toUri())
                 } else {
-                    Log.d(TAG, "PLAYING: Custom downloaded song")
+                    val isDownloadNew = downloadUtil.localMgr.getFilePathIfExists(mediaId)
+                    isDownloadNew?.let {
+                        Log.d(TAG, "PLAYING: Custom downloaded song")
+                        return@Factory dataSpec.withUri(it)
+                    }
                 }
-
-                val file = File(song.localPath)
-                if (!file.exists()) {
-                    throw PlaybackException(
-                        "File not found",
-                        Throwable(),
-                        PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND
-                    )
-                }
-
-                return@Factory dataSpec.withUri(file.toUri())
             }
 
             val isDownload =

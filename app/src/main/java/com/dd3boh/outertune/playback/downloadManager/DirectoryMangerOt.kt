@@ -3,8 +3,8 @@ package com.dd3boh.outertune.playback.downloadManager
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
 import androidx.documentfile.provider.DocumentFile
+import androidx.documentfile.provider.TreeDocumentFileOt
 import com.dd3boh.outertune.db.entities.Song
 import com.dd3boh.outertune.utils.reportException
 import com.dd3boh.outertune.utils.scanners.LocalMediaScanner.Companion.scanDfRecursive
@@ -16,6 +16,8 @@ class DownloadDirectoryManagerOt(private var context: Context, private var dir: 
     val TAG = DownloadDirectoryManagerOt::class.simpleName.toString()
     var mainDir: DocumentFile? = null
     var allDirs: List<DocumentFile> = mutableListOf()
+
+    var availableFiles: Set<DocumentFile> = mutableSetOf()
 
     init {
         doInit(context, dir, extraDirs)
@@ -81,35 +83,39 @@ class DownloadDirectoryManagerOt(private var context: Context, private var dir: 
     }
 
     fun isExists(mediaId: String): DocumentFile? {
-        val result = ArrayList<DocumentFile>()
-        for (dir in allDirs) {
-            scanDfRecursive(dir, result, true) { it.substringAfterLast('[').substringBeforeLast(']') == mediaId }
-        }
-        return result.firstOrNull()
+        return availableFiles.find { (it as TreeDocumentFileOt).id == mediaId }
     }
 
     fun getFilePathIfExists(mediaId: String): Uri? {
-        var existingFile: DocumentFile? = isExists(mediaId)
-        return existingFile?.uri
+        return isExists(mediaId)?.uri
     }
 
     fun getMissingFiles(mediaId: List<Song>): List<Song> {
         val missingFiles = mediaId.toMutableSet()
-        val result = getAvailableFiles()
+        val result = getAvailableFiles(false)
         missingFiles.removeIf { f -> result.any { it.key == f.id } }
         return missingFiles.toList()
     }
 
-    fun getAvailableFiles(): Map<String, Uri> {
+    fun getAvailableFiles() = getAvailableFiles(true)
+
+    fun getAvailableFiles(useCache: Boolean = true): Map<String, Uri> {
         val availableFiles = HashMap<String, Uri>()
         val result = ArrayList<DocumentFile>()
-        for (dir in allDirs) {
-            scanDfRecursive(dir, result, true)
+        if (useCache) {
+            result.addAll(this.availableFiles.toList())
+        } else {
+            for (dir in allDirs) {
+                scanDfRecursive(dir, result, true)
+            }
         }
 
         for (file in result) {
             val path = file.name ?: continue
             availableFiles.put(path.substringAfterLast('[').substringBeforeLast(']'), file.uri)
+        }
+        if (!useCache) {
+            this.availableFiles = result.toSet()
         }
         return availableFiles
     }
@@ -125,11 +131,9 @@ class DownloadDirectoryManagerOt(private var context: Context, private var dir: 
     fun getTotalDlStorageUsage(): Long {
         if (allDirs.isEmpty()) return 0
         val result = ArrayList<DocumentFile>()
-        for (dir in allDirs) {
-            scanDfRecursive(dir, result, true)
-        }
+        availableFiles.sumOf { it.length() }
 
-        return result.filter { it.name != null }.sumOf { it.length() }
+        return availableFiles.sumOf { it.length() }
     }
 
     fun getExtraDlStorageUsage(): Long {

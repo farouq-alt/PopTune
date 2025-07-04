@@ -32,6 +32,7 @@ public class TreeDocumentFileOt extends DocumentFile {
     private Context mContext;
     private Uri mUri;
     private String mName;
+    private String mId;
     public TreeDocumentFileOt(@Nullable DocumentFile parent, Context context, Uri uri) {
         super(parent);
         mContext = context;
@@ -42,6 +43,11 @@ public class TreeDocumentFileOt extends DocumentFile {
         mContext = context;
         mUri = uri;
         mName = name;
+        int startIndex = name.lastIndexOf("[");
+        int endIndex = name.lastIndexOf("]");
+        if (startIndex < endIndex) {
+            mId = name.substring(startIndex + 1, endIndex);
+        }
     }
     @Override
     public @Nullable DocumentFile createFile(@NonNull String mimeType,
@@ -75,6 +81,9 @@ public class TreeDocumentFileOt extends DocumentFile {
         } else {
             return DocumentsContractApi19Ot.getName(mContext, mUri);
         }
+    }
+    public @Nullable String getId() {
+        return mId;
     }
     @Override
     public @Nullable String getType() {

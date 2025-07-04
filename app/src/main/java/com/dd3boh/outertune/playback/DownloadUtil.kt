@@ -390,7 +390,7 @@ class DownloadUtil @Inject constructor(
             val timeNow = LocalDateTime.now()
 
             // remove missing files
-            val availableFiles = localMgr.getAvailableFiles()
+            val availableFiles = localMgr.getAvailableFiles(false)
             availableFiles.forEach { f ->
                 runBlocking(Dispatchers.IO) {
                     try {
