@@ -75,8 +75,12 @@ fun fileFromUri(context: Context, uri: Uri): File? {
             "primary" -> Environment.getExternalStorageDirectory()
             else -> {
                 // Try to handle secondary storage
-                val secondaryStorage = System.getenv("SECONDARY_STORAGE")?.split(":")
-                secondaryStorage?.firstOrNull { File(it).exists() }?.let { File(it) }
+                val secondaryStorage = "/storage/$type"
+                if (File(secondaryStorage).exists()) {
+                    File(secondaryStorage)
+                } else {
+                    null
+                }
             }
         }
 
