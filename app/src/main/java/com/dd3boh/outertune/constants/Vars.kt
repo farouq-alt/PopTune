@@ -6,9 +6,9 @@ import com.dd3boh.outertune.BuildConfig
  * Feature flags
  */
 
-const val ENABLE_UPDATE_CHECKER = BuildConfig.FLAVOR == "github"
+const val ENABLE_UPDATE_CHECKER = BuildConfig.FLAVOR == "full"
 
-const val ENABLE_FFMETADATAEX = BuildConfig.FLAVOR == "github"
+const val ENABLE_FFMETADATAEX = BuildConfig.FLAVOR == "full"
 
 
 /**

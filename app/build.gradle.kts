@@ -62,15 +62,14 @@ android {
     flavorDimensions.add("abi")
 
     productFlavors {
-        // TODO: Change name -> here, github actions, version info tables in github
-        // universal
-        create("universal") {
+        // main version
+        create("core") {
             isDefault = true
             dimension = "abi"
         }
 
         // fully featured version, large file size
-        create("github") {
+        create("full") {
             dimension = "abi"
         }
     }
@@ -80,7 +79,6 @@ android {
         variant.outputs
             .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
             .forEach { output ->
-                // do not write universal twice
                 var outputFileName = "OuterTune-${variant.versionName}-${output.baseName}-${output.versionCode}.apk"
                 output.outputFileName = outputFileName
             }
@@ -102,7 +100,7 @@ android {
 
     tasks.withType<KotlinCompile> {
         exclude("**/*LibrariesScreen.kt")
-        if (!name.substringAfter("compile").lowercase().startsWith("github")) {
+        if (!name.substringAfter("compile").lowercase().startsWith("full")) {
             exclude("**/*FFMpegScanner.kt")
         } else {
             exclude("**/*FFMpegScannerDud.kt")
@@ -206,6 +204,6 @@ dependencies {
 
 afterEvaluate {
     dependencies {
-        add("githubImplementation", project(":ffMetadataEx"))
+        add("fullImplementation", project(":ffMetadataEx"))
     }
 }

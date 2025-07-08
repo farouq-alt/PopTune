@@ -90,11 +90,16 @@ lint/tmp/
 
 # build outputs
 /app/release/
+/app/core
+/app/full
+
+# TODO: remove in the future
 /app/universal
 /app/arm64
 /app/uncommon_abi
 /app/x86_64
 /app/github
+# TODO: remove in the future
 
 # misc
 .DS_Store

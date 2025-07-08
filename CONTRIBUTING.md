@@ -7,16 +7,16 @@ For most users, we recommend importing and building through Android Studio.
 There are the following build flavours
 
 ```
-universal
-github
+core
+full
 ```
 
-| Flavour   | Architecture support                              | Version update checker | FFMpeg tag extractor |
-|-----------|---------------------------------------------------|------------------------|----------------------|
-| universal | arm64-v8a, armeabi-v7a, x86, x84_64 (with splits) | ❌                      | ❌                    |
-| github    | arm64-v8a, armeabi-v7a, x86, x84_64 (with splits) | ✅                      | ✅                    |
+| Flavour | Architecture support                | Version update checker | FFMpeg tag extractor |
+|---------|-------------------------------------|------------------------|----------------------|
+| core    | arm64-v8a, armeabi-v7a, x86, x84_64 | ❌                      | ❌                    |
+| full    | arm64-v8a, armeabi-v7a, x86, x84_64 | ✅                      | ✅                    |
 
-**Extra setup is required for the `github` variant.** Please
+**Extra setup is required for the `full` variant.** Please
 see https://github.com/OuterTune/ffMetadataEx/blob/main/README.md#building
 
 <br/><br/>
