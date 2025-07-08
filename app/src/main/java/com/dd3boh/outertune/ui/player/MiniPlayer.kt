@@ -91,7 +91,7 @@ fun MiniPlayer(
         modifier = modifier
             .fillMaxWidth()
             .height(MiniPlayerHeight)
-            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp))
+//            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp))
     ) {
         LinearProgressIndicator(
             progress = { (position.toFloat() / duration).coerceIn(0f, 1f) },
@@ -104,13 +104,8 @@ fun MiniPlayer(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = modifier
-                .windowInsetsPadding(
-                    WindowInsets.systemBars
-                        .only(WindowInsetsSides.Horizontal)
-                        .add(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal))
-                )
-                .fillMaxSize()
-                .padding(end = 6.dp),
+
+                .fillMaxSize(),
         ) {
             Box(Modifier.weight(1f)) {
                 mediaMetadata?.let {

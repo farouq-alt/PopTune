@@ -650,7 +650,7 @@ class MainActivity : ComponentActivity() {
 
                     val shouldHideNavAndPlayer = remember(navBackStackEntry) {
                         navBackStackEntry?.destination?.route?.let {
-                            (it.startsWith("settings") || it == "setup_wizard" || it == "login")
+                            ((it.startsWith("settings") && !tabMode) || it == "setup_wizard" || it == "login")
                         } == true
                     }
 
@@ -661,7 +661,9 @@ class MainActivity : ComponentActivity() {
                     }
 
                     val shouldShowNavigationBar = remember(navBackStackEntry, searchActive, shouldHideNavAndPlayer) {
-                        (!useRail || tabMode) && !searchActive && !shouldHideNavAndPlayer
+                        (!useRail || tabMode) && !searchActive && !shouldHideNavAndPlayer && navBackStackEntry?.destination?.route?.startsWith(
+                            "settings"
+                        ) != true
                     }
 
                     val shouldShowNavigationRail = remember(navBackStackEntry, searchActive, shouldHideNavAndPlayer) {
@@ -689,7 +691,7 @@ class MainActivity : ComponentActivity() {
                     )
 
                     val playerAwareWindowInsets =
-                        remember(bottomInset, shouldShowNavigationBar, playerBottomSheetState.isDismissed) {
+                        remember(bottomInset, shouldShowNavigationBar, playerBottomSheetState.isDismissed, shouldShowNavigationRail) {
                             var bottom = bottomInset
 
                             if (!playerBottomSheetState.isDismissed && !tabMode) bottom += MiniPlayerHeight
@@ -701,10 +703,10 @@ class MainActivity : ComponentActivity() {
                             } else {
                                 windowsInsets
                                     .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
-                                    .add(cutoutInsets.only(WindowInsetsSides.Start))
+                                    .add(cutoutInsets.only(WindowInsetsSides.Horizontal))
                                     .add(
                                         WindowInsets(
-                                            left = if (tabMode) 0.dp else NavigationBarHeight,
+                                            left = if (tabMode || !shouldShowNavigationRail) 0.dp else NavigationBarHeight,
                                             top = AppBarHeight,
                                             bottom = bottom
                                         )
@@ -1448,11 +1450,13 @@ class MainActivity : ComponentActivity() {
                             // tab
                             if (tabMode) {
                                 Row {
-                                    PlayerScreen(
-                                        navController,
-                                        playerBottomSheetState,
-                                        modifier = Modifier.weight(0.4f)
-                                    )
+                                    if (oobeStatus >= OOBE_VERSION) {
+                                        PlayerScreen(
+                                            navController,
+                                            playerBottomSheetState,
+                                            modifier = Modifier.weight(0.4f)
+                                        )
+                                    }
 
                                     Box(
                                         modifier = Modifier.weight(0.6f)
