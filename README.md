@@ -1,6 +1,6 @@
 # OuterTune
 
-<img src="./assets/outertune.webp" height="72">
+<img src="./assets/outertune.webp" height="88" alt="OuterTune app icon">
 
 A Material 3 YouTube Music client & local music player for Android
 
@@ -14,6 +14,12 @@ A Material 3 YouTube Music client & local music player for Android
 [<img src="assets/IzzyOnDroidButtonGreyBorder.svg" alt="Get it on IzzyOnDroid" height="40">](https://apt.izzysoft.de/fdroid/index/apk/com.dd3boh.outertune)⠀⠀
 [<img src="assets/badge_obtainium.png" alt="Get it on Obtainium" height="40">](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.dd3boh.outertune%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FDD3Boh%2FOuterTune%22%2C%22author%22%3A%22DD3Boh%22%2C%22name%22%3A%22OuterTune%22%2C%22preferredApkIndex%22%3A0%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Afalse%2C%5C%22fallbackToOlderReleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22filterReleaseNotesByRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22verifyLatestTag%5C%22%3Afalse%2C%5C%22dontSortReleasesList%5C%22%3Afalse%2C%5C%22useLatestAssetDateAsReleaseDate%5C%22%3Afalse%2C%5C%22trackOnly%5C%22%3Afalse%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%5C%22%2C%5C%22versionDetection%5C%22%3Atrue%2C%5C%22releaseDateAsVersion%5C%22%3Afalse%2C%5C%22useVersionCodeAsOSVersion%5C%22%3Afalse%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22invertAPKFilter%5C%22%3Afalse%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%2C%5C%22appName%5C%22%3A%5C%22%5C%22%2C%5C%22shizukuPretendToBeGooglePlay%5C%22%3Afalse%2C%5C%22allowInsecure%5C%22%3Afalse%2C%5C%22exemptFromBackgroundUpdates%5C%22%3Afalse%2C%5C%22skipUpdateNotifications%5C%22%3Afalse%2C%5C%22about%5C%22%3A%5C%22A%20Material%203%20YouTube%20Music%20client%20%26%20local%20music%20player%20for%20Android%5C%22%7D%22%2C%22overrideSource%22%3A%22GitHub%22%7D)
 
+
+> [!NOTE]
+> We are looking for maintainers! If you wish to become a maintainer (or even are just curious about it), please send an email to outertune@protonmail.com
+
+> [!WARNING]
+> OuterTune is in a "stable beta" phase. While this app can certainly be used as your main music player, be aware there is a possibility of bugs, incomplete features, or any other unexpected behaviour.
 
 ## Features
 
@@ -31,9 +37,14 @@ synchronization, local media playback, multiple queues, and a new take on UI des
 - Local audio file playback
     - Play local and Youtube Music songs at the same time
     - We don't use MediaStore's broken metadata extractor! (e.g tags delimited with `\\` now show up properly)
-- Synchronized lyrics (LRC format, also includes multi-line support)
+- Synchronized lyrics
 - Audio normalization, tempo/pitch adjustment, and various other audio effects
 - Android Auto support
+- Support for Android 8 (Oreo) and higher
+
+> [!NOTE]
+> Read our FAQ on our [wiki](https://github.com/OuterTune/OuterTune/wiki/Frequently-Asked-Questions-(FAQ))
+
 
 ## Screenshots
 
@@ -47,20 +58,6 @@ synchronization, local media playback, multiple queues, and a new take on UI des
 >
 >If you're in a region where YouTube Music is not supported, you won't be able to use this app
 ***unless*** you have a proxy or VPN to connect to a YTM supported region.
-
-## FAQ
-
-### Q: How to scrobble music to LastFM, LibreFM, ListenBrainz or GNU FM?
-
-Use other music scrobbler apps. You can
-try [Pano Scrobbler](https://play.google.com/store/apps/details?id=com.arn.scrobble).
-
-### Q: Why OuterTune isn't showing in Android Auto?
-
-1. Go to Android Auto's settings and tap multiple times on the version in the bottom to enable
-   developer settings
-2. In the three dots menu at the top-right of the screen, click "Developer settings"
-3. Enable "Unknown sources"
 
 ## Building & Contributing
 
@@ -84,6 +81,12 @@ including bug fixes and new features.
 
 <a href="https://paypal.me/DD3Boh"><img src="./assets/paypal.png" alt="PayPal" height="60" ></a>
 
+## Help & Support
+
+For bug reports and/or feature requests, please create a Github issue: https://github.com/OuterTune/OuterTune/issues
+
+For all other inquiries, you can contact us at outertune@protonmail.com
+
 ## Attribution
 
 Thanks to all our contributors! Check them out [here](https://github.com/OuterTune/OuterTune/graphs/contributors)
@@ -93,6 +96,8 @@ would have been possible without it.
 
 [Musicolet](https://play.google.com/store/apps/details?id=in.krosbits.musicolet) for inspiration of a local music player
 experience done right.
+
+[Gramophone](https://github.com/FoedusProgramme/Gramophone) for emotional support, and a legendary lyrics parser
 
 ## Disclaimer
 
