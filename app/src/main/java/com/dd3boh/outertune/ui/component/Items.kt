@@ -41,7 +41,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.outlined.Album
-import androidx.compose.material.icons.rounded.Album
 import androidx.compose.material.icons.rounded.CloudOff
 import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material.icons.rounded.Edit
@@ -78,6 +77,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -140,8 +141,6 @@ import com.zionhuang.innertube.models.SongItem
 import com.zionhuang.innertube.models.YTItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.any
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -1464,7 +1463,7 @@ fun ItemThumbnail(
     ) {
         var isRectangularImage by remember { mutableStateOf(false) }
 
-        if (thumbnailUrl == null || thumbnailUrl.startsWith("/storage") == true) {
+        if (thumbnailUrl == null || thumbnailUrl.startsWith("/storage")) {
             // local thumbnail arts
             AsyncImageLocal(
                 image = { thumbnailUrl?.let { imageCache.getLocalThumbnail(thumbnailUrl, true) } },
@@ -1503,16 +1502,28 @@ fun ItemThumbnail(
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(shape)
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(0.6f))
                 ) {
-                    Text(
-                        text = albumIndex.toString(),
-                        color = MaterialTheme.colorScheme.surface,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier
-                            .background(Color.Black.copy(0.6f))
-                            .padding(horizontal = 4.dp)
-                    )
+                    Box {
+                        Text(
+                            text = albumIndex.toString(),
+                            color = MaterialTheme.colorScheme.surface,
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                drawStyle = Stroke(
+                                    miter = 10f,
+                                    width = 8f,
+                                    join = StrokeJoin.Round
+                                )
+                            ),
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            text = albumIndex.toString(),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
                 }
             }
         }
@@ -1544,11 +1555,11 @@ fun ItemThumbnail(
         PlayingIndicatorBox(
             isActive = isActive && !context.isPowerSaver(),
             playWhenReady = isPlaying,
-            color = if (albumIndex != null) MaterialTheme.colorScheme.onBackground else Color.White,
+            color = Color.White,
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    color = if (albumIndex != null) Color.Transparent else Color.Black.copy(alpha = ActiveBoxAlpha),
+                    color = Color.Black.copy(alpha = ActiveBoxAlpha),
                     shape = shape
                 )
         )
