@@ -275,6 +275,13 @@ interface SongsDao {
     fun downloadedOrQueuedSongs(): Flow<List<Song>>
 
     @Transaction
+    @Query("SELECT * FROM song WHERE isLocal = 0 AND dateDownload IS NULL AND localPath IS NULL")
+    fun downloadRelinkableSongs(): Flow<List<Song>>
+
+    @Query("UPDATE song SET dateDownload = :dateDownload WHERE id = :songId")
+    fun updateDownloadStatus(songId: String, dateDownload: LocalDateTime?)
+
+    @Transaction
     @Query("UPDATE song SET dateDownload = :dateDownload, localPath = :localPath WHERE id = :mediaId AND isLocal = 0")
     fun registerDownloadSong(mediaId: String, dateDownload: LocalDateTime, localPath: String)
 
@@ -398,9 +405,6 @@ interface SongsDao {
 
     @Query("UPDATE song SET liked = 0, likedDate = null WHERE id = :songId")
     fun removeLike(songId: String)
-
-    @Query("UPDATE song SET dateDownload = :dateDownload WHERE id = :songId")
-    suspend fun updateDownloadStatus(songId: String, dateDownload: LocalDateTime?)
 
     @Query("UPDATE song SET inLibrary = null WHERE localPath = null")
     fun disableInvalidLocalSongs()
