@@ -55,6 +55,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dd3boh.outertune.LocalDatabase
 import com.dd3boh.outertune.R
+import com.dd3boh.outertune.constants.LyricTrimKey
+import com.dd3boh.outertune.constants.MultilineLrcKey
 import com.dd3boh.outertune.db.entities.LyricsEntity
 import com.dd3boh.outertune.extensions.isInternetConnected
 import com.dd3boh.outertune.models.MediaMetadata
@@ -68,7 +70,10 @@ import com.dd3boh.outertune.ui.component.TextFieldDialog
 import com.dd3boh.outertune.ui.screens.settings.fragments.LyricFormatFrag
 import com.dd3boh.outertune.ui.screens.settings.fragments.LyricParserFrag
 import com.dd3boh.outertune.ui.screens.settings.fragments.LyricSourceFrag
+import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.viewmodels.LyricsMenuViewModel
+import org.akanework.gramophone.logic.utils.SemanticLyrics
+import org.akanework.gramophone.logic.utils.parseLrc
 
 
 @Composable
@@ -77,9 +82,13 @@ fun LyricsMenu(
     mediaMetadataProvider: () -> MediaMetadata,
     onDismiss: () -> Unit,
     viewModel: LyricsMenuViewModel = hiltViewModel(),
+    onRefreshRequest: (SemanticLyrics?) -> Unit,
 ) {
     val context = LocalContext.current
     val database = LocalDatabase.current
+
+    val multilineLrc by rememberPreference(MultilineLrcKey, defaultValue = true)
+    val lyricTrim by rememberPreference(LyricTrimKey, defaultValue = false)
 
     var showEditDialog by rememberSaveable {
         mutableStateOf(false)
@@ -101,6 +110,7 @@ fun LyricsMenu(
                         )
                     )
                 }
+                onRefreshRequest(parseLrc(it, lyricTrim, multilineLrc))
             }
         )
     }
@@ -223,6 +233,8 @@ fun LyricsMenu(
                                     )
                                 )
                             }
+
+                            onRefreshRequest(parseLrc(result.lyrics, lyricTrim, multilineLrc))
                         }
                         .padding(12.dp)
                         .animateContentSize()
@@ -408,7 +420,7 @@ fun LyricsMenu(
             title = R.string.refetch
         ) {
             onDismiss()
-            viewModel.refetchLyrics(mediaMetadataProvider())
+            viewModel.refetchLyrics(mediaMetadataProvider()) { onRefreshRequest(it) }
         }
         GridMenuItem(
             icon = Icons.Rounded.Search,
