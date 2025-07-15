@@ -186,9 +186,9 @@ fun Lyrics(
         PlayerBackgroundStyle.FOLLOW_THEME -> MaterialTheme.colorScheme.secondary
         else ->
             if (useDarkTheme)
-                MaterialTheme.colorScheme.onSurface
+                MaterialTheme.colorScheme.secondary
             else
-                MaterialTheme.colorScheme.onPrimary
+                MaterialTheme.colorScheme.secondaryContainer
     }
 
     var currentLineIndex by remember {
@@ -411,7 +411,7 @@ fun Lyrics(
             Text(
                 text = stringResource(R.string.lyrics_not_found),
                 fontSize = lyricsFontSize.sp,
-                color = MaterialTheme.colorScheme.secondary,
+                color = textColor,
                 textAlign = when (lyricsTextPosition) {
                     LyricsPosition.LEFT -> TextAlign.Left
                     LyricsPosition.CENTER -> TextAlign.Center
@@ -421,7 +421,6 @@ fun Lyrics(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp, vertical = 8.dp)
-                    .alpha(0.5f)
             )
         }
 
