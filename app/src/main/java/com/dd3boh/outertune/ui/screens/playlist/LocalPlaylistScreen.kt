@@ -97,6 +97,7 @@ import com.dd3boh.outertune.LocalDownloadUtil
 import com.dd3boh.outertune.LocalNetworkConnected
 import com.dd3boh.outertune.LocalPlayerAwareWindowInsets
 import com.dd3boh.outertune.LocalPlayerConnection
+import com.dd3boh.outertune.LocalSnackbarHostState
 import com.dd3boh.outertune.LocalSyncUtils
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.AlbumThumbnailSize
@@ -164,7 +165,7 @@ fun LocalPlaylistScreen(
     var locked by rememberPreference(PlaylistEditLockKey, defaultValue = false)
     val syncMode by rememberEnumPreference(key = YtmSyncModeKey, defaultValue = SyncMode.RO)
 
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarHostState = LocalSnackbarHostState.current
 
     var inSelectMode by rememberSaveable { mutableStateOf(false) }
     val selection = rememberSaveable(
@@ -791,7 +792,10 @@ fun LocalPlaylistHeader(
                             onClick = {
                                 scope.launch {
                                     syncUtils.syncPlaylist(playlist.playlist.browseId, playlist.id)
-                                    snackbarHostState.showSnackbar(context.getString(R.string.playlist_synced))
+                                    snackbarHostState.showSnackbar(
+                                        message = context.getString(R.string.playlist_synced),
+                                        withDismissAction = true
+                                    )
                                 }
                             },
                             enabled = isNetworkConnected
@@ -838,7 +842,7 @@ fun LocalPlaylistHeader(
                         else -> {
                             IconButton(
                                 onClick = {
-                                   downloadUtil.download(songs.map { it.song.toMediaMetadata() })
+                                    downloadUtil.download(songs.map { it.song.toMediaMetadata() })
                                 }
                             ) {
                                 Icon(

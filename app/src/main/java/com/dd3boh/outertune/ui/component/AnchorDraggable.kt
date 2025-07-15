@@ -53,9 +53,11 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
 import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.R
+import com.dd3boh.outertune.constants.SNACKBAR_VERY_SHORT
 import com.dd3boh.outertune.constants.SwipeToQueueKey
 import com.dd3boh.outertune.utils.rememberPreference
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -102,13 +104,18 @@ fun SwipeToQueueBox(
                                 playerConnection?.enqueueEnd(item)
 
                                 coroutineScope.launch {
-                                    snackbarHostState?.showSnackbar(
-                                        message = context.getString(
-                                            R.string.song_added_to_queue_end,
-                                            item.mediaMetadata.title
-                                        ),
-                                        duration = SnackbarDuration.Short
-                                    )
+                                    val job = launch {
+                                        snackbarHostState?.showSnackbar(
+                                            message = context.getString(
+                                                R.string.song_added_to_queue_end,
+                                                item.mediaMetadata.title
+                                            ),
+                                            withDismissAction = true,
+                                            duration = SnackbarDuration.Indefinite
+                                        )
+                                    }
+                                    delay(SNACKBAR_VERY_SHORT)
+                                    job.cancel()
                                 }
                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                 resetDrag(coroutineScope, swipeOffset)
@@ -123,6 +130,7 @@ fun SwipeToQueueBox(
                                             R.string.song_added_to_queue,
                                             item.mediaMetadata.title
                                         ),
+                                        withDismissAction = true,
                                         duration = SnackbarDuration.Short
                                     )
                                 }

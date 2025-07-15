@@ -64,6 +64,7 @@ import com.dd3boh.outertune.constants.LastUpdateCheckKey
 import com.dd3boh.outertune.constants.LastVersionKey
 import com.dd3boh.outertune.constants.MAX_CONCURRENT_JOBS
 import com.dd3boh.outertune.constants.OOBE_VERSION
+import com.dd3boh.outertune.constants.SNACKBAR_VERY_SHORT
 import com.dd3boh.outertune.constants.TopBarInsets
 import com.dd3boh.outertune.ui.component.ColumnWithContentPadding
 import com.dd3boh.outertune.ui.component.IconButton
@@ -223,6 +224,7 @@ fun AboutScreen(
                         "LYRIC_FETCH_TIMEOUT: $LYRIC_FETCH_TIMEOUT",
                         "OOBE_VERSION: $OOBE_VERSION",
                         "LYRIC_FETCH_TIMEOUT: $LYRIC_FETCH_TIMEOUT",
+                        "SNACKBAR_VERY_SHORT: $SNACKBAR_VERY_SHORT"
                     )
                     if (ENABLE_UPDATE_CHECKER) {
                         val lastVer by rememberPreference(LastVersionKey, defaultValue = "0.0.0")

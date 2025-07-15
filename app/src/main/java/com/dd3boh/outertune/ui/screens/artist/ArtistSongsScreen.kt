@@ -42,6 +42,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.dd3boh.outertune.LocalPlayerAwareWindowInsets
 import com.dd3boh.outertune.LocalPlayerConnection
+import com.dd3boh.outertune.LocalSnackbarHostState
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.ArtistSongSortDescendingKey
 import com.dd3boh.outertune.constants.ArtistSongSortType
@@ -99,7 +100,7 @@ fun ArtistSongsScreen(
         BackHandler(onBack = onExitSelectionMode)
     }
 
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarHostState = LocalSnackbarHostState.current
 
     Box(
         modifier = Modifier.fillMaxSize()

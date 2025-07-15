@@ -53,6 +53,7 @@ class DownloadDirectoryManagerOt(private var context: Context, private var dir: 
             allDirs = mutableListOf()
             reportException(e)
 //            Toast.makeText(context, "Failed to initiate download manager: " + e.message, Toast.LENGTH_LONG).show()
+            // TODO: snackbar for failed uri or not set up?
         }
     }
 

@@ -39,6 +39,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -61,6 +62,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat.requestPermissions
 import com.dd3boh.outertune.LocalDatabase
 import com.dd3boh.outertune.LocalPlayerConnection
+import com.dd3boh.outertune.LocalSnackbarHostState
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.DownloadExtraPathKey
 import com.dd3boh.outertune.constants.DownloadPathKey
@@ -111,6 +113,7 @@ fun ColumnScope.LocalScannerFrag() {
     val database = LocalDatabase.current
     val coroutineScope = rememberCoroutineScope()
     val playerConnection = LocalPlayerConnection.current
+    val snackbarHostState = LocalSnackbarHostState.current
 
     // scanner vars
     val scannerState by scannerState.collectAsState()
@@ -176,12 +179,13 @@ fun ColumnScope.LocalScannerFrag() {
                 if (context.checkSelfPermission(MEDIA_PERMISSION_LEVEL)
                     != PackageManager.PERMISSION_GRANTED
                 ) {
-
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.scanner_missing_storage_perm),
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = context.getString(R.string.scanner_missing_storage_perm),
+                            withDismissAction = true,
+                            duration = SnackbarDuration.Short
+                        )
+                    }
 
                     requestPermissions(
                         context as Activity,
@@ -213,40 +217,34 @@ fun ColumnScope.LocalScannerFrag() {
                             if (lookupYtmArtists && scannerState <= 0) {
                                 coroutineScope.launch(Dispatchers.IO) {
                                     try {
-                                        withContext(Dispatchers.Main) {
-                                            Toast.makeText(
-                                                context, context.getString(R.string.scanner_ytm_link_start),
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
+                                        snackbarHostState.showSnackbar(
+                                            message = context.getString(R.string.scanner_ytm_link_start),
+                                            withDismissAction = true,
+                                            duration = SnackbarDuration.Short
+                                        )
                                         scanner.localToRemoteArtist(database)
-                                        withContext(Dispatchers.Main) {
-                                            Toast.makeText(
-                                                context, context.getString(R.string.scanner_ytm_link_success),
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
+                                        snackbarHostState.showSnackbar(
+                                            message = context.getString(R.string.scanner_ytm_link_success),
+                                            withDismissAction = true,
+                                            duration = SnackbarDuration.Short
+                                        )
                                     } catch (e: ScannerAbortException) {
-                                        withContext(Dispatchers.Main) {
-                                            Toast.makeText(
-                                                context,
-                                                "${context.getString(R.string.scanner_ytm_link_success)}: ${e.message}",
-                                                Toast.LENGTH_LONG
-                                            ).show()
-                                        }
+                                        snackbarHostState.showSnackbar(
+                                            message = "${context.getString(R.string.scanner_ytm_link_success)}: ${e.message}",
+                                            withDismissAction = true,
+                                            duration = SnackbarDuration.Short
+                                        )
                                     }
                                 }
                             }
                         } catch (e: ScannerAbortException) {
                             scannerFailure = true
 
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(
-                                    context,
-                                    "${context.getString(R.string.scanner_scan_fail)}: ${e.message}",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            }
+                            snackbarHostState.showSnackbar(
+                                message = "${context.getString(R.string.scanner_scan_fail)}: ${e.message}",
+                                withDismissAction = true,
+                                duration = SnackbarDuration.Short
+                            )
                         } finally {
                             destroyScanner(SCANNER_OWNER_LM)
                             clearDtCache()
@@ -263,36 +261,34 @@ fun ColumnScope.LocalScannerFrag() {
                             if (lookupYtmArtists && scannerState <= 0) {
                                 coroutineScope.launch(Dispatchers.IO) {
                                     try {
-                                        Toast.makeText(
-                                            context,
-                                            context.getString(R.string.scanner_ytm_link_start),
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        snackbarHostState.showSnackbar(
+                                            message = context.getString(R.string.scanner_ytm_link_start),
+                                            withDismissAction = true,
+                                            duration = SnackbarDuration.Short
+                                        )
                                         scanner.localToRemoteArtist(database)
-                                        Toast.makeText(
-                                            context,
-                                            context.getString(R.string.scanner_ytm_link_success),
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        snackbarHostState.showSnackbar(
+                                            message = context.getString(R.string.scanner_ytm_link_success),
+                                            withDismissAction = true,
+                                            duration = SnackbarDuration.Short
+                                        )
                                     } catch (e: ScannerAbortException) {
-                                        Toast.makeText(
-                                            context,
-                                            "${context.getString(R.string.scanner_ytm_link_fail)}: ${e.message}",
-                                            Toast.LENGTH_LONG
-                                        ).show()
+                                        snackbarHostState.showSnackbar(
+                                            message = "${context.getString(R.string.scanner_ytm_link_fail)}: ${e.message}",
+                                            withDismissAction = true,
+                                            duration = SnackbarDuration.Short
+                                        )
                                     }
                                 }
                             }
                         } catch (e: ScannerAbortException) {
                             scannerFailure = true
 
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(
-                                    context,
-                                    "${context.getString(R.string.scanner_scan_fail)}: ${e.message}",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            }
+                            snackbarHostState.showSnackbar(
+                                message = "${context.getString(R.string.scanner_scan_fail)}: ${e.message}",
+                                withDismissAction = true,
+                                duration = SnackbarDuration.Short
+                            )
                         } finally {
                             destroyScanner(SCANNER_OWNER_LM)
                             clearDtCache()
