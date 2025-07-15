@@ -125,7 +125,6 @@ import com.dd3boh.outertune.models.MediaMetadata
 import com.dd3boh.outertune.models.MultiQueueObject
 import com.dd3boh.outertune.models.toMediaMetadata
 import com.dd3boh.outertune.playback.queues.ListQueue
-import com.dd3boh.outertune.ui.component.Icon.FolderCopy
 import com.dd3boh.outertune.ui.menu.FolderMenu
 import com.dd3boh.outertune.ui.menu.SongMenu
 import com.dd3boh.outertune.ui.utils.getNSongsString
@@ -253,7 +252,7 @@ fun ListItem(
 
         // local song indicator
         if (isLocalSong == true) {
-            FolderCopy()
+            Icon.FolderCopy()
         }
 
         if (!subtitle.isNullOrEmpty()) {
@@ -370,7 +369,6 @@ fun SongListItem(
     showLikedIcon: Boolean = true,
     showInLibraryIcon: Boolean = true,
     showDownloadIcon: Boolean = true,
-    showLocalIcon: Boolean = true,
     playlistSong: PlaylistSong? = null,
     playlist: Playlist? = null,
     showDragHandle: Boolean = false,
@@ -401,7 +399,9 @@ fun SongListItem(
                 if (showLikedIcon && song.song.liked) {
                     Icon.Favorite()
                 }
-                if (showInLibraryIcon && song.song.inLibrary != null) {
+                if (showInLibraryIcon && song.song.isLocal) {
+                    Icon.FolderCopy()
+                } else if (showInLibraryIcon && song.song.inLibrary != null) {
                     Icon.Library()
                 }
                 if (showDownloadIcon) {
@@ -413,9 +413,6 @@ fun SongListItem(
                             .collectAsState(initial = null)
                         Icon.Download(download?.state)
                     }
-                }
-                if (showLocalIcon && song.song.isLocal) {
-                    FolderCopy()
                 }
             },
             thumbnailContent = {
