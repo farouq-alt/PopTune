@@ -105,7 +105,7 @@
     <string name="swipe2Queue_description">Deslize em uma música para adicioná-la à fila após a música em reprodução no momento</string>
     <string name="swipe2Queue">Deslizar para enfileirar</string>
     <string name="scanner_manual_btn">Executar sincronização manual</string>
-    <string name="scanner_missing_storage_perm">A busca requer permissões de armazenamento</string>
+    <string name="scanner_missing_storage_perm">A busca de midia local requer permissões de armazenamento</string>
     <string name="scanner_progress_syncing">Sincronizando…</string>
     <string name="scanner_scan_fail">A busca falhou</string>
     <string name="scanner_ytm_link_fail">O processo de vínculo de artistas do YouTube falhou</string>
@@ -219,4 +219,13 @@
     <string name="dl_calculate_size">Toque para calcular o tamanho dos downloads</string>
     <string name="dl_size_used_main">Externo: %s usados</string>
     <string name="scanner_sensitivity_L0">Usar o primeiro resultado fornecido pelo YouTube quando a pesquisa no YouTube está ativada, caso contrário combinar título</string>
+    <string name="app_info_title">Informações do aplicativo</string>
+    <string name="device_info_title">Informações do dispositivo</string>
+    <string name="help_bug_report_action">Enviar um relatório de erro (pelo GitHub)</string>
+    <string name="help_contact_email_inquiries">Outras consultas (toque para copiar o e-mail)</string>
+    <string name="help_support_forum">Ajuda e suporte (pelo GitHub)</string>
+    <string name="wiki">Wiki</string>
+    <string name="err_invalid_ytm_song">Falha ao reproduzir a música. Somente conteúdo acessível pelo YouTube Music pode ser reproduzido</string>
+    <string name="err_restore_incompatible_database">Não foi possível restaurar banco de dados incompatível</string>
+    <string name="m3u_import_failed">Nenhuma música encontrada. Arquivo M3U inválido, ou nenhuma correspondência das músicas foi encontrada</string>
 </resources>
