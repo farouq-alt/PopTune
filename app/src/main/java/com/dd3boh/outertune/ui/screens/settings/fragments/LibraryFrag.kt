@@ -29,7 +29,6 @@ import com.dd3boh.outertune.ui.component.PreferenceEntry
 import com.dd3boh.outertune.ui.component.SwitchPreference
 import com.dd3boh.outertune.utils.rememberPreference
 import com.zionhuang.innertube.utils.parseCookieString
-import kotlin.collections.contains
 
 @Composable
 fun ColumnScope.ListenHistoryFrag() {

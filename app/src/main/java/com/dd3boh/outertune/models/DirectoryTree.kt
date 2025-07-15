@@ -10,9 +10,9 @@ package com.dd3boh.outertune.models
 
 import android.util.Log
 import androidx.compose.ui.util.fastFirstOrNull
+import com.dd3boh.outertune.constants.SCANNER_DEBUG
 import com.dd3boh.outertune.constants.SongSortType
 import com.dd3boh.outertune.db.entities.Song
-import com.dd3boh.outertune.constants.SCANNER_DEBUG
 import com.dd3boh.outertune.ui.utils.uninitializedDirectoryTree
 import com.dd3boh.outertune.utils.fixFilePath
 import java.time.ZoneOffset

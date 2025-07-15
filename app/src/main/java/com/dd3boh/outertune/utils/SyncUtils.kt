@@ -29,8 +29,8 @@ import com.dd3boh.outertune.db.entities.ArtistEntity
 import com.dd3boh.outertune.db.entities.PlaylistEntity
 import com.dd3boh.outertune.db.entities.PlaylistSongMap
 import com.dd3boh.outertune.db.entities.SongEntity
-import com.dd3boh.outertune.extensions.isInternetConnected
 import com.dd3boh.outertune.extensions.isAutoSyncEnabled
+import com.dd3boh.outertune.extensions.isInternetConnected
 import com.dd3boh.outertune.extensions.toEnum
 import com.dd3boh.outertune.models.toMediaMetadata
 import com.dd3boh.outertune.playback.DownloadUtil
