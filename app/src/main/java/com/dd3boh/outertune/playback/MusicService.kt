@@ -279,6 +279,18 @@ class MusicService : MediaLibraryService(),
                         ).show()
                     }
 
+                    override fun onIsPlayingChanged(isPlaying: Boolean) {
+                        if (!isPlaying) {
+                            val pos = player.currentPosition
+                            scope.launch {
+                                dataStore.edit { settings ->
+                                    settings[LastPosKey] = pos
+                                }
+                            }
+                        }
+                        super.onIsPlayingChanged(isPlaying)
+                    }
+
                     // start playback again on seek
                     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                         super.onMediaItemTransition(mediaItem, reason)
@@ -976,16 +988,11 @@ class MusicService : MediaLibraryService(),
     }
 
     fun saveQueueToDisk() {
+        val pos = player.currentPosition
         val data = queueBoard.getAllQueues()
         CoroutineScope(Dispatchers.IO).launch {
             // db on main thread crash, use Dispatchers.IO
             database.rewriteAllQueues(data)
-        }
-
-        val pos = player.currentPosition
-
-        runBlocking {
-            // async issues, run blocking
             dataStore.edit { settings ->
                 settings[LastPosKey] = pos
             }

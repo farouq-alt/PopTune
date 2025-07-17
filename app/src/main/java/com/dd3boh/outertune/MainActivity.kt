@@ -332,7 +332,6 @@ class MainActivity : ComponentActivity() {
          *
          * Regardless of what happens, queues and last position are saves
          */
-        super.onDestroy()
         unbindService(serviceConnection)
 
         if (dataStore.get(StopMusicOnTaskClearKey, false) && isFinishing) {
@@ -342,6 +341,8 @@ class MainActivity : ComponentActivity() {
         } else {
             playerConnection?.service?.saveQueueToDisk()
         }
+
+        super.onDestroy()
     }
 
     @SuppressLint("UnusedBoxWithConstraintsScope")
