@@ -388,13 +388,6 @@ class MusicService : MediaLibraryService(),
             updateNotification()
         }
 
-        combine(
-            currentMediaMetadata.distinctUntilChangedBy { it?.id },
-            dataStore.data.map { it[ShowLyricsKey] ?: false }.distinctUntilChanged()
-        ) { mediaMetadata, showLyrics ->
-            mediaMetadata to showLyrics
-        }
-
         dataStore.data
             .map { it[SkipSilenceKey] ?: false }
             .distinctUntilChanged()
@@ -474,7 +467,6 @@ class MusicService : MediaLibraryService(),
         if (dataStore.get(PersistentQueueKey, true)) {
             queueBoard = QueueBoard(this, database.readQueue().toMutableList())
             queueBoard.getCurrentQueue()?.let {
-                player.shuffleModeEnabled = it.shuffled
                 queueBoard.initialized = true
             }
         } else {
@@ -916,8 +908,13 @@ class MusicService : MediaLibraryService(),
     }
 
     override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
-        val q = queueBoard.getCurrentQueue()!!
-        player.setShuffleOrder(ShuffleOrder.UnshuffledShuffleOrder(q.getSize()))
+        val q = queueBoard.getCurrentQueue()
+        if (q == null) {
+            player.setShuffleOrder(ShuffleOrder.UnshuffledShuffleOrder(player.mediaItemCount))
+            return
+        } else {
+            player.setShuffleOrder(ShuffleOrder.UnshuffledShuffleOrder(q.getSize()))
+        }
         if (q.shuffled == shuffleModeEnabled) return
         triggerShuffle()
     }
