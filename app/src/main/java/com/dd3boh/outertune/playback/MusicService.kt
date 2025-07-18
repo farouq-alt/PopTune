@@ -79,7 +79,6 @@ import com.dd3boh.outertune.constants.PauseRemoteListenHistoryKey
 import com.dd3boh.outertune.constants.PersistentQueueKey
 import com.dd3boh.outertune.constants.PlayerVolumeKey
 import com.dd3boh.outertune.constants.RepeatModeKey
-import com.dd3boh.outertune.constants.ShowLyricsKey
 import com.dd3boh.outertune.constants.SkipOnErrorKey
 import com.dd3boh.outertune.constants.SkipSilenceKey
 import com.dd3boh.outertune.constants.minPlaybackDurKey
@@ -105,6 +104,8 @@ import com.dd3boh.outertune.playback.queues.ListQueue
 import com.dd3boh.outertune.playback.queues.Queue
 import com.dd3boh.outertune.playback.queues.YouTubeQueue
 import com.dd3boh.outertune.utils.CoilBitmapLoader
+import com.dd3boh.outertune.utils.CoilBitmapLoader.Companion.drawPlaceholder
+import com.dd3boh.outertune.utils.LmImageCacheMgr
 import com.dd3boh.outertune.utils.NetworkConnectivityObserver
 import com.dd3boh.outertune.utils.SyncUtils
 import com.dd3boh.outertune.utils.YTPlayerUtils
@@ -126,7 +127,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -207,6 +207,8 @@ class MusicService : MediaLibraryService(),
     @DownloadCache
     lateinit var downloadCache: SimpleCache
 
+    lateinit var imageCache: LmImageCacheMgr
+
     lateinit var player: ExoPlayer
     private lateinit var mediaSession: MediaLibrarySession
 
@@ -216,6 +218,8 @@ class MusicService : MediaLibraryService(),
 
     override fun onCreate() {
         super.onCreate()
+
+        imageCache = LmImageCacheMgr(this, drawPlaceholder(this, 1920, 1080, 0.7f))
 
         // network connectivity
         try {
@@ -360,7 +364,7 @@ class MusicService : MediaLibraryService(),
                     PendingIntent.FLAG_IMMUTABLE
                 )
             )
-            .setBitmapLoader(CoilBitmapLoader(this, scope))
+            .setBitmapLoader(CoilBitmapLoader(this, scope, imageCache = imageCache))
             .build()
 
         player.repeatMode = dataStore.get(RepeatModeKey, REPEAT_MODE_OFF)

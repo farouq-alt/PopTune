@@ -8,34 +8,44 @@
 
 package com.dd3boh.outertune.utils
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import androidx.core.graphics.scale
 import com.dd3boh.outertune.models.ImageCacheManager
+import com.dd3boh.outertune.utils.CoilBitmapLoader.Companion.drawPlaceholder
 
-class LmImageCacheMgr {
+class LmImageCacheMgr(context: Context, val placeholderImage: Bitmap = drawPlaceholder(context, 2000, 2000)) {
 
     private var localImageCache = ImageCacheManager(300)
 
 
     /**
      * Extract the album art from the audio file. The image is not resized
-     * (did you mean to use getLocalThumbnail(path: String?, resize: Boolean)?).
      *
      * @param path Full path of audio file
      */
-    fun getLocalThumbnail(path: String?): Bitmap? = getLocalThumbnail(path, false)
+    fun getLocalThumbnail(path: String?): Bitmap? = getLocalThumbnail(path, false, false)
+
+    /**
+     * Extract the album art from the audio file. No fallback image is created.
+     *
+     * @param path Full path of audio file
+     */
+    fun getLocalThumbnail(path: String?, resize: Boolean): Bitmap? = getLocalThumbnail(path, resize, false)
 
     /**
      * Extract the album art from the audio file
      *
      * @param path Full path of audio file
      * @param resize Whether to resize the Bitmap to a thumbnail size (300x300)
+     * @param fallback Use a default fallback image if no image could be resolved
      */
-    fun getLocalThumbnail(path: String?, resize: Boolean): Bitmap? {
+    fun getLocalThumbnail(path: String?, resize: Boolean, fallback: Boolean): Bitmap? {
+        val fallbackReturn = if (fallback) placeholderImage else null
         if (path == null) {
-            return null
+            return fallbackReturn
         }
         // try cache lookup
         val cachedImage = if (resize) {
@@ -57,9 +67,9 @@ class LmImageCacheMgr {
             val art = mData.embeddedPicture
             BitmapFactory.decodeByteArray(art, 0, art!!.size)
         } catch (e: Exception) {
-            localImageCache.cache(path, null, resize)
+            localImageCache.cache(path, fallbackReturn, resize)
             null
-        } ?: return null
+        } ?: return fallbackReturn
 
         if (resize) {
             image = image.scale(100, 100, false)

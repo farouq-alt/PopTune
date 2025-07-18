@@ -47,6 +47,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.dd3boh.outertune.LocalImageCache
 import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.constants.PlayerHorizontalPadding
 import com.dd3boh.outertune.constants.ShowLyricsKey
@@ -54,7 +55,6 @@ import com.dd3boh.outertune.constants.ThumbnailCornerRadius
 import com.dd3boh.outertune.models.MediaMetadata
 import com.dd3boh.outertune.ui.component.AsyncImageLocal
 import com.dd3boh.outertune.ui.component.Lyrics
-import com.dd3boh.outertune.ui.utils.imageCache
 import com.dd3boh.outertune.utils.rememberPreference
 
 @Composable
@@ -66,6 +66,7 @@ fun Thumbnail(
     customMediaMetadata: MediaMetadata? = null
 ) {
     val haptic = LocalHapticFeedback.current
+    val imageCache = LocalImageCache.current
     val playerConnection = LocalPlayerConnection.current ?: return
     val currentView = LocalView.current
     val playerMediaMetadata by playerConnection.mediaMetadata.collectAsState()
@@ -108,7 +109,7 @@ fun Thumbnail(
                         // local thumbnail arts
                         mediaMetadata.let { // required to re render when song changes
                             AsyncImageLocal(
-                                image = { imageCache.getLocalThumbnail(it.localPath, false) },
+                                image = { imageCache.getLocalThumbnail(it.localPath, false, true) },
                                 contentScale = contentScale,
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(ThumbnailCornerRadius * 2))
