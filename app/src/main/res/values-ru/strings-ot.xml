@@ -98,7 +98,7 @@
         <item quantity="other">%d песен найдено</item>
     </plurals>
     <string name="scanner_strict_file_name_description">Если включено, имена файлов НЕ будут игнорироваться. Например: «Песня.ogg» и «Песня.flac» будут считаться разными треками. Настройки чувствительности сканера всё равно применяются</string>
-    <string name="scanner_missing_storage_perm">Сканеру требуются разрешения на доступ к хранилищу</string>
+    <string name="scanner_missing_storage_perm">Локальному сканеру медиа требуются разрешения на доступ к хранилищу для работы</string>
     <string name="dev_settings_title">Включить настройки для разработчиков</string>
     <string name="dev_settings_description">Открывает дополнительные настройки, используемые во время разработки</string>
     <string name="oobe_welcome_message">Добро пожаловать в OuterTune</string>
@@ -215,7 +215,7 @@
     <string name="dl_rescan_description">Обновить базу данных и реестр загружаемых файлов, если какие-либо файлы или папки изменились</string>
     <string name="dl_extra_path_description">Песни из этих папок появятся в приложении только в том случае, если вы уже проигрывали их ранее или добавляли в список воспроизведения</string>
     <string name="dl_main_path_title">Установить внешнюю папку загрузок…</string>
-    <string name="dl_calculate_size">Нажмите, чтобы вычислить размер загрузки</string>
+    <string name="dl_calculate_size">Нажмите, чтобы рассчитать размер загрузки</string>
     <string name="dl_size_used_extra">Дополнительные импорты: %s использовано</string>
     <string name="dl_size_used_cache">Внутреннее: %s использовано</string>
     <string name="dl_size_used_main">Внешнее: %s использовано</string>
