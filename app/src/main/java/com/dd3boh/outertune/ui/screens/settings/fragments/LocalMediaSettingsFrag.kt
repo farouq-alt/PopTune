@@ -151,7 +151,7 @@ fun ColumnScope.LocalScannerFrag() {
 
     val (lastLocalScan, onLastLocalScanChange) = rememberPreference(
         LastLocalScanKey,
-        LocalDateTime.now().atOffset(ZoneOffset.UTC).toEpochSecond()
+        LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()
     )
 
     LaunchedEffect(scanPaths) {
@@ -298,7 +298,7 @@ fun ColumnScope.LocalScannerFrag() {
                     imageCache.purgeCache()
                     playerConnection?.service?.initQueue()
 
-                    onLastLocalScanChange(LocalDateTime.now().atOffset(ZoneOffset.UTC).toEpochSecond())
+                    onLastLocalScanChange(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
                 }
             }
         ) {

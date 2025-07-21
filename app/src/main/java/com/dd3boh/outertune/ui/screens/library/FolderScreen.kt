@@ -139,7 +139,7 @@ fun FolderScreen(
     val (flatSubfolders, onFlatSubfoldersChange) = rememberPreference(FlatSubfoldersKey, defaultValue = true)
     val lastLocalScan by rememberPreference(
         LastLocalScanKey,
-        LocalDateTime.now().atOffset(ZoneOffset.UTC).toEpochSecond()
+        LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()
     )
     val localLibEnable by rememberPreference(LocalLibraryEnableKey, defaultValue = true)
 
