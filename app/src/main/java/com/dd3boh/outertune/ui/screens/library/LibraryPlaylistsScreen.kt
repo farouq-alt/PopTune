@@ -81,6 +81,8 @@ import com.dd3boh.outertune.ui.component.CreatePlaylistDialog
 import com.dd3boh.outertune.ui.component.DropdownItem
 import com.dd3boh.outertune.ui.component.EmptyPlaceholder
 import com.dd3boh.outertune.ui.component.HideOnScrollFAB
+import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
+import com.dd3boh.outertune.ui.component.LazyVerticalGridScrollbar
 import com.dd3boh.outertune.ui.component.LibraryPlaylistGridItem
 import com.dd3boh.outertune.ui.component.LibraryPlaylistListItem
 import com.dd3boh.outertune.ui.component.SortHeader
@@ -212,7 +214,7 @@ fun LibraryPlaylistsScreen(
                 }
             )
 
-            Row (
+            Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 playlists?.let { playlists ->
@@ -326,6 +328,9 @@ fun LibraryPlaylistsScreen(
                         }
                     }
                 }
+                LazyColumnScrollbar(
+                    state = lazyListState,
+                )
 
                 HideOnScrollFAB(
                     lazyListState = lazyListState,
@@ -419,6 +424,9 @@ fun LibraryPlaylistsScreen(
                         }
                     }
                 }
+                LazyVerticalGridScrollbar(
+                    state = lazyGridState,
+                )
 
                 HideOnScrollFAB(
                     lazyListState = lazyGridState,

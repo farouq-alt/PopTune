@@ -79,6 +79,7 @@ import com.dd3boh.outertune.ui.component.ChipsRow
 import com.dd3boh.outertune.ui.component.FloatingFooter
 import com.dd3boh.outertune.ui.component.HideOnScrollFAB
 import com.dd3boh.outertune.ui.component.IconButton
+import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
 import com.dd3boh.outertune.ui.component.NavigationTitle
 import com.dd3boh.outertune.ui.component.SelectHeader
 import com.dd3boh.outertune.ui.component.SongListItem
@@ -193,10 +194,12 @@ fun HistoryScreen(
                 .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
                 .union(WindowInsets.ime)
                 .asPaddingValues(),
-            modifier = Modifier.windowInsetsPadding(
-                LocalPlayerAwareWindowInsets.current
-                    .only(WindowInsetsSides.Top)
-            ).padding(bottom = if (inSelectMode) 64.dp else 0.dp)
+            modifier = Modifier
+                .windowInsetsPadding(
+                    LocalPlayerAwareWindowInsets.current
+                        .only(WindowInsetsSides.Top)
+                )
+                .padding(bottom = if (inSelectMode) 64.dp else 0.dp)
         ) {
             stickyHeader(
                 key = "searchbar"
@@ -392,6 +395,9 @@ fun HistoryScreen(
                 }
             }
         }
+        LazyColumnScrollbar(
+            state = lazyListState,
+        )
 
         HideOnScrollFAB(
             visible = filteredEventsMap.isNotEmpty(),

@@ -53,6 +53,7 @@ import com.dd3boh.outertune.playback.queues.ListQueue
 import com.dd3boh.outertune.ui.component.FloatingFooter
 import com.dd3boh.outertune.ui.component.HideOnScrollFAB
 import com.dd3boh.outertune.ui.component.IconButton
+import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
 import com.dd3boh.outertune.ui.component.SelectHeader
 import com.dd3boh.outertune.ui.component.SongListItem
 import com.dd3boh.outertune.ui.component.SortHeader
@@ -101,7 +102,8 @@ fun ArtistSongsScreen(
     val snackbarHostState = LocalSnackbarHostState.current
 
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .padding(bottom = 32.dp)
     ) {
         LazyColumn(
@@ -183,6 +185,9 @@ fun ArtistSongsScreen(
                 )
             }
         }
+        LazyColumnScrollbar(
+            state = lazyListState,
+        )
 
         TopAppBar(
             title = { Text(artist?.artist?.name.orEmpty()) },

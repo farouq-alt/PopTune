@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,6 +38,7 @@ import com.dd3boh.outertune.ui.component.AlbumGridItem
 import com.dd3boh.outertune.ui.component.ArtistGridItem
 import com.dd3boh.outertune.ui.component.ChipsRow
 import com.dd3boh.outertune.ui.component.IconButton
+import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
 import com.dd3boh.outertune.ui.component.NavigationTitle
 import com.dd3boh.outertune.ui.component.SongListItem
 import com.dd3boh.outertune.ui.menu.AlbumMenu
@@ -61,11 +63,14 @@ fun StatsScreen(
     val mostPlayedAlbums by viewModel.mostPlayedAlbums.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
+    val lazyListState = rememberLazyListState()
 
     val mostPlayedSongTitle = stringResource(R.string.most_played_songs)
 
     LazyColumn(
-        contentPadding = LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom).asPaddingValues(),
+        state = lazyListState,
+        contentPadding = LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
+            .asPaddingValues(),
         modifier = Modifier.windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Top))
     ) {
         item {
@@ -108,7 +113,9 @@ fun StatsScreen(
                 inSelectMode = false,
                 isSelected = false,
                 navController = navController,
-                modifier = Modifier.fillMaxWidth().animateItem()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .animateItem()
             )
         }
 
@@ -191,6 +198,9 @@ fun StatsScreen(
             }
         }
     }
+    LazyColumnScrollbar(
+        state = lazyListState,
+    )
 
     TopAppBar(
         title = { Text(stringResource(R.string.stats)) },

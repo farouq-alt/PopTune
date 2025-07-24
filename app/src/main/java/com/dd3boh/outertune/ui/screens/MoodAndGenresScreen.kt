@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -37,6 +38,7 @@ import com.dd3boh.outertune.LocalPlayerAwareWindowInsets
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.TopBarInsets
 import com.dd3boh.outertune.ui.component.IconButton
+import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
 import com.dd3boh.outertune.ui.component.NavigationTitle
 import com.dd3boh.outertune.ui.component.shimmer.ListItemPlaceHolder
 import com.dd3boh.outertune.ui.component.shimmer.ShimmerHost
@@ -55,7 +57,10 @@ fun MoodAndGenresScreen(
 
     val moodAndGenresList by viewModel.moodAndGenres.collectAsState()
 
+    val lazyListState = rememberLazyListState()
+
     LazyColumn(
+        state = lazyListState,
         contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues()
     ) {
         if (moodAndGenresList == null) {
@@ -100,6 +105,9 @@ fun MoodAndGenresScreen(
             }
         }
     }
+    LazyColumnScrollbar(
+        state = lazyListState,
+    )
 
     TopAppBar(
         title = { Text(stringResource(R.string.mood_and_genres)) },

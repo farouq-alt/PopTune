@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Input
 import androidx.compose.material.icons.rounded.GraphicEq
@@ -61,6 +63,7 @@ import com.dd3boh.outertune.db.entities.Song
 import com.dd3boh.outertune.db.entities.SongEntity
 import com.dd3boh.outertune.ui.component.DefaultDialog
 import com.dd3boh.outertune.ui.component.EnumListPreference
+import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
 import com.dd3boh.outertune.utils.reportException
 import com.dd3boh.outertune.utils.scanners.LocalMediaScanner
 import com.dd3boh.outertune.utils.scanners.LocalMediaScanner.Companion.compareM3uSong
@@ -182,6 +185,7 @@ fun ImportM3uDialog(
         }
 
         if (importedSongs.isNotEmpty()) {
+            val lazyListState = rememberLazyListState()
             Text(
                 text = stringResource(R.string.import_success_songs),
                 fontSize = 24.sp,
@@ -189,27 +193,34 @@ fun ImportM3uDialog(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            LazyColumn(
-                modifier = Modifier
-                    .heightIn(max = 150.dp)
-                    .padding(start = 20.dp, top = 8.dp, end = 20.dp, bottom = 20.dp)
-            ) {
-                itemsIndexed(
-                    items = importedSongs.map { it.title },
-                    key = { _, song -> song.hashCode() }
-                ) { index, item ->
-                    Text(
-                        text = item,
-                        fontSize = 14.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                    )
+            Box() {
+                LazyColumn(
+                    state = lazyListState,
+                    modifier = Modifier
+                        .heightIn(max = 150.dp)
+                        .padding(start = 20.dp, top = 8.dp, end = 20.dp, bottom = 20.dp)
+                ) {
+                    itemsIndexed(
+                        items = importedSongs.map { it.title },
+                        key = { _, song -> song.hashCode() }
+                    ) { index, item ->
+                        Text(
+                            text = item,
+                            fontSize = 14.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        )
+                    }
                 }
+                LazyColumnScrollbar(
+                    state = lazyListState,
+                )
             }
         }
 
         if (rejectedSongs.isNotEmpty()) {
+            val lazyListState = rememberLazyListState()
             Text(
                 text = stringResource(R.string.import_failed_songs),
                 fontSize = 24.sp,
@@ -217,23 +228,29 @@ fun ImportM3uDialog(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            LazyColumn(
-                modifier = Modifier
-                    .heightIn(max = 150.dp)
-                    .padding(start = 20.dp, top = 8.dp, end = 20.dp, bottom = 20.dp)
-            ) {
-                itemsIndexed(
-                    items = rejectedSongs,
-                    key = { _, song -> song.hashCode() }
-                ) { index, item ->
-                    Text(
-                        text = item,
-                        fontSize = 14.sp,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                    )
+            Box() {
+                LazyColumn(
+                    state = lazyListState,
+                    modifier = Modifier
+                        .heightIn(max = 150.dp)
+                        .padding(start = 20.dp, top = 8.dp, end = 20.dp, bottom = 20.dp)
+                ) {
+                    itemsIndexed(
+                        items = rejectedSongs,
+                        key = { _, song -> song.hashCode() }
+                    ) { index, item ->
+                        Text(
+                            text = item,
+                            fontSize = 14.sp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                        )
+                    }
                 }
+                LazyColumnScrollbar(
+                    state = lazyListState,
+                )
             }
         }
 

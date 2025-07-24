@@ -58,6 +58,8 @@ import com.dd3boh.outertune.models.toMediaMetadata
 import com.dd3boh.outertune.playback.queues.ListQueue
 import com.dd3boh.outertune.ui.component.FloatingFooter
 import com.dd3boh.outertune.ui.component.IconButton
+import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
+import com.dd3boh.outertune.ui.component.LazyVerticalGridScrollbar
 import com.dd3boh.outertune.ui.component.SelectHeader
 import com.dd3boh.outertune.ui.component.SwipeToQueueBox
 import com.dd3boh.outertune.ui.component.YouTubeGridItem
@@ -209,7 +211,8 @@ fun ArtistItemsScreen(
                                         playerConnection.playQueue(
                                             ListQueue(
                                                 title = "Artist songs: ${song.artists.firstOrNull()?.name}",
-                                                items = itemsPage?.items.orEmpty().map { (it as SongItem).toMediaMetadata() },
+                                                items = itemsPage?.items.orEmpty()
+                                                    .map { (it as SongItem).toMediaMetadata() },
                                                 startIndex = index
                                             )
                                         )
@@ -243,6 +246,9 @@ fun ArtistItemsScreen(
                 }
             }
         }
+        LazyColumnScrollbar(
+            state = lazyListState,
+        )
     } else {
         LazyVerticalGrid(
             state = lazyGridState,
@@ -321,6 +327,9 @@ fun ArtistItemsScreen(
                 }
             }
         }
+        LazyVerticalGridScrollbar(
+            state = lazyGridState,
+        )
     }
 
     TopAppBar(

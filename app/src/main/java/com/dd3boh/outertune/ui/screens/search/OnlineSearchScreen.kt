@@ -50,6 +50,7 @@ import com.dd3boh.outertune.extensions.togglePlayPause
 import com.dd3boh.outertune.models.toMediaMetadata
 import com.dd3boh.outertune.playback.queues.ListQueue
 import com.dd3boh.outertune.ui.component.IconButton
+import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
 import com.dd3boh.outertune.ui.component.SearchBarIconOffsetX
 import com.dd3boh.outertune.ui.component.SwipeToQueueBox
 import com.dd3boh.outertune.ui.component.YouTubeListItem
@@ -265,6 +266,9 @@ fun OnlineSearchScreen(
             }
         }
     }
+    LazyColumnScrollbar(
+        state = lazyListState,
+    )
 
     Box(
         modifier = Modifier.fillMaxSize()

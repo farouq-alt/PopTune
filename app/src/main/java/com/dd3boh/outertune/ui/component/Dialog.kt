@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -182,7 +183,14 @@ fun ListDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = modifier.padding(vertical = 24.dp)
             ) {
-                LazyColumn(content = content)
+                val lazyListState = rememberLazyListState()
+                LazyColumn(
+                    state = lazyListState,
+                    content = content
+                )
+                LazyColumnScrollbar(
+                    state = lazyListState,
+                )
             }
         }
     }
@@ -545,16 +553,16 @@ fun DetailsDialog(
 
                 details.addAll(
                     mutableListOf(
-                    stringResource(R.string.volume) to "${(volume * 100).toInt()}%",
-                    stringResource(R.string.file_size) to currentFormat?.contentLength?.let {
-                        // TODO: This should 1024 sized not 1000
-                        if (mediaMetadata.isLocal && mediaMetadata.localPath != null && File(mediaMetadata.localPath).exists()) {
-                            Formatter.formatShortFileSize(context, File(mediaMetadata.localPath).length())
-                        } else {
-                            Formatter.formatShortFileSize(context, it)
+                        stringResource(R.string.volume) to "${(volume * 100).toInt()}%",
+                        stringResource(R.string.file_size) to currentFormat?.contentLength?.let {
+                            // TODO: This should 1024 sized not 1000
+                            if (mediaMetadata.isLocal && mediaMetadata.localPath != null && File(mediaMetadata.localPath).exists()) {
+                                Formatter.formatShortFileSize(context, File(mediaMetadata.localPath).length())
+                            } else {
+                                Formatter.formatShortFileSize(context, it)
+                            }
                         }
-                    }
-                ))
+                    ))
 
                 if (mediaMetadata.isLocal) {
                     details.add("Path" to mediaMetadata.localPath)

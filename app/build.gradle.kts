@@ -144,6 +144,7 @@ dependencies {
     implementation(libs.hilt.navigation)
     implementation(libs.datastore)
 
+    // compose
     implementation(libs.compose.runtime)
     implementation(libs.compose.foundation)
     implementation(libs.compose.ui)
@@ -153,18 +154,20 @@ dependencies {
     implementation(libs.compose.reorderable)
     implementation(libs.compose.icons.extended)
 
+    // ui
+    implementation(libs.coil)
+    implementation(libs.lazycolumnscrollbar)
+    implementation(libs.shimmer)
+
+    // material
     implementation(libs.adaptive)
-
-    implementation(libs.viewmodel)
-    implementation(libs.viewmodel.compose)
-
     implementation(libs.material3)
     implementation(libs.palette)
     implementation(projects.materialColorUtilities)
 
-    implementation(libs.coil)
-
-    implementation(libs.shimmer)
+    // viewmodel
+    implementation(libs.viewmodel)
+    implementation(libs.viewmodel.compose)
 
     implementation(libs.media3)
     implementation(libs.media3.session)

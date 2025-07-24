@@ -70,6 +70,7 @@ import com.dd3boh.outertune.ui.component.ChipsRow
 import com.dd3boh.outertune.ui.component.EmptyPlaceholder
 import com.dd3boh.outertune.ui.component.FloatingFooter
 import com.dd3boh.outertune.ui.component.HideOnScrollFAB
+import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
 import com.dd3boh.outertune.ui.component.SelectHeader
 import com.dd3boh.outertune.ui.component.SongListItem
 import com.dd3boh.outertune.ui.component.SortHeader
@@ -309,6 +310,9 @@ fun LibrarySongsScreen(
                 }
             }
         }
+        LazyColumnScrollbar(
+            state = lazyListState,
+        )
 
         HideOnScrollFAB(
             visible = !songs.isNullOrEmpty(),

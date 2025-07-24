@@ -95,6 +95,7 @@ import com.dd3boh.outertune.ui.component.AutoResizeText
 import com.dd3boh.outertune.ui.component.FloatingFooter
 import com.dd3boh.outertune.ui.component.FontSizeRange
 import com.dd3boh.outertune.ui.component.IconButton
+import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
 import com.dd3boh.outertune.ui.component.NavigationTitle
 import com.dd3boh.outertune.ui.component.SelectHeader
 import com.dd3boh.outertune.ui.component.SongListItem
@@ -320,7 +321,8 @@ fun AlbumScreen(
                                         else -> {
                                             IconButton(
                                                 onClick = {
-                                                    val songs = albumWithSongsLocal.songs.map { it.toMediaMetadata() }
+                                                    val songs =
+                                                        albumWithSongsLocal.songs.map { it.toMediaMetadata() }
                                                     downloadUtil.download(songs)
                                                 }
                                             ) {
@@ -525,6 +527,9 @@ fun AlbumScreen(
             }
         }
     }
+    LazyColumnScrollbar(
+        state = state,
+    )
 
     TopAppBar(
         title = { },

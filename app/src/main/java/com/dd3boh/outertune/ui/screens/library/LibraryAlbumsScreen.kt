@@ -68,6 +68,8 @@ import com.dd3boh.outertune.constants.LocalLibraryEnableKey
 import com.dd3boh.outertune.ui.component.ChipsRow
 import com.dd3boh.outertune.ui.component.EmptyPlaceholder
 import com.dd3boh.outertune.ui.component.IconButton
+import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
+import com.dd3boh.outertune.ui.component.LazyVerticalGridScrollbar
 import com.dd3boh.outertune.ui.component.LibraryAlbumGridItem
 import com.dd3boh.outertune.ui.component.LibraryAlbumListItem
 import com.dd3boh.outertune.ui.component.SortHeader
@@ -228,7 +230,7 @@ fun LibraryAlbumsScreen(
             ),
     ) {
         when (viewType) {
-            LibraryViewType.LIST ->
+            LibraryViewType.LIST -> {
                 LazyColumn(
                     state = lazyListState,
                     contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues()
@@ -272,9 +274,15 @@ fun LibraryAlbumsScreen(
                             )
                         }
                     }
-                }
 
-            LibraryViewType.GRID ->
+                }
+                LazyColumnScrollbar(
+                    state = lazyListState,
+                )
+            }
+
+            LibraryViewType.GRID -> {
+
                 LazyVerticalGrid(
                     state = lazyGridState,
                     columns = GridCells.Adaptive(minSize = GridThumbnailHeight + 24.dp),
@@ -323,6 +331,10 @@ fun LibraryAlbumsScreen(
                         }
                     }
                 }
+                LazyVerticalGridScrollbar(
+                    state = lazyGridState,
+                )
+            }
         }
 
         Indicator(

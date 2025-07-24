@@ -98,6 +98,7 @@ import com.dd3boh.outertune.ui.component.EmptyPlaceholder
 import com.dd3boh.outertune.ui.component.FloatingFooter
 import com.dd3boh.outertune.ui.component.FontSizeRange
 import com.dd3boh.outertune.ui.component.IconButton
+import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
 import com.dd3boh.outertune.ui.component.SelectHeader
 import com.dd3boh.outertune.ui.component.SongListItem
 import com.dd3boh.outertune.ui.utils.getNSongsString
@@ -533,6 +534,9 @@ fun AutoPlaylistScreen(
                 )
             }
         }
+        LazyColumnScrollbar(
+            state = lazyListState,
+        )
 
         TopAppBar(
             title = { },

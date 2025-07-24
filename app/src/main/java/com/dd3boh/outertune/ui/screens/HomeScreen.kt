@@ -89,6 +89,7 @@ import com.dd3boh.outertune.ui.component.AlbumGridItem
 import com.dd3boh.outertune.ui.component.ArtistGridItem
 import com.dd3boh.outertune.ui.component.ChipsRow
 import com.dd3boh.outertune.ui.component.HideOnScrollFAB
+import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
 import com.dd3boh.outertune.ui.component.NavigationTile
 import com.dd3boh.outertune.ui.component.NavigationTitle
 import com.dd3boh.outertune.ui.component.SongGridItem
@@ -661,7 +662,9 @@ fun HomeScreen(
                         thumbnail = it.title.thumbnailUrl?.let { thumbnailUrl ->
                             {
                                 val shape =
-                                    if (it.title is Artist) CircleShape else RoundedCornerShape(ThumbnailCornerRadius)
+                                    if (it.title is Artist) CircleShape else RoundedCornerShape(
+                                        ThumbnailCornerRadius
+                                    )
                                 AsyncImage(
                                     model = thumbnailUrl,
                                     contentDescription = null,
@@ -816,6 +819,9 @@ fun HomeScreen(
                 }
             }
         }
+        LazyColumnScrollbar(
+            state = lazylistState,
+        )
 
         HideOnScrollFAB(
             visible = allLocalItems.isNotEmpty() || allYtItems.isNotEmpty(),

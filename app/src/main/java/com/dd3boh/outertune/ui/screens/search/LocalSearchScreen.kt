@@ -49,6 +49,7 @@ import com.dd3boh.outertune.ui.component.AlbumListItem
 import com.dd3boh.outertune.ui.component.ArtistListItem
 import com.dd3boh.outertune.ui.component.ChipsRow
 import com.dd3boh.outertune.ui.component.EmptyPlaceholder
+import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
 import com.dd3boh.outertune.ui.component.PlaylistListItem
 import com.dd3boh.outertune.ui.component.SongListItem
 import com.dd3boh.outertune.viewmodels.LocalFilter
@@ -153,11 +154,12 @@ fun LocalSearchScreen(
                                         .getOrDefault(LocalFilter.SONG, emptyList())
                                         .filterIsInstance<Song>()
                                         .map { it.toMediaMetadata() }
-                                    playerConnection.playQueue(ListQueue(
-                                        title = "${context.getString(R.string.queue_searched_songs_ot)} $query",
-                                        items = songs,
-                                        startIndex = songs.indexOfFirst { it.id == item.id }
-                                    ))
+                                    playerConnection.playQueue(
+                                        ListQueue(
+                                            title = "${context.getString(R.string.queue_searched_songs_ot)} $query",
+                                            items = songs,
+                                            startIndex = songs.indexOfFirst { it.id == item.id }
+                                        ))
                                 },
                                 onSelectedChange = { },
                                 inSelectMode = false,
@@ -216,6 +218,9 @@ fun LocalSearchScreen(
             }
         }
     }
+    LazyColumnScrollbar(
+        state = lazyListState,
+    )
 
     Box(
         modifier = Modifier.fillMaxSize()

@@ -93,6 +93,7 @@ import com.dd3boh.outertune.ui.component.FloatingFooter
 import com.dd3boh.outertune.ui.component.HideOnScrollFAB
 import com.dd3boh.outertune.ui.component.IconButton
 import com.dd3boh.outertune.ui.component.IconTextButton
+import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
 import com.dd3boh.outertune.ui.component.ResizableIconButton
 import com.dd3boh.outertune.ui.component.SelectHeader
 import com.dd3boh.outertune.ui.component.SongFolderItem
@@ -499,6 +500,9 @@ fun FolderScreen(
                 )
             }
         }
+        LazyColumnScrollbar(
+            state = lazyListState,
+        )
 
         HideOnScrollFAB(
             visible = currDir.toList().isNotEmpty(),

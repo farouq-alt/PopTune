@@ -49,6 +49,7 @@ import com.dd3boh.outertune.playback.queues.ListQueue
 import com.dd3boh.outertune.ui.component.ChipsRow
 import com.dd3boh.outertune.ui.component.EmptyPlaceholder
 import com.dd3boh.outertune.ui.component.IconButton
+import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
 import com.dd3boh.outertune.ui.component.NavigationTitle
 import com.dd3boh.outertune.ui.component.SwipeToQueueBox
 import com.dd3boh.outertune.ui.component.YouTubeListItem
@@ -108,17 +109,18 @@ fun OnlineSearchResult(
         }
     }
 
-    val ytItemContent: @Composable LazyItemScope.(YTItem, List<YTItem>) -> Unit = { item: YTItem, collection: List<YTItem> ->
-        val content: @Composable () -> Unit = {
-            YouTubeListItem(
-                item = item,
-                isActive = when (item) {
-                    is SongItem -> mediaMetadata?.id == item.id
-                    is AlbumItem -> mediaMetadata?.album?.id == item.id
-                    else -> false
-                },
-                isPlaying = isPlaying,
-                trailingContent = {
+    val ytItemContent: @Composable LazyItemScope.(YTItem, List<YTItem>) -> Unit =
+        { item: YTItem, collection: List<YTItem> ->
+            val content: @Composable () -> Unit = {
+                YouTubeListItem(
+                    item = item,
+                    isActive = when (item) {
+                        is SongItem -> mediaMetadata?.id == item.id
+                        is AlbumItem -> mediaMetadata?.album?.id == item.id
+                        else -> false
+                    },
+                    isPlaying = isPlaying,
+                    trailingContent = {
                         IconButton(
                             onClick = {
                                 menuState.show {
@@ -156,57 +158,62 @@ fun OnlineSearchResult(
                             )
                         }
 
-                },
-                modifier = Modifier
-                    .combinedClickable(
-                        onClick = {
-                            when (item) {
-                                is SongItem -> {
-                                    if (item.id == mediaMetadata?.id) {
-                                        playerConnection.player.togglePlayPause()
-                                    } else {
-                                        val songSuggestions = collection.filter { it is SongItem }
-                                        playerConnection.playQueue(
-                                            ListQueue(
-                                                title = "${context.getString(R.string.queue_searched_songs_ot)} ${ URLDecoder.decode(viewModel.query, "UTF-8")}",
-                                                items = songSuggestions.map { (it as SongItem).toMediaMetadata() },
-                                                startIndex = songSuggestions.indexOf(item)
-                                            ),
-                                            replace = true,
+                    },
+                    modifier = Modifier
+                        .combinedClickable(
+                            onClick = {
+                                when (item) {
+                                    is SongItem -> {
+                                        if (item.id == mediaMetadata?.id) {
+                                            playerConnection.player.togglePlayPause()
+                                        } else {
+                                            val songSuggestions = collection.filter { it is SongItem }
+                                            playerConnection.playQueue(
+                                                ListQueue(
+                                                    title = "${context.getString(R.string.queue_searched_songs_ot)} ${
+                                                        URLDecoder.decode(
+                                                            viewModel.query,
+                                                            "UTF-8"
+                                                        )
+                                                    }",
+                                                    items = songSuggestions.map { (it as SongItem).toMediaMetadata() },
+                                                    startIndex = songSuggestions.indexOf(item)
+                                                ),
+                                                replace = true,
+                                            )
+                                        }
+                                    }
+
+                                    is AlbumItem -> navController.navigate("album/${item.id}")
+                                    is ArtistItem -> navController.navigate("artist/${item.id}")
+                                    is PlaylistItem -> navController.navigate("online_playlist/${item.id}")
+                                }
+                            },
+                            onLongClick = {
+                                menuState.show {
+                                    when (item) {
+                                        is SongItem -> YouTubeSongMenu(
+                                            song = item,
+                                            navController = navController,
+                                            onDismiss = menuState::dismiss
                                         )
+
+                                        else -> {}
                                     }
                                 }
-
-                                is AlbumItem -> navController.navigate("album/${item.id}")
-                                is ArtistItem -> navController.navigate("artist/${item.id}")
-                                is PlaylistItem -> navController.navigate("online_playlist/${item.id}")
                             }
-                        },
-                        onLongClick = {
-                            menuState.show {
-                                when (item) {
-                                    is SongItem -> YouTubeSongMenu(
-                                        song = item,
-                                        navController = navController,
-                                        onDismiss = menuState::dismiss
-                                    )
+                        )
+                        .animateItem()
+                )
+            }
 
-                                    else -> {}
-                                }
-                            }
-                        }
-                    )
-                    .animateItem()
+            if (item !is SongItem) content()
+            else SwipeToQueueBox(
+                item = item.toMediaItem(),
+                content = { content() },
+                snackbarHostState = snackbarHostState
             )
         }
-
-        if (item !is SongItem) content()
-        else SwipeToQueueBox(
-            item = item.toMediaItem(),
-            content = { content() },
-            snackbarHostState = snackbarHostState
-        )
-    }
 
     LazyColumn(
         state = lazyListState,
@@ -276,6 +283,9 @@ fun OnlineSearchResult(
             }
         }
     }
+    LazyColumnScrollbar(
+        state = lazyListState,
+    )
 
     Box(
         modifier = Modifier.fillMaxSize()

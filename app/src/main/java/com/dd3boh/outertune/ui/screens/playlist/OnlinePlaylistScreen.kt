@@ -113,6 +113,7 @@ import com.dd3boh.outertune.ui.component.DefaultDialog
 import com.dd3boh.outertune.ui.component.FloatingFooter
 import com.dd3boh.outertune.ui.component.FontSizeRange
 import com.dd3boh.outertune.ui.component.IconButton
+import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
 import com.dd3boh.outertune.ui.component.SelectHeader
 import com.dd3boh.outertune.ui.component.SwipeToQueueBox
 import com.dd3boh.outertune.ui.component.YouTubeListItem
@@ -427,7 +428,10 @@ fun OnlinePlaylistScreen(
                                                         IconButton(
                                                             onClick = {
                                                                 viewModel.viewModelScope.launch(Dispatchers.IO) {
-                                                                    syncUtils.syncPlaylist(playlist.id, dbPlaylist!!.id)
+                                                                    syncUtils.syncPlaylist(
+                                                                        playlist.id,
+                                                                        dbPlaylist!!.id
+                                                                    )
                                                                 }
                                                                 val _songs = songs.map { it.toMediaMetadata() }
                                                                 downloadUtil.download(_songs)
@@ -653,6 +657,9 @@ fun OnlinePlaylistScreen(
                 }
             }
         }
+        LazyColumnScrollbar(
+            state = lazyListState,
+        )
 
         TopAppBar(
             title = {

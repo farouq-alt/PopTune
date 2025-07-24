@@ -133,6 +133,7 @@ import com.dd3boh.outertune.ui.component.BottomSheet
 import com.dd3boh.outertune.ui.component.BottomSheetState
 import com.dd3boh.outertune.ui.component.EmptyPlaceholder
 import com.dd3boh.outertune.ui.component.IconButton
+import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
 import com.dd3boh.outertune.ui.component.MediaMetadataListItem
 import com.dd3boh.outertune.ui.component.ResizableIconButton
 import com.dd3boh.outertune.ui.component.SelectHeader
@@ -567,6 +568,9 @@ fun BoxScope.QueueContent(
                 }
             }
         }
+        LazyColumnScrollbar(
+            state = lazyQueuesListState,
+        )
     }
 
     val songHeader: @Composable ColumnScope.(Modifier) -> Unit = { modifier ->
@@ -766,6 +770,9 @@ fun BoxScope.QueueContent(
                 }
             }
         }
+        LazyColumnScrollbar(
+            state = lazySongsListState,
+        )
     }
 
     val searchBar: @Composable ColumnScope.() -> Unit = {
@@ -814,7 +821,7 @@ fun BoxScope.QueueContent(
         }
     }
 
-    // queue info + player controls
+// queue info + player controls
     val bottomNav: @Composable ColumnScope.() -> Unit = {
         Column(
             modifier = Modifier
@@ -1021,7 +1028,7 @@ fun BoxScope.QueueContent(
     }
 
 
-    // finally render ui
+// finally render ui
     if (landscape) {
         Row {
             // song header & song list
