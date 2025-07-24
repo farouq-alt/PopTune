@@ -15,13 +15,15 @@ import my.nanihadesuka.compose.InternalLazyColumnScrollbar
 import my.nanihadesuka.compose.InternalLazyVerticalGridScrollbar
 import my.nanihadesuka.compose.ScrollbarSettings
 
+// Thumb doesn't reach bottom / thumb size randomly changes
+// https://github.com/nanihadesuka/LazyColumnScrollbar/issues/40
 val DefaultScrollbar: ScrollbarSettings
     @Composable
     get() =
         ScrollbarSettings.Default.copy(
             thumbThickness = 8.dp,
-            thumbMinLength = 0.1f,
-            thumbMaxLength = 0.2f,
+//            thumbMinLength = 0.1f,
+//            thumbMaxLength = 0.1f,
             thumbUnselectedColor = MaterialTheme.colorScheme.primary,
             thumbSelectedColor = MaterialTheme.colorScheme.secondary, // TODO: re-eval colour
             hideDelayMillis = 2000,
