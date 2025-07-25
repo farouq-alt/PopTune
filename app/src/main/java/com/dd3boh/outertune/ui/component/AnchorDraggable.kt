@@ -61,7 +61,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-
+/**
+ * Swipe to perform an action. This supports one or two actions
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SwipeToQueueBox(
@@ -72,14 +74,64 @@ fun SwipeToQueueBox(
     enabled: Boolean = true
 ) {
     val context = LocalContext.current
-    val haptic = LocalHapticFeedback.current
+    val coroutineScope = rememberCoroutineScope()
     val playerConnection = LocalPlayerConnection.current
+
+    SwipeActionBox(
+        firstAction = Pair(Icons.AutoMirrored.Rounded.PlaylistPlay, {
+            playerConnection?.enqueueNext(item)
+            coroutineScope.launch {
+                snackbarHostState?.showSnackbar(
+                    message = context.getString(
+                        R.string.song_added_to_queue,
+                        item.mediaMetadata.title
+                    ),
+                    withDismissAction = true,
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }),
+        secondAction = Pair(Icons.AutoMirrored.Rounded.PlaylistAdd, {
+            playerConnection?.enqueueEnd(item)
+            coroutineScope.launch {
+                val job = launch {
+                    snackbarHostState?.showSnackbar(
+                        message = context.getString(
+                            R.string.song_added_to_queue_end,
+                            item.mediaMetadata.title
+                        ),
+                        withDismissAction = true,
+                        duration = SnackbarDuration.Indefinite
+                    )
+                }
+                delay(SNACKBAR_VERY_SHORT)
+                job.cancel()
+            }
+        }),
+        enabled = enabled,
+        modifier = modifier,
+        content = content
+    )
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun SwipeActionBox(
+    firstAction: Pair<ImageVector, () -> Unit>,
+    modifier: Modifier = Modifier,
+    secondAction: Pair<ImageVector, () -> Unit>? = null,
+    enabled: Boolean = true,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    val haptic = LocalHapticFeedback.current
     val coroutineScope = rememberCoroutineScope()
 
     val defaultActionSize = 150.dp
+    // determines how close the second action will come in behind the first action. Higher values == closer
+    val tightnessFactor = 200f
 
     val swipeOffset = remember { mutableFloatStateOf(0f) }
-    var progress = remember { mutableIntStateOf(0) } // swipeOffset but to track haptics and opacity
+    val progress = remember { mutableIntStateOf(0) } // swipeOffset but to track haptics and opacity
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val firstThreshold = (screenWidth * 0.4f).value
     val secondThreshold = (screenWidth * 0.8f).value
@@ -101,39 +153,17 @@ fun SwipeToQueueBox(
                     onDragStopped = {
                         when {
                             swipeOffset.floatValue >= secondThreshold -> {
-                                playerConnection?.enqueueEnd(item)
-
-                                coroutineScope.launch {
-                                    val job = launch {
-                                        snackbarHostState?.showSnackbar(
-                                            message = context.getString(
-                                                R.string.song_added_to_queue_end,
-                                                item.mediaMetadata.title
-                                            ),
-                                            withDismissAction = true,
-                                            duration = SnackbarDuration.Indefinite
-                                        )
-                                    }
-                                    delay(SNACKBAR_VERY_SHORT)
-                                    job.cancel()
+                                if (secondAction == null) {
+                                    firstAction.second.invoke()
+                                } else {
+                                    secondAction.second.invoke()
                                 }
                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                 resetDrag(coroutineScope, swipeOffset)
                             }
 
                             swipeOffset.floatValue >= firstThreshold -> {
-                                playerConnection?.enqueueNext(item)
-
-                                coroutineScope.launch {
-                                    snackbarHostState?.showSnackbar(
-                                        message = context.getString(
-                                            R.string.song_added_to_queue,
-                                            item.mediaMetadata.title
-                                        ),
-                                        withDismissAction = true,
-                                        duration = SnackbarDuration.Short
-                                    )
-                                }
+                                firstAction.second.invoke()
                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                                 resetDrag(coroutineScope, swipeOffset)
                             }
@@ -153,7 +183,7 @@ fun SwipeToQueueBox(
                 }
             }
             if (swipeOffset.floatValue > 0f) {
-                if (swipeOffset.floatValue >= secondThreshold) {
+                if (secondAction != null && swipeOffset.floatValue >= secondThreshold) {
                     if (progress.intValue < 2) {
                         haptic.performHapticFeedback(HapticFeedbackType.Reject)
                     }
@@ -167,7 +197,7 @@ fun SwipeToQueueBox(
                 DragActionIcon(
                     color = MaterialTheme.colorScheme.primary,
                     tint = MaterialTheme.colorScheme.onPrimary,
-                    icon = Icons.AutoMirrored.Rounded.PlaylistPlay,
+                    icon = firstAction.first,
                     modifier = Modifier
                         .alpha(if (progress.intValue == 1) 1f else 0.6f)
                         .width(defaultActionSize)
@@ -178,22 +208,28 @@ fun SwipeToQueueBox(
                         }
                 )
 
-                DragActionIcon(
-                    color = MaterialTheme.colorScheme.secondary,
-                    tint = MaterialTheme.colorScheme.onSecondary,
-                    icon = Icons.AutoMirrored.Rounded.PlaylistAdd,
-                    modifier = Modifier
-                        .alpha(if (progress.intValue == 2) 1f else 0.6f)
-                        .width(defaultActionSize)
-                        .fillMaxHeight()
-                        .align(Alignment.CenterStart)
-                        .offset {
-                            IntOffset(
-                                (-screenWidth.value - (defaultActionSize.value * 6f) + (swipeOffset.floatValue * 3.0f))
-                                    .roundToInt(), 0
-                            )
-                        }
-                )
+                secondAction?.let {
+                    DragActionIcon(
+                        color = MaterialTheme.colorScheme.secondary,
+                        tint = MaterialTheme.colorScheme.onSecondary,
+                        icon = it.first,
+                        modifier = Modifier
+                            .alpha(if (progress.intValue == 2) 1f else 0.6f)
+                            .width(defaultActionSize)
+                            .fillMaxHeight()
+                            .align(Alignment.CenterStart)
+                            .offset {
+                                val x = -screenWidth.value + swipeOffset.floatValue
+                                val size = defaultActionSize.value
+                                // x-\frac{x^{2}}{k}-\left(0.9s\right)
+                                // x = firstAction offset, k = tightnessFactor, s = size
+                                IntOffset(
+                                    ((x - (x * x / tightnessFactor)) - (size * 0.9)
+                                        .coerceIn(0.0, size.toDouble())).roundToInt(), 0
+                                )
+                            }
+                    )
+                }
             }
 
             // Foreground draggable content
