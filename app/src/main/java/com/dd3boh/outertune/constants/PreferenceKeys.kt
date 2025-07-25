@@ -126,7 +126,7 @@ val LastLocalScanKey = longPreferencesKey("lastLocalScan")
  */
 val DevSettingsKey = booleanPreferencesKey("devSettings")
 val OobeStatusKey = intPreferencesKey("oobeStatus")
-val SwipeToSkip = booleanPreferencesKey("swipeToSkip")
+val SwipeToSkipKey = booleanPreferencesKey("swipeToSkip")
 
 
 /**

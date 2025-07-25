@@ -125,7 +125,7 @@ import com.dd3boh.outertune.constants.PlayerBackgroundStyleKey
 import com.dd3boh.outertune.constants.PlayerHorizontalPadding
 import com.dd3boh.outertune.constants.QueuePeekHeight
 import com.dd3boh.outertune.constants.ShowLyricsKey
-import com.dd3boh.outertune.constants.SwipeToSkip
+import com.dd3boh.outertune.constants.SwipeToSkipKey
 import com.dd3boh.outertune.extensions.isPowerSaver
 import com.dd3boh.outertune.extensions.metadata
 import com.dd3boh.outertune.extensions.tabMode
@@ -175,7 +175,7 @@ fun BottomSheetPlayer(
 
     val thumbnailLazyGridState = rememberLazyGridState()
 
-    val swipeToSkip by rememberPreference(SwipeToSkip, defaultValue = true)
+    val swipeToSkip by rememberPreference(SwipeToSkipKey, defaultValue = false)
     val previousMediaMetadata = if (swipeToSkip && playerConnection.player.hasPreviousMediaItem()) {
         val previousIndex = playerConnection.player.previousMediaItemIndex
         playerConnection.player.getMediaItemAt(previousIndex).metadata

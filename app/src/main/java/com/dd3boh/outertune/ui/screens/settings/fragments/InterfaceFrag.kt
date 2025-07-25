@@ -53,7 +53,7 @@ import com.dd3boh.outertune.constants.LanguageCodeToName
 import com.dd3boh.outertune.constants.ListItemHeight
 import com.dd3boh.outertune.constants.SYSTEM_DEFAULT
 import com.dd3boh.outertune.constants.SwipeToQueueKey
-import com.dd3boh.outertune.constants.SwipeToSkip
+import com.dd3boh.outertune.constants.SwipeToSkipKey
 import com.dd3boh.outertune.constants.ThumbnailCornerRadius
 import com.dd3boh.outertune.extensions.move
 import com.dd3boh.outertune.ui.component.ActionPromptDialog
@@ -391,7 +391,7 @@ fun ColumnScope.TabExtrasFrag() {
 
 @Composable
 fun ColumnScope.SwipeGesturesFrag() {
-    val (swipeToSkip, onSwipeToSkipChange) = rememberPreference(SwipeToSkip, defaultValue = true)
+    val (swipeToSkip, onSwipeToSkipChange) = rememberPreference(SwipeToSkipKey, defaultValue = false)
     val (swipe2Queue, onSwipe2QueueChange) = rememberPreference(SwipeToQueueKey, defaultValue = true)
 
     SwitchPreference(
