@@ -99,7 +99,7 @@ import androidx.media3.exoplayer.offline.Download.STATE_COMPLETED
 import androidx.media3.exoplayer.offline.Download.STATE_DOWNLOADING
 import androidx.media3.exoplayer.offline.Download.STATE_QUEUED
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.dd3boh.outertune.BuildConfig
 import com.dd3boh.outertune.LocalDatabase
 import com.dd3boh.outertune.LocalDownloadUtil
@@ -1479,8 +1479,8 @@ fun ItemThumbnail(
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 onSuccess = { success ->
-                    val width = success.result.drawable.intrinsicWidth
-                    val height = success.result.drawable.intrinsicHeight
+                    val width = success.result.image.width
+                    val height = success.result.image.height
 
                     isRectangularImage = width.toFloat() / height != 1f
                 },

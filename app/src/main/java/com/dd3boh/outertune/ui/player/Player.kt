@@ -110,9 +110,10 @@ import androidx.media3.common.Player.REPEAT_MODE_ONE
 import androidx.media3.common.Player.STATE_ENDED
 import androidx.media3.common.Player.STATE_READY
 import androidx.navigation.NavController
-import coil.ImageLoader
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.ImageLoader
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
 import com.dd3boh.outertune.LocalImageCache
 import com.dd3boh.outertune.LocalMenuState
 import com.dd3boh.outertune.LocalPlayerConnection
@@ -274,7 +275,7 @@ fun BottomSheetPlayer(
                         .data(mediaMetadata?.thumbnailUrl)
                         .allowHardware(false)
                         .build()
-                ).drawable as? BitmapDrawable)?.bitmap?.extractGradientColors()
+                ).image as? BitmapDrawable)?.bitmap?.extractGradientColors()
 
                 result?.let {
                     gradientColors = it

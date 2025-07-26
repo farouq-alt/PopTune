@@ -16,10 +16,14 @@ import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.datastore.preferences.core.edit
-import coil.ImageLoader
-import coil.ImageLoaderFactory
-import coil.disk.DiskCache
-import coil.request.CachePolicy
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.SingletonImageLoader
+import coil3.disk.DiskCache
+import coil3.disk.directory
+import coil3.request.CachePolicy
+import coil3.request.allowHardware
+import coil3.request.crossfade
 import com.dd3boh.outertune.constants.AccountChannelHandleKey
 import com.dd3boh.outertune.constants.AccountEmailKey
 import com.dd3boh.outertune.constants.AccountNameKey
@@ -57,7 +61,7 @@ import java.net.Proxy
 import java.util.Locale
 
 @HiltAndroidApp
-class App : Application(), ImageLoaderFactory {
+class App : Application(), SingletonImageLoader.Factory {
     private val TAG = App::class.simpleName.toString()
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -152,14 +156,13 @@ class App : Application(), ImageLoaderFactory {
         }
     }
 
-    override fun newImageLoader(): ImageLoader {
+    override fun newImageLoader(context: PlatformContext): ImageLoader {
         val cacheSize = dataStore[MaxImageCacheSizeKey]
 
         // will crash app if you set to 0 after cache starts being used
         if (cacheSize == 0) {
             return ImageLoader.Builder(this)
                 .crossfade(true)
-                .respectCacheHeaders(false)
                 .allowHardware(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
                 .diskCachePolicy(CachePolicy.DISABLED)
                 .build()
@@ -167,7 +170,6 @@ class App : Application(), ImageLoaderFactory {
 
         return ImageLoader.Builder(this)
         .crossfade(true)
-        .respectCacheHeaders(false)
         .allowHardware(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
         .diskCache(
             DiskCache.Builder()
