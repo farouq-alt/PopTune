@@ -278,7 +278,7 @@ class MusicService : MediaLibraryService(),
 
                         Toast.makeText(
                             this@MusicService,
-                            "${getString(R.string.err_general)}: ${error.message} (${error.errorCode}): ${error.cause?.message ?: ""} ",
+                            "plr: ${error.message} (${error.errorCode}): ${error.cause?.message ?: ""} ",
                             Toast.LENGTH_LONG
                         ).show()
                     }
@@ -631,7 +631,7 @@ class MusicService : MediaLibraryService(),
                 player.playWhenReady = playWhenReady
             } catch (e: Exception) {
                 reportException(e)
-                Toast.makeText(this@MusicService, "${getString(R.string.err_general)}: ${e.message}", Toast.LENGTH_LONG)
+                Toast.makeText(this@MusicService, "plr: ${e.message}", Toast.LENGTH_LONG)
                     .show()
             }
         }
