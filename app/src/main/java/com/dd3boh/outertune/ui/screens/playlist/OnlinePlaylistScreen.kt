@@ -33,6 +33,7 @@ import androidx.compose.material.icons.rounded.OfflinePin
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Shuffle
+import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -129,6 +130,7 @@ import com.dd3boh.outertune.viewmodels.OnlinePlaylistViewModel
 import com.zionhuang.innertube.models.SongItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
@@ -151,6 +153,8 @@ fun OnlinePlaylistScreen(
     val playlist by viewModel.playlist.collectAsState()
     val songs by viewModel.playlistSongs.collectAsState()
     val mutableSongs = remember { mutableStateListOf<SongItem>() }
+
+    val isLoading by viewModel.isLoading.collectAsState()
 
     // multiselect
     var inSelectMode by rememberSaveable { mutableStateOf(false) }
@@ -460,17 +464,26 @@ fun OnlinePlaylistScreen(
                                                 }
                                             }
 
+                                            // Allow the user to load the entire playlist
+                                            // Actions such as play, menu, etc will not fetch the entire playlist. By
+                                            // design, this will be at the user's discretion
                                             IconButton(
                                                 onClick = {
-                                                    playerConnection.enqueueEnd(
-                                                        items = songs.map { it.toMediaItem() }
+                                                    viewModel.loadRemainingSongs()
+                                                },
+                                                enabled = !isLoading,
+                                            ) {
+                                                if (isLoading) {
+                                                    CircularProgressIndicator(
+                                                        modifier = Modifier.size(16.dp),
+                                                        strokeWidth = 2.dp
+                                                    )
+                                                } else {
+                                                    Icon(
+                                                        imageVector = Icons.Rounded.Sync,
+                                                        contentDescription = null
                                                     )
                                                 }
-                                            ) {
-                                                Icon(
-                                                    painter = painterResource(R.drawable.queue_music),
-                                                    contentDescription = null
-                                                )
                                             }
 
                                             IconButton(

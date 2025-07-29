@@ -30,8 +30,11 @@ class OnlinePlaylistViewModel @Inject constructor(
     val dbPlaylist = database.playlistByBrowseId(playlistId)
         .stateIn(viewModelScope, SharingStarted.Lazily, null)
 
+    val isLoading = MutableStateFlow(false)
+
     init {
         viewModelScope.launch(Dispatchers.IO) {
+            isLoading.value = true
             YouTube.playlist(playlistId)
                 .onSuccess { playlistPage ->
                     playlist.value = playlistPage.playlist
@@ -40,14 +43,27 @@ class OnlinePlaylistViewModel @Inject constructor(
                 }.onFailure {
                     reportException(it)
                 }
+            isLoading.value = false
         }
     }
 
     fun loadMoreSongs() {
         continuation?.let {
+            isLoading.value = true
             viewModelScope.launch(Dispatchers.IO) {
-               getContinuation(it)
+                getContinuation(it)
             }
+            isLoading.value = false
+        }
+    }
+
+    fun loadRemainingSongs() {
+        viewModelScope.launch(Dispatchers.IO) {
+            isLoading.value = true
+            while (continuation != null) {
+                getContinuation(continuation!!)
+            }
+            isLoading.value = false
         }
     }
 
