@@ -99,12 +99,12 @@ while also allowing users to translate our app as well. New, specific strings to
     <string name="wiki">Wiki</string>
 
 <!-- Contributions -->
-    <string name="all_contributors" translatable="false">Show all contributors</string>
-    <string name="att_contributor" translatable="false">Contributor</string>
-    <string name="att_lead_developer" translatable="false">Lead developer</string>
-    <string name="att_maintainer" translatable="false">Maintainer</string>
-    <string name="att_translations" translatable="false">Translations support</string>
-    <string name="att_translator" translatable="false">Translator (%s)</string>
+    <string name="all_contributors">Show all contributors</string>
+    <string name="att_contributor">Contributor</string>
+    <string name="att_lead_developer">Lead developer</string>
+    <string name="att_maintainer">Maintainer</string>
+    <string name="att_project_support">Project support</string>
+    <string name="att_translator">Translator (%s)</string>
     <string name="attrib_zhuang">Zion Huang for InnerTune</string>
     <string name="attribution_title">Attribution</string>
     <string name="special_thanks">Special thanks</string>

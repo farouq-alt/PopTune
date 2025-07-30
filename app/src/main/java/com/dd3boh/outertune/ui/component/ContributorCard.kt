@@ -110,7 +110,18 @@ data class ContributorInfo(
 
 // TODO: localized contributor types
 enum class ContributorType {
-    CONTRIBUTOR, LEAD_DEVELOPER, MAINTAINER, TRANSLATIONS_SUPPORT, TRANSLATOR, CUSTOM;
+    // General code contributor
+    CONTRIBUTOR,
+    // Main developers, in charge of the general project direction
+    LEAD_DEVELOPER,
+    // Maintains the project. (ex. pull requests, bug fixes, documentation, etc)
+    MAINTAINER,
+    // Non-code related contributions to the project
+    PROJECT_SUPPORT,
+    // Translation(s) contributor
+    TRANSLATOR,
+    // Miscellaneous contributions. Anything that does not fit into any of the above categories or requiring custom text
+    CUSTOM;
 
     companion object {
         fun getString(context: Context, contributorType: ContributorType, extraContent: String? = null) =
@@ -118,7 +129,7 @@ enum class ContributorType {
                 CONTRIBUTOR -> context.getString(R.string.att_contributor)
                 LEAD_DEVELOPER -> context.getString(R.string.att_lead_developer)
                 MAINTAINER -> context.getString(R.string.att_maintainer)
-                TRANSLATIONS_SUPPORT -> context.getString(R.string.att_translations)
+                PROJECT_SUPPORT -> context.getString(R.string.att_project_support)
                 TRANSLATOR -> context.getString(R.string.att_translator, extraContent)
                 CUSTOM -> ""
             }
