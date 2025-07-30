@@ -230,4 +230,5 @@
     <string name="err_invalid_ytm_song">Не удалось воспроизвести песню. Можно воспроизводить только контент, доступный в YouTube Music</string>
     <string name="err_restore_incompatible_database">Не удалось восстановить несовместимую базу данных</string>
     <string name="m3u_import_failed">Песни не найдены. Файл M3U недействителен или соответствующие треки отсутствуют</string>
+    <string name="tap_show_more">Нажмите, чтобы узнать больше</string>
 </resources>
