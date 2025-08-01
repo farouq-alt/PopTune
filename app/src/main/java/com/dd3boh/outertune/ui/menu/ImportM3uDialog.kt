@@ -282,13 +282,14 @@ fun ImportM3uDialog(
 
 
     /**
-     * Dialog
+     * ---------------------------
+     * Dialogs
+     * ---------------------------
      */
 
     if (showChoosePlaylistDialog) {
         AddToPlaylistDialog(
             navController = navController,
-            isVisible = true,
             allowSyncing = false,
             initialTextFieldValue = importedTitle,
             songs = importedSongs,
