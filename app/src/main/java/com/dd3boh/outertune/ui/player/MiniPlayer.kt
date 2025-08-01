@@ -163,7 +163,7 @@ fun MiniMediaInfo(
             if (mediaMetadata.isLocal) {
                 // local thumbnail arts
                 AsyncImageLocal(
-                    image = { imageCache.getLocalThumbnail(mediaMetadata.localPath, true, true) },
+                    image = { imageCache.getLocalThumbnail(mediaMetadata.localPath, true) },
                     modifier = Modifier
                         .clip(RoundedCornerShape(ThumbnailCornerRadius))
                         .aspectRatio(ratio = 1f)
