@@ -7,7 +7,7 @@
  * For any other attributions, refer to the git commit history
  */
 
-package com.dd3boh.outertune.ui.component
+package com.dd3boh.outertune.ui.dialog
 
 import android.content.ClipData
 import android.text.format.Formatter
@@ -64,9 +64,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -82,10 +79,11 @@ import androidx.compose.ui.window.DialogProperties
 import com.dd3boh.outertune.LocalSnackbarHostState
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.DialogCornerRadius
-import com.dd3boh.outertune.constants.MenuCornerRadius
 import com.dd3boh.outertune.constants.SNACKBAR_VERY_SHORT
 import com.dd3boh.outertune.db.entities.FormatEntity
 import com.dd3boh.outertune.models.MediaMetadata
+import com.dd3boh.outertune.ui.component.button.IconButton
+import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
@@ -620,62 +618,6 @@ fun InfoLabel(
         if (isError) Icons.Outlined.Error else Icons.Outlined.Info,
         contentDescription = null,
         tint = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary,
-        modifier = Modifier.padding(4.dp)
-    )
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodySmall,
-        modifier = Modifier.padding(horizontal = 4.dp)
-    )
-}
-
-@Composable
-fun IconLabelButton(
-    text: String,
-    icon: ImageVector,
-    background: Color = MaterialTheme.colorScheme.secondaryContainer,
-    tint: Color = MaterialTheme.colorScheme.onSecondaryContainer,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) = Row(
-    verticalAlignment = Alignment.CenterVertically,
-    modifier = modifier
-        .background(background, RoundedCornerShape(MenuCornerRadius))
-        .padding(horizontal = 8.dp)
-        .clickable { onClick() }
-) {
-    Icon(
-        imageVector = icon,
-        contentDescription = null,
-        tint = tint,
-        modifier = Modifier.padding(4.dp)
-    )
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodySmall,
-        modifier = Modifier.padding(horizontal = 4.dp)
-    )
-}
-
-@Composable
-fun IconLabelButton(
-    text: String,
-    painter: Painter,
-    background: Color = MaterialTheme.colorScheme.secondaryContainer,
-    tint: Color = MaterialTheme.colorScheme.onSecondaryContainer,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) = Row(
-    verticalAlignment = Alignment.CenterVertically,
-    modifier = modifier
-        .background(background, RoundedCornerShape(MenuCornerRadius))
-        .padding(horizontal = 8.dp)
-        .clickable { onClick() }
-) {
-    Icon(
-        painter = painter,
-        contentDescription = null,
-        tint = tint,
         modifier = Modifier.padding(4.dp)
     )
     Text(
