@@ -351,6 +351,7 @@ AND NOT EXISTS (
                 title = mq.title,
                 shuffled = mq.shuffled,
                 queuePos = mq.queuePos,
+                lastSongPos = mq.lastSongPos,
                 index = mq.index,
                 playlistId = mq.playlistId
             )
@@ -386,6 +387,7 @@ AND NOT EXISTS (
                 title = mq.title,
                 shuffled = mq.shuffled,
                 queuePos = mq.queuePos,
+                lastSongPos = mq.lastSongPos,
                 index = mq.index,
                 playlistId = mq.playlistId
             )
