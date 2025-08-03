@@ -214,7 +214,7 @@ class FFMpegScanner() : MetadataScanner {
                         id = songId,
                         title = title,
                         duration = duration.toInt(), // we use seconds for duration
-                        thumbnailUrl = null,
+                        thumbnailUrl = file.absolutePath,
                         albumId = albumId,
                         albumName = albumName,
                         year = year,

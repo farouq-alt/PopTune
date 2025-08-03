@@ -555,7 +555,10 @@ fun DetailsDialog(
                         stringResource(R.string.file_size) to currentFormat?.contentLength?.let {
                             // TODO: This should 1024 sized not 1000
                             if (mediaMetadata.isLocal && mediaMetadata.localPath != null && File(mediaMetadata.localPath).exists()) {
-                                Formatter.formatShortFileSize(context, File(mediaMetadata.localPath).length())
+                                Formatter.formatShortFileSize(
+                                    context,
+                                    File(mediaMetadata.localPath).length() * (1024 / 1000)
+                                )
                             } else {
                                 Formatter.formatShortFileSize(context, it)
                             }
