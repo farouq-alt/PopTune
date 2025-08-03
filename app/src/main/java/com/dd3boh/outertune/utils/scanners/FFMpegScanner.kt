@@ -12,6 +12,7 @@ import android.os.ParcelFileDescriptor
 import android.util.Log
 import com.dd3boh.outertune.constants.DEBUG_SAVE_OUTPUT
 import com.dd3boh.outertune.constants.EXTRACTOR_DEBUG
+import com.dd3boh.outertune.constants.SCANNER_DEBUG
 import com.dd3boh.outertune.db.entities.AlbumEntity
 import com.dd3boh.outertune.db.entities.ArtistEntity
 import com.dd3boh.outertune.db.entities.FormatEntity
@@ -77,6 +78,8 @@ class FFMpegScanner() : MetadataScanner {
             var rawArtists: String? = data.artist
             var albumName: String? = data.album
             var genres: String? = data.genre
+            var trackNumber: Int? = null
+            var discNumber: Int? = null
             var rawDate: String? = null
             var codec: String? = data.codec
             var type: String? = data.codecType?.lowercase()
@@ -87,6 +90,8 @@ class FFMpegScanner() : MetadataScanner {
 
             var artistList: MutableList<ArtistEntity> = ArrayList<ArtistEntity>()
             var genresList: MutableList<GenreEntity> = ArrayList<GenreEntity>()
+
+            var extraData: String = "" // extra data field
 
             // read extra data from FFmpeg
             // album, artist, genre, title all have their own fields, but it is not detected for all songs. We use the
@@ -134,7 +139,32 @@ class FFMpegScanner() : MetadataScanner {
                         }
                     }
 
-                    else -> ""
+                    "TRACKNUMBER" -> {
+                        try {
+                            trackNumber = parseInt(it)
+                        } catch (e: Exception) {
+                            if (SCANNER_DEBUG) {
+                                e.printStackTrace()
+                            }
+                        }
+                    }
+                    "DISCNUMBER" -> {
+                        try {
+                            discNumber = parseInt(it)
+                        } catch (e: Exception) {
+                            if (SCANNER_DEBUG) {
+                                e.printStackTrace()
+                            }
+                        }
+                    }
+                    else -> {
+                        extraData += "\n$key: $it"
+                    }
+
+
+                    else -> {
+                        extraData += "$key: $it\n"
+                    }
                 }
             }
 
@@ -215,6 +245,8 @@ class FFMpegScanner() : MetadataScanner {
                         title = title,
                         duration = duration.toInt(), // we use seconds for duration
                         thumbnailUrl = file.absolutePath,
+                        trackNumber = trackNumber,
+                        discNumber = discNumber,
                         albumId = albumId,
                         albumName = albumName,
                         year = year,
@@ -237,8 +269,7 @@ class FFMpegScanner() : MetadataScanner {
                     bitrate = bitrate.toInt(),
                     sampleRate = sampleRate,
                     contentLength = duration,
-                    loudnessDb = null,
-                    playbackTrackingUrl = null
+                    extraComment = if (!extraData.isBlank()) extraData else null
                 )
             )
         }
