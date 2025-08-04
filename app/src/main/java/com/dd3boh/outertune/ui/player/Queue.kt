@@ -55,11 +55,8 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material.icons.rounded.Repeat
-import androidx.compose.material.icons.rounded.RepeatOne
 import androidx.compose.material.icons.rounded.Replay
 import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material.icons.rounded.Shuffle
 import androidx.compose.material.icons.rounded.SkipNext
 import androidx.compose.material.icons.rounded.SkipPrevious
 import androidx.compose.material3.Checkbox
@@ -87,7 +84,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -191,7 +187,6 @@ fun QueueSheet(
             queueState = state,
             onTerminate = onTerminate,
             playerState = playerBottomSheetState,
-            onBackgroundColor = onBackgroundColor,
             navController = navController
         )
     }
@@ -201,7 +196,6 @@ fun QueueSheet(
 fun QueueScreen(
     onTerminate: () -> Unit,
     playerBottomSheetState: BottomSheetState,
-    onBackgroundColor: Color,
     navController: NavController,
     modifier: Modifier = Modifier,
 ) {
@@ -216,7 +210,6 @@ fun QueueScreen(
         QueueContent(
             onTerminate = onTerminate,
             playerState = playerBottomSheetState,
-            onBackgroundColor = onBackgroundColor,
             navController = navController
         )
     }
@@ -228,7 +221,6 @@ fun BoxScope.QueueContent(
     queueState: BottomSheetState? = null,
     playerState: BottomSheetState,
     onTerminate: () -> Unit,
-    onBackgroundColor: Color,
     navController: NavController,
 ) {
     val context = LocalContext.current
@@ -830,6 +822,8 @@ fun BoxScope.QueueContent(
 
 // queue info + player controls
     val bottomNav: @Composable ColumnScope.() -> Unit = {
+
+
         Column(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.secondaryContainer)
@@ -931,6 +925,7 @@ fun BoxScope.QueueContent(
 
             // player controls
             if (queueState != null) {
+                val iconButtonColor = MaterialTheme.colorScheme.onSecondaryContainer
                 Row(
                     horizontalArrangement = Arrangement.SpaceAround,
                     verticalAlignment = Alignment.CenterVertically,
@@ -940,13 +935,12 @@ fun BoxScope.QueueContent(
                 ) {
                     Box(modifier = Modifier.weight(1f)) {
                         ResizableIconButton(
-                            icon = Icons.Rounded.Shuffle,
+                            if (shuffleModeEnabled) R.drawable.shuffle_on else R.drawable.shuffle_off,
                             modifier = Modifier
                                 .size(32.dp)
                                 .padding(4.dp)
-                                .align(Alignment.Center)
-                                .alpha(if (shuffleModeEnabled) 1f else 0.3f),
-                            color = onBackgroundColor,
+                                .align(Alignment.Center),
+                            color = iconButtonColor,
                             onClick = {
                                 playerConnection.triggerShuffle()
                                 haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
@@ -961,7 +955,7 @@ fun BoxScope.QueueContent(
                             modifier = Modifier
                                 .size(32.dp)
                                 .align(Alignment.Center),
-                            color = onBackgroundColor,
+                            color = iconButtonColor,
                             onClick = {
                                 playerConnection.player.seekToPrevious()
                                 haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
@@ -977,7 +971,7 @@ fun BoxScope.QueueContent(
                             modifier = Modifier
                                 .size(36.dp)
                                 .align(Alignment.Center),
-                            color = onBackgroundColor,
+                            color = iconButtonColor,
                             onClick = {
                                 if (playbackState == STATE_ENDED) {
                                     playerConnection.player.seekTo(0, 0)
@@ -1000,7 +994,7 @@ fun BoxScope.QueueContent(
                             modifier = Modifier
                                 .size(32.dp)
                                 .align(Alignment.Center),
-                            color = onBackgroundColor,
+                            color = iconButtonColor,
                             onClick = {
                                 playerConnection.player.seekToNext()
                                 haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
@@ -1011,16 +1005,16 @@ fun BoxScope.QueueContent(
                     Box(modifier = Modifier.weight(1f)) {
                         ResizableIconButton(
                             icon = when (repeatMode) {
-                                REPEAT_MODE_OFF, REPEAT_MODE_ALL -> Icons.Rounded.Repeat
-                                REPEAT_MODE_ONE -> Icons.Rounded.RepeatOne
+                                REPEAT_MODE_OFF -> R.drawable.repeat_off
+                                REPEAT_MODE_ALL -> R.drawable.repeat_on
+                                REPEAT_MODE_ONE -> R.drawable.repeat_one
                                 else -> throw IllegalStateException()
                             },
                             modifier = Modifier
                                 .size(32.dp)
                                 .padding(4.dp)
-                                .align(Alignment.Center)
-                                .alpha(if (repeatMode == REPEAT_MODE_OFF) 0.3f else 1f),
-                            color = onBackgroundColor,
+                                .align(Alignment.Center),
+                            color = iconButtonColor,
                             onClick = {
                                 playerConnection.player.toggleRepeatMode()
                                 haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)

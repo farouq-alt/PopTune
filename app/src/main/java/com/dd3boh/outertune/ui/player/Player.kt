@@ -61,10 +61,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material.icons.rounded.Repeat
-import androidx.compose.material.icons.rounded.RepeatOne
 import androidx.compose.material.icons.rounded.Replay
-import androidx.compose.material.icons.rounded.Shuffle
 import androidx.compose.material.icons.rounded.SkipNext
 import androidx.compose.material.icons.rounded.SkipPrevious
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -86,7 +83,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -522,12 +518,11 @@ fun BottomSheetPlayer(
 
                 Box(modifier = Modifier.weight(1f)) {
                     ResizableIconButton(
-                        icon = Icons.Rounded.Shuffle,
+                        icon = if (shuffleModeEnabled) R.drawable.shuffle_on else R.drawable.shuffle_off,
                         modifier = Modifier
                             .size(32.dp)
                             .padding(4.dp)
-                            .align(Alignment.Center)
-                            .alpha(if (shuffleModeEnabled) 1f else 0.5f),
+                            .align(Alignment.Center),
                         color = onBackgroundColor,
                         onClick = {
                             playerConnection.triggerShuffle()
@@ -600,15 +595,15 @@ fun BottomSheetPlayer(
                 Box(modifier = Modifier.weight(1f)) {
                     ResizableIconButton(
                         icon = when (repeatMode) {
-                            REPEAT_MODE_OFF, REPEAT_MODE_ALL -> Icons.Rounded.Repeat
-                            REPEAT_MODE_ONE -> Icons.Rounded.RepeatOne
+                            REPEAT_MODE_OFF -> R.drawable.repeat_off
+                            REPEAT_MODE_ALL -> R.drawable.repeat_on
+                            REPEAT_MODE_ONE -> R.drawable.repeat_one
                             else -> throw IllegalStateException()
                         },
                         modifier = Modifier
                             .size(32.dp)
                             .padding(4.dp)
-                            .align(Alignment.Center)
-                            .alpha(if (repeatMode == REPEAT_MODE_OFF) 0.5f else 1f),
+                            .align(Alignment.Center),
                         color = onBackgroundColor,
                         onClick = {
                             playerConnection.player.toggleRepeatMode()
@@ -655,7 +650,7 @@ fun BottomSheetPlayer(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.3f))
+                            .background(Color.Black.copy(alpha = 0.4f))
                     )
                 }
             }
@@ -693,7 +688,9 @@ fun BottomSheetPlayer(
             val verticalInsets = WindowInsets(left = 0.dp, top = vPaddingDp, right = 0.dp, bottom = vPaddingDp)
             Row(
                 modifier = Modifier
-                    .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).add(verticalInsets))
+                    .windowInsetsPadding(
+                        WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal).add(verticalInsets)
+                    )
                     .fillMaxSize()
             ) {
                 BoxWithConstraints(
@@ -764,7 +761,8 @@ fun BottomSheetPlayer(
                         state = thumbnailLazyGridState,
                         rows = GridCells.Fixed(1),
                         flingBehavior = rememberSnapFlingBehavior(thumbnailSnapLayoutInfoProvider),
-                        userScrollEnabled = swipeToSkip && state.isExpanded
+                        userScrollEnabled = swipeToSkip && state.isExpanded,
+                        modifier = Modifier.padding(vertical = QueuePeekHeight / 2)
                     ) {
                         items(
                             items = mediaItems,
@@ -782,8 +780,6 @@ fun BottomSheetPlayer(
                         }
                     }
                 }
-
-                Spacer(Modifier.height(8.dp))
 
                 mediaMetadata?.let {
                     controlsContent(it)

@@ -417,7 +417,7 @@ fun AlbumScreen(
                             modifier = Modifier.weight(1f)
                         ) {
                             Icon(
-                                painter = painterResource(R.drawable.shuffle),
+                                painter = painterResource(R.drawable.shuffle_on),
                                 contentDescription = null,
                                 modifier = Modifier.size(ButtonDefaults.IconSize)
                             )
