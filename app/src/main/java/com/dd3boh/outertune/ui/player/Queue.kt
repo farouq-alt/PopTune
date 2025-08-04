@@ -264,7 +264,6 @@ fun BoxScope.QueueContent(
     var playingQueue by remember { mutableIntStateOf(-1) }
 
     // current queue vars
-    val queueTitle by playerConnection.queueTitle.collectAsState()
     val queueWindows by playerConnection.queueWindows.collectAsState()
 
     /**
@@ -879,7 +878,7 @@ fun BoxScope.QueueContent(
                             }
                     ) {
                         Text(
-                            text = detachedQueue?.title ?: queueTitle.orEmpty(),
+                            text = detachedQueue?.title ?: mutableQueues.getOrNull(playingQueue)?.title ?: "",
                             style = MaterialTheme.typography.titleMedium,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier
