@@ -219,7 +219,7 @@ class MusicService : MediaLibraryService(),
     override fun onCreate() {
         super.onCreate()
 
-        imageCache = LmImageCacheMgr(this, drawPlaceholder(this, 1920, 1080, 0.7f))
+        imageCache = LmImageCacheMgr(this, drawPlaceholder(this, size = 0.4f))
 
         // network connectivity
         try {
