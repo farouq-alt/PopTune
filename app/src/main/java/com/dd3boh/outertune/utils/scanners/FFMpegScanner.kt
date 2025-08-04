@@ -75,18 +75,18 @@ class FFMpegScanner() : MetadataScanner {
 
             val songId = SongEntity.generateSongId()
             var rawTitle: String? = data.title
-            var rawArtists: String? = data.artist
+            val rawArtists: String? = data.artist
             var albumName: String? = data.album
-            var genres: String? = data.genre
+            val genres: String? = data.genre
             var trackNumber: Int? = null
             var discNumber: Int? = null
             var rawDate: String? = null
-            var codec: String? = data.codec
-            var type: String? = data.codecType?.lowercase()
-            var bitrate: Long = data.bitrate
-            var sampleRate: Int = data.sampleRate
-            var channels: Int = data.channels
-            var duration: Long = (data.duration / toSeconds).roundToLong()
+            val codec: String? = data.codec
+            val type: String? = data.codecType?.lowercase()
+            val bitrate: Long = data.bitrate
+            val sampleRate: Int = data.sampleRate
+            val channels: Int = data.channels
+            val duration: Long = (data.duration / toSeconds).roundToLong()
 
             var artistList: MutableList<ArtistEntity> = ArrayList<ArtistEntity>()
             var genresList: MutableList<GenreEntity> = ArrayList<GenreEntity>()
@@ -157,13 +157,9 @@ class FFMpegScanner() : MetadataScanner {
                             }
                         }
                     }
-                    else -> {
-                        extraData += "\n$key: $it"
-                    }
-
 
                     else -> {
-                        extraData += "$key: $it\n"
+                        extraData += "$tag: $it\n"
                     }
                 }
             }
@@ -174,7 +170,7 @@ class FFMpegScanner() : MetadataScanner {
              */
 
             val title: String =
-                if (rawTitle != null && rawTitle.isBlank() == false) { // songs with no title tag
+                if (rawTitle != null && !rawTitle.isBlank()) { // songs with no title tag
                     rawTitle.trim()
                 } else {
                     file.absolutePath.substringAfterLast('/').substringBeforeLast('.')
