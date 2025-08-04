@@ -58,6 +58,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -78,6 +79,7 @@ import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.dd3boh.outertune.LocalDatabase
 import com.dd3boh.outertune.LocalDownloadUtil
+import com.dd3boh.outertune.LocalImageCache
 import com.dd3boh.outertune.LocalMenuState
 import com.dd3boh.outertune.LocalPlayerAwareWindowInsets
 import com.dd3boh.outertune.LocalPlayerConnection
@@ -120,6 +122,7 @@ fun AlbumScreen(
 ) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
+    val imageCache = LocalImageCache.current
     val menuState = LocalMenuState.current
     val database = LocalDatabase.current
     val playerConnection = LocalPlayerConnection.current ?: return
@@ -189,14 +192,25 @@ fun AlbumScreen(
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        val thumbnailUrl = albumWithSongsLocal.album.thumbnailUrl
                         if (albumWithSongsLocal.album.thumbnailUrl != null) {
-                            AsyncImage(
-                                model = albumWithSongsLocal.album.thumbnailUrl,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(AlbumThumbnailSize)
-                                    .clip(RoundedCornerShape(ThumbnailCornerRadius))
-                            )
+                            if (albumWithSongsLocal.album.thumbnailUrl.startsWith("/storage")) {
+                                AsyncImageLocal(
+                                    image = { imageCache.getLocalThumbnail(thumbnailUrl) },
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(AlbumThumbnailSize)
+                                        .clip(RoundedCornerShape(ThumbnailCornerRadius))
+                                )
+                            } else {
+                                AsyncImage(
+                                    model = albumWithSongsLocal.album.thumbnailUrl,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(AlbumThumbnailSize)
+                                        .clip(RoundedCornerShape(ThumbnailCornerRadius))
+                                )
+                            }
                         } else {
                             AsyncImageLocal(
                                 image = { null },
