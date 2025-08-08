@@ -896,11 +896,13 @@ class MusicService : MediaLibraryService(),
 
     private fun createRenderersFactory() = object : DefaultRenderersFactory(this) {
         override fun buildAudioSink(
-            context: Context, enableFloatOutput: Boolean, enableAudioTrackPlaybackParams: Boolean
-        ): AudioSink {
+            context: Context,
+            pcmEncodingRestrictionLifted: Boolean,
+            enableFloatOutput: Boolean,
+            enableAudioTrackPlaybackParams: Boolean
+        ): AudioSink? {
             return DefaultAudioSink.Builder(this@MusicService)
-                .setEnableFloatOutput(enableFloatOutput)
-
+                .setPcmEncodingRestrictionLifted(pcmEncodingRestrictionLifted)
                 .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
                 .setAudioProcessorChain(
                     DefaultAudioSink.DefaultAudioProcessorChain(
@@ -916,7 +918,7 @@ class MusicService : MediaLibraryService(),
 
     override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
         val q = queueBoard.getCurrentQueue()
-        player.shuffleOrder = ShuffleOrder.UnshuffledShuffleOrder(player.mediaItemCount)
+        player.setShuffleOrder(ShuffleOrder.UnshuffledShuffleOrder(player.mediaItemCount))
         if (q == null || q.shuffled == shuffleModeEnabled) return
         triggerShuffle()
     }
@@ -998,10 +1000,15 @@ class MusicService : MediaLibraryService(),
         }
     }
 
-    override fun onUpdateNotification(session: MediaSession, startInForegroundRequired: Boolean) {
+
+    override fun onUpdateNotification(
+        session: MediaSession,
+        startInForegroundRequired: Boolean,
+        reason: @NotificationUpdate Int
+    ) {
         // FG keep alive
         if (!(!player.isPlaying && dataStore.get(KeepAliveKey, false))) {
-            super.onUpdateNotification(session, startInForegroundRequired)
+            super.onUpdateNotification(session, startInForegroundRequired, reason)
         }
     }
 

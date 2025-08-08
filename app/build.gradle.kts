@@ -165,15 +165,14 @@ dependencies {
     implementation(libs.adaptive)
     implementation(libs.material3)
     implementation(libs.palette)
-    implementation(projects.materialColorUtilities)
 
     // viewmodel
     implementation(libs.viewmodel)
     implementation(libs.viewmodel.compose)
 
     implementation(libs.media3)
-    implementation(libs.media3.session)
     implementation(libs.media3.okhttp)
+    implementation(libs.media3.session)
     implementation(libs.media3.workmanager)
 
     implementation(libs.room.runtime)
@@ -185,15 +184,18 @@ dependencies {
     implementation(libs.hilt)
     ksp(libs.hilt.compiler)
 
-    implementation(projects.innertube)
-    implementation(projects.kugou)
-    implementation(projects.lrclib)
-
     coreLibraryDesugaring(libs.desugaring)
 
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.serialization.json)
 
+    // modules
+    implementation(project(":innertube"))
+    implementation(project(":kugou"))
+    implementation(project(":lrclib"))
+    implementation(project(":material-color-utilities"))
+
+    // misc
     /*
     "JitPack builds are broken with the latest CMake version.
     Please download the [aar](https://github.com/Kyant0/taglib/releases) manually but not use maven."
