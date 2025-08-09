@@ -70,7 +70,6 @@ import com.dd3boh.outertune.constants.AudioQuality
 import com.dd3boh.outertune.constants.AudioQualityKey
 import com.dd3boh.outertune.constants.AutoLoadMoreKey
 import com.dd3boh.outertune.constants.KeepAliveKey
-import com.dd3boh.outertune.constants.LastPosKey
 import com.dd3boh.outertune.constants.MediaSessionConstants.CommandToggleLike
 import com.dd3boh.outertune.constants.MediaSessionConstants.CommandToggleRepeatMode
 import com.dd3boh.outertune.constants.MediaSessionConstants.CommandToggleShuffle
@@ -287,11 +286,8 @@ class MusicService : MediaLibraryService(),
                     override fun onIsPlayingChanged(isPlaying: Boolean) {
                         if (!isPlaying) {
                             val pos = player.currentPosition
-                            scope.launch {
-                                dataStore.edit { settings ->
-                                    settings[LastPosKey] = pos
-                                }
-                            }
+                            val q = queueBoard.getCurrentQueue()
+                            q?.lastSongPos = pos
                         }
                         super.onIsPlayingChanged(isPlaying)
                     }
@@ -417,11 +413,11 @@ class MusicService : MediaLibraryService(),
 
         initQueue()
         CoroutineScope(Dispatchers.Main).launch {
-            val queuePos = queueBoard.setCurrQueue(false)
-            if (queuePos != null) {
-                player.seekTo(queuePos, dataStore.get(LastPosKey, C.TIME_UNSET))
-                dataStore.edit { settings ->
-                    settings[LastPosKey] = C.TIME_UNSET
+            val q = queueBoard.setCurrQueue(false)
+            if (q != null) {
+                player.seekTo(q.queuePos, q.lastSongPos)
+                queueBoard.getCurrentQueue()?.let {
+                    it.lastSongPos = C.TIME_UNSET
                 }
             }
         }
@@ -957,7 +953,6 @@ class MusicService : MediaLibraryService(),
         if (playRatio >= minPlaybackDur && !dataStore.get(PauseListenHistoryKey, false)) {
             database.query {
                 incrementPlayCount(mediaItem.mediaId)
-                incrementTotalPlayTime(mediaItem.mediaId, playbackStats.totalPlayTimeMs)
                 try {
                     insert(
                         Event(
@@ -993,10 +988,8 @@ class MusicService : MediaLibraryService(),
         val data = queueBoard.getAllQueues()
         CoroutineScope(Dispatchers.IO).launch {
             // db on main thread crash, use Dispatchers.IO
+            data.last().lastSongPos = pos
             database.rewriteAllQueues(data)
-            dataStore.edit { settings ->
-                settings[LastPosKey] = pos
-            }
         }
     }
 

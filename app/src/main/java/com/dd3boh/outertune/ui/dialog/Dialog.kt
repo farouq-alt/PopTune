@@ -492,7 +492,6 @@ fun DetailsDialog(
     mediaMetadata: MediaMetadata,
     currentFormat: FormatEntity?,
     currentPlayCount: Int?,
-    volume: Float,
     clipboardManager: Clipboard,
     setVisibility: (newState: Boolean) -> Unit,
 ) {
@@ -523,15 +522,21 @@ fun DetailsDialog(
                     .verticalScroll(rememberScrollState())
             ) {
                 val details = mutableListOf(
-                    stringResource(R.string.song_title) to mediaMetadata?.title,
-                    stringResource(R.string.song_artists) to mediaMetadata?.artists?.joinToString { it.name },
-                    stringResource(R.string.media_id) to mediaMetadata?.id,
+                    stringResource(R.string.song_title) to mediaMetadata.title,
+                    stringResource(R.string.song_artists) to mediaMetadata.artists?.joinToString { it.name },
+                    stringResource(R.string.media_id) to mediaMetadata.id,
                     stringResource(R.string.play_count) to currentPlayCount.toString()
                 )
 
                 if (!mediaMetadata.isLocal) {
                     details.add("Itag" to currentFormat?.itag?.toString())
                 } else {
+                    mediaMetadata.trackNumber?.let {
+                        details.add(stringResource(R.string.track_number) to it.toString())
+                    }
+                    mediaMetadata.discNumber?.let {
+                        details.add(stringResource(R.string.disc_number) to it.toString())
+                    }
                     details.add(stringResource(R.string.sort_by_date_released) to mediaMetadata.getDateString())
                     details.add(stringResource(R.string.sort_by_date_modified) to mediaMetadata.getDateModifiedString())
                 }
@@ -542,6 +547,8 @@ fun DetailsDialog(
                         stringResource(R.string.codecs) to currentFormat?.codecs,
                         stringResource(R.string.bitrate) to currentFormat?.bitrate?.let { "${it / 1000} Kbps" },
                         stringResource(R.string.sample_rate) to currentFormat?.sampleRate?.let { "$it Hz" },
+                        stringResource(R.string.bits_per_sample) to (currentFormat?.bitsPerSample?.toString()
+                            ?: stringResource(R.string.unknown)),
                     )
                 )
 
@@ -551,11 +558,12 @@ fun DetailsDialog(
 
                 details.addAll(
                     mutableListOf(
-                        stringResource(R.string.volume) to "${(volume * 100).toInt()}%",
                         stringResource(R.string.file_size) to currentFormat?.contentLength?.let {
-                            // TODO: This should 1024 sized not 1000
                             if (mediaMetadata.isLocal && mediaMetadata.localPath != null && File(mediaMetadata.localPath).exists()) {
-                                Formatter.formatShortFileSize(context, File(mediaMetadata.localPath).length())
+                                Formatter.formatShortFileSize(
+                                    context,
+                                    File(mediaMetadata.localPath).length() * (1024 / 1000)
+                                )
                             } else {
                                 Formatter.formatShortFileSize(context, it)
                             }
@@ -563,7 +571,11 @@ fun DetailsDialog(
                     ))
 
                 if (mediaMetadata.isLocal) {
-                    details.add("Path" to mediaMetadata.localPath)
+                    details.add(stringResource(R.string.file_path) to mediaMetadata.localPath)
+                }
+
+                currentFormat?.extraComment?.let {
+                    details.add(stringResource(R.string.extra_details) to it)
                 }
 
                 details.forEach { (label, text) ->

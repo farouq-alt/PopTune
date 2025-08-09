@@ -448,10 +448,6 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                         Log.v(TAG, "PATH: $s")
                     }
 
-                    /**
-                     * TODO: do not link album (and whatever song id) with youtube yet, figure that out later
-                     */
-
                     if (!SYNC_SCANNER) {
                         // use async scanner
                         scannerJobs.add(
@@ -574,10 +570,6 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
 
                     if (SCANNER_DEBUG)
                         Log.d(TAG, "PATH: $uri")
-
-                    /**
-                     * TODO: do not link album (and whatever song id) with youtube yet, figure that out later
-                     */
 
                     if (!SYNC_SCANNER) {
                         // use async scanner

@@ -400,7 +400,6 @@ fun SongMenu(
             mediaMetadata = song.toMediaMetadata(),
             currentFormat = currentFormat,
             currentPlayCount = song.playCount?.fastSumBy { it.count } ?: 0,
-            volume = playerConnection.player.volume,
             clipboardManager = clipboardManager,
             setVisibility = { showDetailsDialog = it }
         )
