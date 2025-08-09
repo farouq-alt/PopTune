@@ -997,11 +997,10 @@ class MusicService : MediaLibraryService(),
     override fun onUpdateNotification(
         session: MediaSession,
         startInForegroundRequired: Boolean,
-        reason: @NotificationUpdate Int
     ) {
         // FG keep alive
         if (!(!player.isPlaying && dataStore.get(KeepAliveKey, false))) {
-            super.onUpdateNotification(session, startInForegroundRequired, reason)
+            super.onUpdateNotification(session, startInForegroundRequired)
         }
     }
 
