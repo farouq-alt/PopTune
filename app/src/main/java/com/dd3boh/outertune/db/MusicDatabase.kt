@@ -116,7 +116,7 @@ class MusicDatabase(
         AutoMigration(from = 13, to = 14), // Initial queue as database
         AutoMigration(from = 17, to = 18, spec = Migration17To18::class), // Fix Room nonsense
         AutoMigration(from = 18, to = 19), // Recent activity
-        AutoMigration(from = 19, to = 20, spec = Migration19To20::class), // Db optimization
+        AutoMigration(from = 19, to = 20, spec = Migration19To20::class), // Db optimization, remove totalplaytime, local media fields
     ]
 )
 @TypeConverters(Converters::class)
