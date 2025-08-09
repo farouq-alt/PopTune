@@ -99,6 +99,8 @@ experience done right.
 
 [Gramophone](https://github.com/FoedusProgramme/Gramophone) for emotional support, and a legendary lyrics parser
 
+[![Star History Chart](https://api.star-history.com/svg?repos=outertune/outertune&type=Date)](https://www.star-history.com/#outertune/outertune&Date)
+
 ## Disclaimer
 
 This project and its contents are not affiliated with, funded, authorized, endorsed by, or in any
