@@ -235,8 +235,10 @@ fun BottomSheetPlayer(
         else ->
             if (useDarkTheme)
                 MaterialTheme.colorScheme.onSurface
-            else
-                MaterialTheme.colorScheme.onPrimary
+            else {
+                val c = MaterialTheme.colorScheme.secondary
+                c.copy(alpha = 1f, red = c.red - 0.2f, green = c.green - 0.2f, blue = c.blue - 0.2f)
+            }
     }
 
     val showLyrics by rememberPreference(ShowLyricsKey, defaultValue = false)
@@ -307,9 +309,7 @@ fun BottomSheetPlayer(
     BottomSheet(
         state = state,
         modifier = modifier,
-        backgroundColor = if (useDarkTheme || playerBackground == PlayerBackgroundStyle.FOLLOW_THEME) {
-            MaterialTheme.colorScheme.surfaceColorAtElevation(NavigationBarDefaults.Elevation)
-        } else MaterialTheme.colorScheme.onSurfaceVariant,
+        backgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevation(NavigationBarDefaults.Elevation),
         collapsedBackgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp),
         onDismiss = {
             playerConnection.player.stop()
@@ -619,6 +619,7 @@ fun BottomSheetPlayer(
             enter = fadeIn(tween(500)),
             exit = fadeOut(tween(500))
         ) {
+            val overlayColor = if (useDarkTheme) Color.Black.copy(alpha = 0.4f) else Color.White.copy(alpha = 0.55f)
             AnimatedContent(
                 targetState = mediaMetadata,
                 transitionSpec = {
@@ -633,7 +634,7 @@ fun BottomSheetPlayer(
                                 contentScale = ContentScale.FillBounds,
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .blur(200.dp)
+                                    .blur(if (useDarkTheme) 150.dp else 100.dp)
                             )
                         }
                     } else {
@@ -643,14 +644,14 @@ fun BottomSheetPlayer(
                             contentScale = ContentScale.FillBounds,
                             modifier = Modifier
                                 .fillMaxSize()
-                                .blur(200.dp)
+                                .blur(if (useDarkTheme) 150.dp else 100.dp)
                         )
                     }
 
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.4f))
+                            .background(overlayColor)
                     )
                 }
             }
@@ -667,6 +668,11 @@ fun BottomSheetPlayer(
                             .fillMaxSize()
                             .background(Brush.verticalGradient(colors), alpha = 0.8f)
                     )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(overlayColor)
+                    )
                 }
             }
 
@@ -674,7 +680,7 @@ fun BottomSheetPlayer(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.3f))
+                        .background(if (useDarkTheme) Color.Black.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.5f))
                 )
             }
         }

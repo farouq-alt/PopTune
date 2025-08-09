@@ -191,7 +191,7 @@ fun Lyrics(
             if (useDarkTheme)
                 MaterialTheme.colorScheme.secondary
             else
-                MaterialTheme.colorScheme.secondaryContainer
+                MaterialTheme.colorScheme.secondary
     }
 
     var currentLineIndex by remember {

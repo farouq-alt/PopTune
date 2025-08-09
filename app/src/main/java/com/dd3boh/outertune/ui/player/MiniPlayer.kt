@@ -99,6 +99,7 @@ fun MiniPlayer(
 
                 .fillMaxSize(),
         ) {
+            val iconButtonColor = MaterialTheme.colorScheme.onSecondaryContainer
             Box(Modifier.weight(1f)) {
                 mediaMetadata?.let {
                     MiniMediaInfo(
@@ -121,6 +122,7 @@ fun MiniPlayer(
             ) {
                 Icon(
                     imageVector = if (playbackState == Player.STATE_ENDED) Icons.Rounded.Replay else if (isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
+                    tint = iconButtonColor,
                     contentDescription = null
                 )
             }
@@ -131,6 +133,7 @@ fun MiniPlayer(
             ) {
                 Icon(
                     painter = painterResource(R.drawable.skip_next),
+                    tint = iconButtonColor,
                     contentDescription = null
                 )
             }
