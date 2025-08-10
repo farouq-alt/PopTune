@@ -54,6 +54,8 @@ synchronization, local media playback, multiple queues, and a new take on UI des
 <br/><br/>
 <img src="./assets/ytm-sync.jpg" alt="Sync with YouTube Music"/>
 
+[Full image gallery](./assets/gallery)
+
 > [!WARNING]
 >
 >If you're in a region where YouTube Music is not supported, you won't be able to use this app
