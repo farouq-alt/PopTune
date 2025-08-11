@@ -120,6 +120,7 @@ import com.dd3boh.outertune.constants.MiniPlayerHeight
 import com.dd3boh.outertune.constants.PlayerHorizontalPadding
 import com.dd3boh.outertune.extensions.metadata
 import com.dd3boh.outertune.extensions.move
+import com.dd3boh.outertune.extensions.supportsWideScreen
 import com.dd3boh.outertune.extensions.tabMode
 import com.dd3boh.outertune.extensions.togglePlayPause
 import com.dd3boh.outertune.extensions.toggleRepeatMode
@@ -246,7 +247,8 @@ fun BoxScope.QueueContent(
 
     // ui
     val tabMode = context.tabMode()
-    val landscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE && !tabMode
+    val wideScreen = context.supportsWideScreen()
+    val landscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE && !tabMode && wideScreen
 
     // multi queue vars
     var mqExpand by remember { mutableStateOf(false) }

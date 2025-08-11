@@ -125,6 +125,7 @@ import com.dd3boh.outertune.constants.ShowLyricsKey
 import com.dd3boh.outertune.constants.SwipeToSkipKey
 import com.dd3boh.outertune.extensions.isPowerSaver
 import com.dd3boh.outertune.extensions.metadata
+import com.dd3boh.outertune.extensions.supportsWideScreen
 import com.dd3boh.outertune.extensions.tabMode
 import com.dd3boh.outertune.extensions.togglePlayPause
 import com.dd3boh.outertune.extensions.toggleRepeatMode
@@ -324,6 +325,7 @@ fun BottomSheetPlayer(
         }
     ) {
         val tabMode = context.tabMode()
+        val wideScreen = context.supportsWideScreen()
 
         val actionButtons: @Composable RowScope.() -> Unit = {
             Spacer(modifier = Modifier.width(10.dp))
@@ -679,7 +681,7 @@ fun BottomSheetPlayer(
             )
         }
 
-        if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE && !tabMode) {
+        if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE && !tabMode && wideScreen) {
             val vPadding = max(
                 WindowInsets.safeDrawing.getTop(LocalDensity.current),
                 WindowInsets.safeDrawing.getBottom(LocalDensity.current)
