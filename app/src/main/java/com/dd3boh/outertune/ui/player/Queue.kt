@@ -956,6 +956,7 @@ fun BoxScope.QueueContent(
                                 .padding(4.dp)
                                 .align(Alignment.Center),
                             color = iconButtonColor,
+                            enabled = !detachedHead,
                             onClick = {
                                 playerConnection.triggerShuffle()
                                 haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
@@ -966,11 +967,11 @@ fun BoxScope.QueueContent(
                     Box(modifier = Modifier.weight(1f)) {
                         ResizableIconButton(
                             icon = Icons.Rounded.SkipPrevious,
-                            enabled = canSkipPrevious,
                             modifier = Modifier
                                 .size(32.dp)
                                 .align(Alignment.Center),
                             color = iconButtonColor,
+                            enabled = !detachedHead && canSkipPrevious,
                             onClick = {
                                 playerConnection.player.seekToPrevious()
                                 haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
@@ -1001,6 +1002,7 @@ fun BoxScope.QueueContent(
                                 .size(36.dp)
                                 .align(Alignment.Center),
                             color = iconButtonColor,
+                            enabled = !detachedHead,
                             onClick = {
                                 if (playbackState == STATE_ENDED) {
                                     playerConnection.player.seekTo(0, 0)
@@ -1033,11 +1035,11 @@ fun BoxScope.QueueContent(
                     Box(modifier = Modifier.weight(1f)) {
                         ResizableIconButton(
                             icon = Icons.Rounded.SkipNext,
-                            enabled = canSkipNext,
                             modifier = Modifier
                                 .size(32.dp)
                                 .align(Alignment.Center),
                             color = iconButtonColor,
+                            enabled = !detachedHead && canSkipNext,
                             onClick = {
                                 playerConnection.player.seekToNext()
                                 haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
@@ -1058,6 +1060,7 @@ fun BoxScope.QueueContent(
                                 .padding(4.dp)
                                 .align(Alignment.Center),
                             color = iconButtonColor,
+                            enabled = !detachedHead,
                             onClick = {
                                 playerConnection.player.toggleRepeatMode()
                                 haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
