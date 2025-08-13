@@ -13,7 +13,6 @@ import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.graphics.drawable.BitmapDrawable
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
@@ -319,7 +318,78 @@ fun BottomSheetPlayer(
     BottomSheet(
         state = state,
         modifier = modifier,
-        backgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevation(NavigationBarDefaults.Elevation),
+        background = {
+            Box(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(NavigationBarDefaults.Elevation))
+                    .fillMaxSize()
+            ) {
+                val overlayColor = if (useDarkTheme) Color.Black.copy(alpha = 0.4f) else Color.White.copy(alpha = 0.55f)
+                AnimatedContent(
+                    targetState = mediaMetadata,
+                    transitionSpec = {
+                        fadeIn(tween(1000)).togetherWith(fadeOut(tween(1000)))
+                    }
+                ) { metadata ->
+                    if (playerBackground == PlayerBackgroundStyle.BLUR) {
+                        if (metadata?.isLocal == true) {
+                            metadata.let {
+                                AsyncImageLocal(
+                                    image = { imageCache.getLocalThumbnail(it.localPath) },
+                                    contentScale = ContentScale.FillBounds,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .blur(if (useDarkTheme) 150.dp else 100.dp)
+                                )
+                            }
+                        } else {
+                            AsyncImage(
+                                model = metadata?.thumbnailUrl,
+                                contentDescription = null,
+                                contentScale = ContentScale.FillBounds,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .blur(if (useDarkTheme) 150.dp else 100.dp)
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(overlayColor)
+                        )
+                    }
+                }
+
+                AnimatedContent(
+                    targetState = gradientColors,
+                    transitionSpec = {
+                        fadeIn(tween(1000)).togetherWith(fadeOut(tween(1000)))
+                    }
+                ) { colors ->
+                    if (playerBackground == PlayerBackgroundStyle.GRADIENT && colors.size >= 2) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Brush.verticalGradient(colors), alpha = 0.8f)
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(overlayColor)
+                        )
+                    }
+                }
+
+                if (playerBackground != PlayerBackgroundStyle.FOLLOW_THEME && showLyrics) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(if (useDarkTheme) Color.Black.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.5f))
+                    )
+                }
+            }
+        },
         collapsedBackgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp),
         onDismiss = {
             playerConnection.player.stop()
@@ -659,76 +729,6 @@ fun BottomSheetPlayer(
             }
         }
 
-        AnimatedVisibility(
-            visible = !context.isPowerSaver() && state.isExpanded,
-            enter = fadeIn(tween(500)),
-            exit = fadeOut(tween(500))
-        ) {
-            val overlayColor = if (useDarkTheme) Color.Black.copy(alpha = 0.4f) else Color.White.copy(alpha = 0.55f)
-            AnimatedContent(
-                targetState = mediaMetadata,
-                transitionSpec = {
-                    fadeIn(tween(1000)).togetherWith(fadeOut(tween(1000)))
-                }
-            ) { metadata ->
-                if (playerBackground == PlayerBackgroundStyle.BLUR) {
-                    if (metadata?.isLocal == true) {
-                        metadata.let {
-                            AsyncImageLocal(
-                                image = { imageCache.getLocalThumbnail(it.localPath) },
-                                contentScale = ContentScale.FillBounds,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .blur(if (useDarkTheme) 150.dp else 100.dp)
-                            )
-                        }
-                    } else {
-                        AsyncImage(
-                            model = metadata?.thumbnailUrl,
-                            contentDescription = null,
-                            contentScale = ContentScale.FillBounds,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .blur(if (useDarkTheme) 150.dp else 100.dp)
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(overlayColor)
-                    )
-                }
-            }
-
-            AnimatedContent(
-                targetState = gradientColors,
-                transitionSpec = {
-                    fadeIn(tween(1000)).togetherWith(fadeOut(tween(1000)))
-                }
-            ) { colors ->
-                if (playerBackground == PlayerBackgroundStyle.GRADIENT && colors.size >= 2) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Brush.verticalGradient(colors), alpha = 0.8f)
-                    )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(overlayColor)
-                    )
-                }
-            }
-
-            if (playerBackground != PlayerBackgroundStyle.FOLLOW_THEME && showLyrics) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(if (useDarkTheme) Color.Black.copy(alpha = 0.3f) else Color.White.copy(alpha = 0.5f))
-                )
-            }
-        }
 
         if (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE && !tabMode && wideScreen) {
             val vPadding = max(
