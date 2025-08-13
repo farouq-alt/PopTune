@@ -149,6 +149,7 @@ import com.dd3boh.outertune.constants.DynamicThemeKey
 import com.dd3boh.outertune.constants.ENABLE_UPDATE_CHECKER
 import com.dd3boh.outertune.constants.EnabledTabsKey
 import com.dd3boh.outertune.constants.ExcludedScanPathsKey
+import com.dd3boh.outertune.constants.KeepAliveKey
 import com.dd3boh.outertune.constants.LastLocalScanKey
 import com.dd3boh.outertune.constants.LastVersionKey
 import com.dd3boh.outertune.constants.LibraryFilterKey
@@ -340,7 +341,7 @@ class MainActivity : ComponentActivity() {
          */
         unbindService(serviceConnection)
 
-        if (dataStore.get(StopMusicOnTaskClearKey, false) && isFinishing) {
+        if (dataStore.get(StopMusicOnTaskClearKey, false) && dataStore.get(KeepAliveKey, false) && isFinishing) {
 //                stopService(Intent(this, MusicService::class.java)) // Believe me, this doesn't actually stop
             playerConnection?.service?.onDestroy()
             playerConnection = null
