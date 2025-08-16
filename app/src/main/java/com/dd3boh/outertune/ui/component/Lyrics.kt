@@ -332,8 +332,6 @@ fun Lyrics(
                                 haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
                             }
                     ) {
-                        val canUseFancyLyrics = currentPos.toULong() in item.start..item.end + 100.toULong()
-                                && lyricsFancy && item.words != null && !context.isPowerSaver()
                         if (currentPos.toULong() in item.start..item.end + 100.toULong() && lyricsFancy
                             && item.words != null && !context.isPowerSaver()
                         ) { // word by word
@@ -392,7 +390,7 @@ fun Lyrics(
                                 },
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.alpha(
-                                    if (!isSynced || (index == displayedCurrentLineIndex && !canUseFancyLyrics)) {
+                                    if (!isSynced || ((index == displayedCurrentLineIndex || (index == displayedCurrentLineIndex + 1 && item.isTranslated)) && item.words == null)) {
                                         1f
                                     } else {
                                         0.5f
@@ -553,10 +551,10 @@ fun splitTextToLines(
 fun findCurrentLineIndex(lines: List<LyricLine>, position: Long): Int {
     for (index in lines.indices) {
         if (lines[index].start > (position).toUInt()) {
-            return index - 1
+            return if (lines[index - 1].isTranslated) index - 2 else index - 1
         }
     }
-    return lines.lastIndex
+    return if (lines[lines.lastIndex].isTranslated) lines.lastIndex - 1 else lines.lastIndex
 }
 
 /**
