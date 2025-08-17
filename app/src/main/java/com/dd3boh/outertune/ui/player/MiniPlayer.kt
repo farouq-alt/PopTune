@@ -133,7 +133,7 @@ fun MiniPlayer(
             ) {
                 Icon(
                     painter = painterResource(R.drawable.skip_next),
-                    tint = iconButtonColor,
+                    tint = iconButtonColor.copy(alpha = (if (canSkipNext) 1f else 0.5f)),
                     contentDescription = null
                 )
             }
