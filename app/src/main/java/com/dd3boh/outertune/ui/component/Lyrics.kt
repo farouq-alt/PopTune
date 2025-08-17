@@ -120,7 +120,7 @@ fun Lyrics(
     val playerConnection = LocalPlayerConnection.current ?: return
     val menuState = LocalMenuState.current
     val density = LocalDensity.current
-    var showLyrics by rememberPreference(ShowLyricsKey, false)
+    var (showLyrics, onShowLyricsChange) = rememberPreference(ShowLyricsKey, false)
     val landscapeOffset = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     val lyricsTextPosition by rememberEnumPreference(LyricsTextPositionKey, LyricsPosition.CENTER)
@@ -427,7 +427,7 @@ fun Lyrics(
                     .padding(end = 12.dp)
             ) {
                 IconButton(
-                    onClick = { showLyrics = false }
+                    onClick = { onShowLyricsChange(false) }
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Close,

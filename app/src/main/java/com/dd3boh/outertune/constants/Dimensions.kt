@@ -35,6 +35,7 @@ val GridThumbnailHeight = 128.dp
 val AlbumThumbnailSize = 144.dp
 
 val ThumbnailCornerRadius = 6.dp
+val AlbumCornerRadius = 16.dp
 val MenuCornerRadius = 16.dp
 val DialogCornerRadius = 32.dp
 

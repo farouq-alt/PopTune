@@ -30,7 +30,7 @@ import com.dd3boh.outertune.ui.utils.getNSongsString
 @Composable
 fun ArtistListItem(
     artist: Artist,
-    modifier: Modifier = Modifier.Companion,
+    modifier: Modifier = Modifier,
     badges: @Composable RowScope.() -> Unit = {
         if (artist.artist.bookmarkedAt != null) {
             Icon.Favorite()
@@ -42,7 +42,7 @@ fun ArtistListItem(
                 Icons.Rounded.CloudOff,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.Companion
+                modifier = Modifier
                     .size(18.dp)
                     .padding(end = 2.dp)
             )
@@ -52,7 +52,7 @@ fun ArtistListItem(
             Icon(
                 imageVector = Icons.Rounded.OfflinePin,
                 contentDescription = null,
-                modifier = Modifier.Companion
+                modifier = Modifier
                     .size(18.dp)
                     .padding(end = 2.dp)
             )
@@ -67,7 +67,7 @@ fun ArtistListItem(
         AsyncImage(
             model = artist.artist.thumbnailUrl,
             contentDescription = null,
-            modifier = Modifier.Companion
+            modifier = Modifier
                 .size(ListThumbnailSize)
                 .clip(CircleShape)
         )
@@ -79,7 +79,7 @@ fun ArtistListItem(
 @Composable
 fun ArtistGridItem(
     artist: Artist,
-    modifier: Modifier = Modifier.Companion,
+    modifier: Modifier = Modifier,
     badges: @Composable RowScope.() -> Unit = {
         if (artist.artist.bookmarkedAt != null) {
             Icon.Favorite()
@@ -91,7 +91,7 @@ fun ArtistGridItem(
                 Icons.Rounded.CloudOff,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.Companion
+                modifier = Modifier
                     .size(18.dp)
                     .padding(end = 2.dp)
             )
@@ -101,7 +101,7 @@ fun ArtistGridItem(
             Icon(
                 imageVector = Icons.Rounded.OfflinePin,
                 contentDescription = null,
-                modifier = Modifier.Companion
+                modifier = Modifier
                     .size(18.dp)
                     .padding(end = 2.dp)
             )
@@ -117,7 +117,7 @@ fun ArtistGridItem(
             model = artist.artist.thumbnailUrl,
             contentDescription = null,
             contentScale = ContentScale.Companion.Crop,
-            modifier = Modifier.Companion
+            modifier = Modifier
                 .fillMaxSize()
                 .clip(CircleShape)
         )
