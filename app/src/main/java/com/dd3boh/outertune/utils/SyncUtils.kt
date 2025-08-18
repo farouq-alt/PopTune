@@ -122,6 +122,7 @@ class SyncUtils @Inject constructor(
     private fun checkEnabled(item: SyncContent): Boolean {
         return decodeSyncString(context.dataStore.get(YtmSyncContentKey, DEFAULT_SYNC_CONTENT)).contains(item)
     }
+
     private fun checkPartialSyncEligibility(key: Preferences.Key<Long>): Boolean {
         val lastSync = context.dataStore.get(key, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
         val currentTime = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
@@ -586,7 +587,7 @@ class SyncUtils @Inject constructor(
         // REQUIRED: internet, no ongoing sync, and category enabled
         if (!_isSyncingRecentActivity.value && (!checkEnabled(SyncContent.RECENT_ACTIVITY) || !context.isInternetConnected())) {
             if (_isSyncingRecentActivity.value)
-                Log.i(TAG, "Library songs synchronization already in progress")
+                Log.i(TAG, "Recent activity synchronization already in progress")
             return
         }
         // OPTIONAL: auto sync and cooldown
@@ -597,20 +598,25 @@ class SyncUtils @Inject constructor(
         }
         _isSyncingRecentActivity.value = true
 
-        YouTube.libraryRecentActivity().onSuccess { page ->
-            val recentActivity = page.items.take(9).drop(1)
+        try {
+            Log.i(TAG, "Recent activity synchronization started")
+            YouTube.libraryRecentActivity().onSuccess { page ->
+                val recentActivity = page.items.take(9).drop(1)
 
-            coroutineScope {
-                launch(Dispatchers.IO) {
-                    database.clearRecentActivity()
+                coroutineScope {
+                    launch(Dispatchers.IO) {
+                        database.clearRecentActivity()
 
-                    recentActivity.reversed().forEach { database.insertRecentActivityItem(it) }
+                        recentActivity.reversed().forEach { database.insertRecentActivityItem(it) }
+                    }
                 }
             }
-        }
-
-        context.dataStore.edit { settings ->
-            settings[LastRecentActivitySyncKey] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+        } finally {
+            context.dataStore.edit { settings ->
+                settings[LastRecentActivitySyncKey] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+            }
+            _isSyncingRecentActivity.value = false
+            Log.i(TAG, "Recent activity synchronization ended")
         }
     }
 
