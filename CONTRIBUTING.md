@@ -123,6 +123,8 @@ To make everyone's life easier, there are a set of guidelines that are to be fol
 | `<file name>` | Changes for one single file, that to not fit into any other tags                                |
 | app           | General changes, or anything that does not fit any other tags. (For within the app module only) |
 | outertune     | General changes that span across multiple modules                                               |
+| fastlane      | Fastlane components                                                                             |
+| translations  | General changes to translation components                                                       |
 
 - Please use a tag if it already exists, however, if you are developing a new major feature, you are free to assign your
   own appropriate tag
