@@ -788,7 +788,9 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
         }
 
         bubbleUp(item)
-        player.player.shuffleModeEnabled = item.shuffled
+        if (player.player.shuffleModeEnabled != item.shuffled) {
+            player.player.shuffleModeEnabled = item.shuffled
+        }
         return queuePos
     }
 

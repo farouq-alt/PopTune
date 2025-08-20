@@ -122,6 +122,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -181,7 +182,6 @@ class MusicService : MediaLibraryService(),
 
     var queueBoard = QueueBoard(this)
     var queuePlaylistId: String? = null
-    private var lastMediaItemIndex = -1
 
     val currentMediaMetadata = MutableStateFlow<com.dd3boh.outertune.models.MediaMetadata?>(null)
 
@@ -313,6 +313,7 @@ class MusicService : MediaLibraryService(),
                             songId != null // aka "hasNext"
                         ) {
                             scope.launch(SilentHandler) {
+                                delay(200) // TODO: Maybe fixes weird issue of radio sometimes not working in some languages???
                                 val mediaItems = YouTubeQueue(WatchEndpoint(songId)).nextPage()
                                 if (player.playbackState != STATE_IDLE) {
                                     queueBoard.enqueueEnd(mediaItems.drop(1), isRadio = true)
@@ -320,20 +321,23 @@ class MusicService : MediaLibraryService(),
                             }
                         }
 
-                        // this absolute eye sore detects if we loop back to the beginning of queue, when shuffle AND repeat all
+                        queueBoard.setCurrQueuePosIndex(player.currentMediaItemIndex)
+
+                        // reshuffle queue when shuffle AND repeat all are enabled
                         // no, when repeat mode is on, player does not "STATE_ENDED"
-                        if (player.currentMediaItemIndex == 0 && lastMediaItemIndex == player.mediaItemCount - 1 &&
+                        if (player.currentMediaItemIndex == player.mediaItemCount - 1 &&
                             (reason == MEDIA_ITEM_TRANSITION_REASON_AUTO || reason == MEDIA_ITEM_TRANSITION_REASON_SEEK) &&
                             player.shuffleModeEnabled && player.repeatMode == REPEAT_MODE_ALL
                         ) {
-                            queueBoard.shuffleCurrent(false) // reshuffle queue
-                            queueBoard.setCurrQueue()
+                            scope.launch(SilentHandler) {
+                                // or else race condition: Assertions.checkArgument(eventTime.realtimeMs >= currentPlaybackStateStartTimeMs) fails in updatePlaybackState()
+                                delay(200)
+                                queueBoard.shuffleCurrent(player.mediaItemCount > 2)
+                                queueBoard.setCurrQueue()
+                            }
                         }
-                        lastMediaItemIndex = player.currentMediaItemIndex
 
                         updateNotification() // also updates when queue changes
-
-                        queueBoard.setCurrQueuePosIndex(player.currentMediaItemIndex)
                     }
                 })
                 sleepTimer = SleepTimer(scope, this)
