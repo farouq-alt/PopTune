@@ -28,6 +28,7 @@ import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.FilterAlt
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -226,6 +227,24 @@ fun LibraryPlaylistsScreen(
                 Spacer(Modifier.width(4.dp))
                 ActionDropdown(
                     actions = listOf(
+                        DropdownItem(
+                            title = stringResource(R.string.library_filter),
+                            leadingIcon = { Icon(Icons.Rounded.FilterAlt, null) },
+                            action = {},
+                            secondaryDropdown =
+                                listOf(
+                                    DropdownItem(
+                                        title = stringResource(R.string.filter_library),
+                                        leadingIcon = null,
+                                        action = { filter = PlaylistFilter.LIBRARY }
+                                    ),
+                                    DropdownItem(
+                                        title = stringResource(R.string.filter_downloaded),
+                                        leadingIcon = null,
+                                        action = { filter = PlaylistFilter.DOWNLOADED }
+                                    ),
+                                )
+                        ),
                         DropdownItem(
                             title = stringResource(R.string.create_playlist),
                             leadingIcon = { Icon(Icons.Rounded.Add, null) },

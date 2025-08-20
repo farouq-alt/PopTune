@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -21,6 +22,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.List
+import androidx.compose.material.icons.rounded.FilterAlt
 import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -72,6 +74,8 @@ import com.dd3boh.outertune.ui.component.LazyVerticalGridScrollbar
 import com.dd3boh.outertune.ui.component.LibraryArtistGridItem
 import com.dd3boh.outertune.ui.component.LibraryArtistListItem
 import com.dd3boh.outertune.ui.component.SortHeader
+import com.dd3boh.outertune.ui.menu.ActionDropdown
+import com.dd3boh.outertune.ui.menu.DropdownItem
 import com.dd3boh.outertune.ui.utils.MEDIA_PERMISSION_LEVEL
 import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
@@ -89,7 +93,6 @@ fun LibraryArtistsScreen(
     val coroutineScope = rememberCoroutineScope()
 
     var filter by rememberEnumPreference(ArtistFilterKey, ArtistFilter.LIKED)
-    libraryFilterContent?.let { filter = ArtistFilter.LIKED }
     val localLibEnable by rememberPreference(LocalLibraryEnableKey, defaultValue = true)
 
     var artistViewType by rememberEnumPreference(ArtistViewTypeKey, LibraryViewType.GRID)
@@ -210,6 +213,34 @@ fun LibraryArtistsScreen(
                     text = pluralStringResource(R.plurals.n_artist, artists.size, artists.size),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.secondary
+                )
+                Spacer(Modifier.width(4.dp))
+                ActionDropdown(
+                    actions = listOf(
+                        DropdownItem(
+                            title = stringResource(R.string.library_filter),
+                            leadingIcon = { Icon(Icons.Rounded.FilterAlt, null) },
+                            action = {},
+                            secondaryDropdown =
+                                listOf(
+                                    DropdownItem(
+                                        title = stringResource(R.string.filter_liked),
+                                        leadingIcon = null,
+                                        action = { filter = ArtistFilter.LIKED }
+                                    ),
+                                    DropdownItem(
+                                        title = stringResource(R.string.filter_library),
+                                        leadingIcon = null,
+                                        action = { filter = ArtistFilter.LIBRARY }
+                                    ),
+                                    DropdownItem(
+                                        title = stringResource(R.string.filter_downloaded),
+                                        leadingIcon = null,
+                                        action = { filter = ArtistFilter.DOWNLOADED }
+                                    ),
+                                )
+                        ),
+                    ),
                 )
             }
         }

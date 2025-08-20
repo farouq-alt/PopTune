@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.rounded.Album
+import androidx.compose.material.icons.rounded.FilterAlt
 import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -73,6 +74,8 @@ import com.dd3boh.outertune.ui.component.LazyVerticalGridScrollbar
 import com.dd3boh.outertune.ui.component.LibraryAlbumGridItem
 import com.dd3boh.outertune.ui.component.LibraryAlbumListItem
 import com.dd3boh.outertune.ui.component.SortHeader
+import com.dd3boh.outertune.ui.menu.ActionDropdown
+import com.dd3boh.outertune.ui.menu.DropdownItem
 import com.dd3boh.outertune.ui.utils.MEDIA_PERMISSION_LEVEL
 import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
@@ -94,8 +97,6 @@ fun LibraryAlbumsScreen(
     val coroutineScope = rememberCoroutineScope()
 
     var filter by rememberEnumPreference(AlbumFilterKey, AlbumFilter.LIKED)
-    libraryFilterContent?.let { filter = AlbumFilter.LIKED }
-
     var albumViewType by rememberEnumPreference(AlbumViewTypeKey, LibraryViewType.GRID)
     val libraryViewType by rememberEnumPreference(LibraryViewTypeKey, LibraryViewType.GRID)
     val viewType = if (libraryFilterContent != null) libraryViewType else albumViewType
@@ -207,11 +208,42 @@ fun LibraryAlbumsScreen(
 
             Spacer(Modifier.weight(1f))
 
-            albums?.let { albums ->
-                Text(
-                    text = pluralStringResource(R.plurals.n_album, albums.size, albums.size),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.secondary
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                albums?.let { albums ->
+                    Text(
+                        text = pluralStringResource(R.plurals.n_album, albums.size, albums.size),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+                ActionDropdown(
+                    actions = listOf(
+                        DropdownItem(
+                            title = stringResource(R.string.library_filter),
+                            leadingIcon = { Icon(Icons.Rounded.FilterAlt, null) },
+                            action = {},
+                            secondaryDropdown =
+                                listOf(
+                                    DropdownItem(
+                                        title = stringResource(R.string.filter_liked),
+                                        leadingIcon = null,
+                                        action = { filter = AlbumFilter.LIKED }
+                                    ),
+                                    DropdownItem(
+                                        title = stringResource(R.string.filter_library),
+                                        leadingIcon = null,
+                                        action = { filter = AlbumFilter.LIBRARY }
+                                    ),
+                                    DropdownItem(
+                                        title = stringResource(R.string.filter_downloaded),
+                                        leadingIcon = null,
+                                        action = { filter = AlbumFilter.DOWNLOADED }
+                                    ),
+                                ),
+                        ),
+                    )
                 )
             }
         }
