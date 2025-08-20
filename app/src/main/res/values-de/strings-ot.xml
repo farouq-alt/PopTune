@@ -83,9 +83,9 @@
     <string name="grp_manual_scanner">Manueller Scan</string>
     <string name="app_info_title">Appinformationen</string>
     <string name="device_info_title">Geräteinformationen</string>
-    <string name="help_bug_report_action">Einen Fehler melden (über Github)</string>
+    <string name="help_bug_report_action">Einen Fehler melden (über GitHub)</string>
     <string name="help_contact_email_inquiries">Andere Anfragen (tippen um die E-Mail-Adresse zu kopieren)</string>
-    <string name="help_support_forum">Hilfe und Unterstützung (über Github)</string>
+    <string name="help_support_forum">Hilfe und Unterstützung (über GitHub)</string>
     <string name="oss_licenses_title">Open Source-Lizenzen</string>
     <string name="wiki">Wiki</string>
     <string name="attribution_title">Mitwirkende</string>

@@ -228,9 +228,9 @@
     <string name="err_invalid_ytm_song">Nie udało się odtworzyć utworu. Można odtworzyć tylko treści dostępne w YouTube Music.</string>
     <string name="app_info_title">Informacje o aplikacji</string>
     <string name="device_info_title">Informacje o urządzeniu</string>
-    <string name="help_bug_report_action">Wyślij zgłoszenie błędu (przez Github)</string>
+    <string name="help_bug_report_action">Wyślij zgłoszenie błędu (przez GitHub)</string>
     <string name="help_contact_email_inquiries">Inne zapytania (Nacisńij, by skopiować Email)</string>
-    <string name="help_support_forum">Wspieraj i pomóż (przez Github)</string>
+    <string name="help_support_forum">Wspieraj i pomóż (przez GitHub)</string>
     <string name="wiki">Wiki</string>
     <string name="all_contributors">Pokaż wszystkich współtwórców</string>
     <string name="att_contributor">Współtwórca</string>

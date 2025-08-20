@@ -221,9 +221,9 @@
     <string name="scanner_sensitivity_L0">Prendre le premier résultat fourni par YouTube lorsque la recherche sur YouTube est activée, sinon faire correspondre le titre.</string>
     <string name="app_info_title">Informations sur l\'application</string>
     <string name="device_info_title">Informations sur l\'appareil</string>
-    <string name="help_bug_report_action">Soumettre un rapport de bogue (via Github)</string>
+    <string name="help_bug_report_action">Soumettre un rapport de bogue (via GitHub)</string>
     <string name="help_contact_email_inquiries">Autres demandes (Appuyez pour copier l\'e-mail)</string>
-    <string name="help_support_forum">Aide et support (via Github)</string>
+    <string name="help_support_forum">Aide et support (via GitHub)</string>
     <string name="wiki">Wiki</string>
     <string name="err_invalid_ytm_song">Impossible de lire le titre. Seul le contenu accessible sur YouTube Music peut être lu.</string>
     <string name="err_restore_incompatible_database">Impossible de restaurer une base de données incompatible</string>
