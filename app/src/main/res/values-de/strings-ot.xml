@@ -17,7 +17,7 @@
     <string name="auto_playlist">Automatische Playlist</string>
     <string name="like_all">Allen „Mag ich“ geben</string>
     <string name="delete_lyric_confirm">Möchtest du wirklich den gespeicherten Songtext für \"%s\" löschen?</string>
-    <string name="err_play_next_on_error">Ein Fehler ist aufgetreten. Nächster wird wiedergegeben</string>
+    <string name="err_play_next_on_error">Ein Fehler ist aufgetreten. Nächstes Lied wird wiedergegeben</string>
     <string name="android_auto">Android Auto</string>
     <string name="select">Auswahlmodus</string>
     <string name="show_liked_and_downloaded_playlist">Zeige die Wiedergabelisten für Favoriten und heruntergeladene Titel in der Bibliothek</string>
@@ -69,7 +69,7 @@
     <string name="attrib_zhuang">Zion Huang für InnerTune</string>
     <string name="player_background_gradient">Farbverlauf</string>
     <string name="token_shown">Erneut antippen, um es zu kopieren oder zu bearbeiten</string>
-    <string name="playlist_add_local_to_synced_note">Hinweis: Das Hinzufügen von lokalen Songs zu synchronisierten/online Playlists wird nicht unterstützt. Jede andere Kombination ist gültig</string>
+    <string name="playlist_add_local_to_synced_note">Hinweis: Das Hinzufügen von lokalen Songs zu synchronisierten/online Playlists wird nicht unterstützt. Jede andere Kombination ist möglich</string>
     <string name="sync_progress_active">Synchronisiere mit YouTube Konto…</string>
     <string name="grp_localization">Lokalisierung</string>
     <string name="grp_proxy">Proxy</string>
@@ -110,7 +110,7 @@
     <string name="lyrics_prefer_local">Bevorzuge lokale Liedertextdateien</string>
     <string name="local_player_settings_title">Lokale Medien</string>
     <string name="flat_subfolders_description">Deaktivieren um die Ordnerstruktur wie auf dem Speicher beizubehalten</string>
-    <string name="disable_lm_confirm">Bist du sicher, dass die lokalen Medienfunktionen deaktiviert werden sollen?</string>
+    <string name="disable_lm_confirm">Bist du sicher, dass die lokalen Medienfunktionen deaktiviert werden sollen? Die Inhalte der Medienbibliothek bleiben unverändert.</string>
     <string name="auto_scanner_title">Automatisch scannen</string>
     <string name="flat_subfolders_title">Ordnerstruktur vereinfachen</string>
     <string name="scan_paths_incl">Pfade scannen</string>
@@ -160,7 +160,7 @@
     <string name="att_project_support">Projektunterstützung</string>
     <string name="att_translator">Übersetzer (%s)</string>
     <string name="sort_by_track_number">Track Nummer</string>
-    <string name="bits_per_sample">Bits pro Sample</string>
+    <string name="bits_per_sample">Bittiefe</string>
     <string name="disc_number">Disk Nummer</string>
     <string name="extra_details">Extra Details</string>
     <string name="file_path">Dateipfad</string>
