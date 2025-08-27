@@ -64,11 +64,13 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionToken
 import com.dd3boh.outertune.MainActivity
 import com.dd3boh.outertune.R
+import com.dd3boh.outertune.constants.AudioDecoderKey
 import com.dd3boh.outertune.constants.AudioNormalizationKey
-import com.dd3boh.outertune.constants.AudioOffload
+import com.dd3boh.outertune.constants.AudioOffloadKey
 import com.dd3boh.outertune.constants.AudioQuality
 import com.dd3boh.outertune.constants.AudioQualityKey
 import com.dd3boh.outertune.constants.AutoLoadMoreKey
+import com.dd3boh.outertune.constants.ENABLE_FFMETADATAEX
 import com.dd3boh.outertune.constants.KeepAliveKey
 import com.dd3boh.outertune.constants.MediaSessionConstants.CommandToggleLike
 import com.dd3boh.outertune.constants.MediaSessionConstants.CommandToggleRepeatMode
@@ -178,6 +180,7 @@ class MusicService : MediaLibraryService(),
     val waitingForNetworkConnection = MutableStateFlow(false)
     private val isNetworkConnected = MutableStateFlow(true)
 
+    private val audioDecoder = dataStore.get(AudioDecoderKey, DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF)
     private val audioQuality by enumPreference(this, AudioQualityKey, AudioQuality.AUTO)
 
     var queueBoard = QueueBoard(this)
@@ -345,7 +348,7 @@ class MusicService : MediaLibraryService(),
                 addAnalyticsListener(PlaybackStatsListener(false, this@MusicService))
 
                 // misc
-                setOffloadEnabled(dataStore.get(AudioOffload, false))
+                setOffloadEnabled(dataStore.get(AudioOffloadKey, false))
             }
 
         mediaLibrarySessionCallback.apply {
@@ -889,25 +892,33 @@ class MusicService : MediaLibraryService(),
         }
     }
 
-    private fun createRenderersFactory() = object : DefaultRenderersFactory(this) {
-        override fun buildAudioSink(
-            context: Context,
-            pcmEncodingRestrictionLifted: Boolean,
-            enableFloatOutput: Boolean,
-            enableAudioTrackPlaybackParams: Boolean
-        ): AudioSink? {
-            return DefaultAudioSink.Builder(this@MusicService)
-                .setPcmEncodingRestrictionLifted(pcmEncodingRestrictionLifted)
-                .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
-                .setAudioProcessorChain(
-                    DefaultAudioSink.DefaultAudioProcessorChain(
-                        emptyArray(),
-                        SilenceSkippingAudioProcessor(),
-                        SonicAudioProcessor()
-                    )
-                )
-                .setAudioOffloadSupportProvider(DefaultAudioOffloadSupportProvider(context))
-                .build()
+    private fun createRenderersFactory(): DefaultRenderersFactory {
+        if (ENABLE_FFMETADATAEX) {
+            return NextRenderersFactory(this)
+                .setEnableDecoderFallback(true)
+                .setExtensionRendererMode(audioDecoder)
+        } else {
+            return object : DefaultRenderersFactory(this) {
+                override fun buildAudioSink(
+                    context: Context,
+                    pcmEncodingRestrictionLifted: Boolean,
+                    enableFloatOutput: Boolean,
+                    enableAudioTrackPlaybackParams: Boolean
+                ): AudioSink? {
+                    return DefaultAudioSink.Builder(this@MusicService)
+                        .setPcmEncodingRestrictionLifted(pcmEncodingRestrictionLifted)
+                        .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
+                        .setAudioProcessorChain(
+                            DefaultAudioSink.DefaultAudioProcessorChain(
+                                emptyArray(),
+                                SilenceSkippingAudioProcessor(),
+                                SonicAudioProcessor()
+                            )
+                        )
+                        .setAudioOffloadSupportProvider(DefaultAudioOffloadSupportProvider(context))
+                        .build()
+                }
+            }
         }
     }
 

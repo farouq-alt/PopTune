@@ -77,6 +77,7 @@ import com.dd3boh.outertune.ui.component.button.IconLabelButton
 import com.dd3boh.outertune.ui.utils.backToMain
 import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.utils.scanners.FFmpegScanner
+import io.github.anilbeesetti.nextlib.media3ext.ffdecoder.FfmpegLibrary
 import java.text.DateFormat.getDateTimeInstance
 import java.util.Date
 
@@ -245,6 +246,8 @@ fun AboutScreen(
                     }
                     if (ENABLE_FFMETADATAEX) {
                         info.add("FFMetadataEx version: ${FFmpegScanner.VERSION_STRING}")
+                        info.add("FFmpeg version: ${FfmpegLibrary.getVersion()}")
+                        info.add("FFmpeg isAvailable: ${FfmpegLibrary.isAvailable()}")
                     }
 
                     Column(

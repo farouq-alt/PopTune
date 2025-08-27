@@ -19,6 +19,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
+import androidx.compose.material.icons.rounded.AudioFile
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.NoCell
 import androidx.compose.material3.ElevatedCard
@@ -31,17 +32,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.navigation.NavController
 import com.dd3boh.outertune.R
-import com.dd3boh.outertune.constants.AudioOffload
+import com.dd3boh.outertune.constants.AudioDecoderKey
+import com.dd3boh.outertune.constants.AudioOffloadKey
+import com.dd3boh.outertune.constants.ENABLE_FFMETADATAEX
 import com.dd3boh.outertune.constants.KeepAliveKey
 import com.dd3boh.outertune.constants.PersistentQueueKey
 import com.dd3boh.outertune.constants.TopBarInsets
 import com.dd3boh.outertune.ui.component.ColumnWithContentPadding
-import com.dd3boh.outertune.ui.component.button.IconButton
+import com.dd3boh.outertune.ui.component.ListPreference
 import com.dd3boh.outertune.ui.component.PreferenceGroupTitle
 import com.dd3boh.outertune.ui.component.SettingsClickToReveal
 import com.dd3boh.outertune.ui.component.SwitchPreference
+import com.dd3boh.outertune.ui.component.button.IconButton
+import com.dd3boh.outertune.ui.dialog.InfoLabel
 import com.dd3boh.outertune.ui.screens.settings.fragments.AudioEffectsFrag
 import com.dd3boh.outertune.ui.screens.settings.fragments.AudioQualityFrag
 import com.dd3boh.outertune.ui.screens.settings.fragments.PlaybackBehaviourFrag
@@ -55,7 +61,11 @@ fun PlayerSettings(
     navController: NavController,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
-    val (audioOffload, onAudioOffloadChange) = rememberPreference(key = AudioOffload, defaultValue = false)
+    val (audioOffload, onAudioOffloadChange) = rememberPreference(key = AudioOffloadKey, defaultValue = false)
+    val (audioDecoder, onAudioDecoderChange) = rememberPreference(
+        key = AudioDecoderKey,
+        defaultValue = DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF
+    )
     val (keepAlive, onKeepAliveChange) = rememberPreference(key = KeepAliveKey, defaultValue = false)
     val (persistentQueue, onPersistentQueueChange) = rememberPreference(key = PersistentQueueKey, defaultValue = true)
 
@@ -120,6 +130,28 @@ fun PlayerSettings(
             ElevatedCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
+                if (ENABLE_FFMETADATAEX) {
+                    ListPreference(
+                        title = { Text(stringResource(R.string.audio_decoder_preference)) },
+                        icon = { Icon(Icons.Rounded.AudioFile, null) },
+                        selectedValue = audioDecoder,
+                        onValueSelected = onAudioDecoderChange,
+                        values = listOf(
+                            DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF,
+                            DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON,
+                            DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER,
+                        ),
+                        valueText = {
+                            when (it) {
+                                DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF -> stringResource(R.string.audio_decoder_system_only)
+                                DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON -> stringResource(R.string.audio_decoder_system_with_ffmpeg)
+                                DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER -> stringResource(R.string.audio_decoder_ffmpeg_only)
+                                else -> {stringResource(R.string.error_unknown)}
+                            }
+                        }
+                    )
+                    InfoLabel(stringResource(R.string.restart_to_apply_changes))
+                }
                 SwitchPreference(
                     title = { Text(stringResource(R.string.audio_offload)) },
                     description = stringResource(R.string.audio_offload_description),
@@ -127,6 +159,7 @@ fun PlayerSettings(
                     checked = audioOffload,
                     onCheckedChange = onAudioOffloadChange
                 )
+                InfoLabel(stringResource(R.string.restart_to_apply_changes))
                 SwitchPreference(
                     title = { Text(stringResource(R.string.keep_alive_title)) },
                     description = stringResource(R.string.keep_alive_description),

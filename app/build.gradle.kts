@@ -131,8 +131,10 @@ android {
     tasks.withType<KotlinCompile> {
         if (!name.substringAfter("compile").lowercase().startsWith("full")) {
             exclude("**/*FFmpegScanner.kt")
+            exclude("**/*NextRendersFactory.kt")
         } else {
             exclude("**/*FFmpegScannerDud.kt")
+            exclude("**/*NextRendersFactoryDud.kt")
         }
     }
 

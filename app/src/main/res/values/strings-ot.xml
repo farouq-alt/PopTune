@@ -148,6 +148,10 @@ while also allowing users to translate our app as well. New, specific strings to
     <string name="wifi_only">Wi-Fi only</string>
 
 <!-- Player settings -->
+    <string name="audio_decoder_ffmpeg_only">Prioritize FFmpeg decoders</string>
+    <string name="audio_decoder_preference">Audio decoder</string>
+    <string name="audio_decoder_system_only">System decoders only</string>
+    <string name="audio_decoder_system_with_ffmpeg">Prioritize system decoders</string>
     <string name="audio_offload">Enable offload</string>
     <string name="audio_offload_description">Use the offload audio path for audio playback. Disabling this may increase power usage but can be useful if you experience issues with audio playback or post processing</string>
     <string name="keep_alive_title">Prevent system killing app</string>
