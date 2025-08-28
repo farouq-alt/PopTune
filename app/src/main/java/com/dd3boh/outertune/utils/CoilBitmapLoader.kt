@@ -18,7 +18,6 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import androidx.media3.common.util.BitmapLoader
 import coil3.ImageLoader
 import coil3.asImage
@@ -30,7 +29,6 @@ import coil3.imageLoader
 import coil3.request.CachePolicy
 import coil3.request.ErrorResult
 import coil3.request.ImageRequest
-import coil3.request.ImageResult
 import coil3.request.Options
 import coil3.request.allowHardware
 import coil3.toBitmap
@@ -42,7 +40,6 @@ import kotlinx.coroutines.guava.future
 import java.util.concurrent.ExecutionException
 import javax.inject.Inject
 import kotlin.math.min
-import kotlin.toString
 
 class CoilBitmapLoader @Inject constructor(
     private val context: Context,
@@ -187,7 +184,6 @@ class CoilBitmapLoader @Inject constructor(
         private val context: Context,
     ) : Fetcher.Factory<LocalArtworkPath> {
         override fun create(data: LocalArtworkPath, options: Options, imageLoader: ImageLoader): Fetcher? {
-            println("asshole are you fucking " + data.toString())
             return CoilBitmapLoader(context, CoroutineScope(Dispatchers.IO), data)
         }
     }

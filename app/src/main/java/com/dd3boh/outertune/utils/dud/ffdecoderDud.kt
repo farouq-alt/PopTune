@@ -1,4 +1,4 @@
-package com.dd3boh.outertune.playback
+package io.github.anilbeesetti.nextlib.media3ext.ffdecoder
 
 import android.content.Context
 import androidx.media3.common.audio.SonicAudioProcessor
@@ -27,5 +27,12 @@ class NextRenderersFactory(context: Context) : DefaultRenderersFactory(context) 
             )
             .setAudioOffloadSupportProvider(DefaultAudioOffloadSupportProvider(context))
             .build()
+    }
+}
+
+class FfmpegLibrary() {
+    companion object {
+        fun isAvailable() = false
+        fun getVersion(): String = "N/A"
     }
 }

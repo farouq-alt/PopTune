@@ -36,9 +36,6 @@ import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.FolderSongSortDescendingKey
 import com.dd3boh.outertune.constants.FolderSongSortType
 import com.dd3boh.outertune.constants.FolderSongSortTypeKey
-import com.dd3boh.outertune.constants.SongSortDescendingKey
-import com.dd3boh.outertune.constants.SongSortType
-import com.dd3boh.outertune.constants.SongSortTypeKey
 import com.dd3boh.outertune.db.entities.Song
 import com.dd3boh.outertune.extensions.toMediaItem
 import com.dd3boh.outertune.models.CulmSongs
