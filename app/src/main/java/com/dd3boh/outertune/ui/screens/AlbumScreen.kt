@@ -193,7 +193,7 @@ fun AlbumScreen(
                         val thumbnailUrl = albumWithSongsLocal.album.thumbnailUrl
                         if (thumbnailUrl != null) {
                             AsyncImage(
-                                model = if (thumbnailUrl.startsWith("/storage")) LocalArtworkPath(thumbnailUrl) else thumbnailUrl,
+                                model = if (thumbnailUrl.startsWith("/storage")) LocalArtworkPath(thumbnailUrl, x = 500, y = 500) else thumbnailUrl,
                                 contentDescription = null,
                                 modifier = Modifier
                                     .size(AlbumThumbnailSize)

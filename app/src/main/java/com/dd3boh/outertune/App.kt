@@ -11,7 +11,6 @@ package com.dd3boh.outertune
 
 import android.app.Application
 import android.content.Context
-import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
@@ -21,6 +20,7 @@ import coil3.PlatformContext
 import coil3.SingletonImageLoader
 import coil3.disk.DiskCache
 import coil3.disk.directory
+import coil3.memory.MemoryCache
 import coil3.request.CachePolicy
 import coil3.request.allowHardware
 import coil3.request.crossfade
@@ -43,6 +43,7 @@ import com.dd3boh.outertune.constants.VisitorDataKey
 import com.dd3boh.outertune.extensions.toEnum
 import com.dd3boh.outertune.extensions.toInetSocketAddress
 import com.dd3boh.outertune.utils.CoilBitmapLoader
+import com.dd3boh.outertune.utils.LocalArtworkPathKeyer
 import com.dd3boh.outertune.utils.dataStore
 import com.dd3boh.outertune.utils.get
 import com.dd3boh.outertune.utils.reportException
@@ -165,9 +166,15 @@ class App : Application(), SingletonImageLoader.Factory {
             return ImageLoader.Builder(this)
                 .components {
                     add(CoilBitmapLoader.Factory(this@App))
+                add(LocalArtworkPathKeyer())
                 }
                 .crossfade(true)
-                .allowHardware(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                .allowHardware(false)
+                .memoryCache {
+                    MemoryCache.Builder()
+                        .maxSizePercent(context, 0.3)
+                        .build()
+                }
                 .diskCachePolicy(CachePolicy.DISABLED)
                 .build()
         }
@@ -175,9 +182,15 @@ class App : Application(), SingletonImageLoader.Factory {
         return ImageLoader.Builder(this)
             .components {
                 add(CoilBitmapLoader.Factory(this@App))
+                add(LocalArtworkPathKeyer())
             }
             .crossfade(true)
-            .allowHardware(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+            .allowHardware(false)
+            .memoryCache {
+                MemoryCache.Builder()
+                    .maxSizePercent(context, 0.3)
+                    .build()
+            }
             .diskCache(
                 // Local images should bypass with DataSource.DISK
                 DiskCache.Builder()

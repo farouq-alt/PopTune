@@ -16,8 +16,8 @@ import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.media.MediaMetadataRetriever
 import android.net.Uri
-import android.os.Build
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.scale
 import androidx.media3.common.util.BitmapLoader
 import coil3.ImageLoader
 import coil3.asImage
@@ -26,6 +26,7 @@ import coil3.fetch.FetchResult
 import coil3.fetch.Fetcher
 import coil3.fetch.ImageFetchResult
 import coil3.imageLoader
+import coil3.key.Keyer
 import coil3.request.CachePolicy
 import coil3.request.ErrorResult
 import coil3.request.ImageRequest
@@ -64,7 +65,7 @@ class CoilBitmapLoader @Inject constructor(
                     context.imageLoader.execute(
                         ImageRequest.Builder(context)
                             .data(LocalArtworkPath(uri.toString()))
-                            .allowHardware(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                            .allowHardware(false)
                             .diskCachePolicy(CachePolicy.DISABLED)
                             .build()
                     )
@@ -72,7 +73,7 @@ class CoilBitmapLoader @Inject constructor(
                     context.imageLoader.execute(
                         ImageRequest.Builder(context)
                             .data(uri)
-                            .allowHardware(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                            .allowHardware(false)
                             .build()
                     )
                 }
@@ -88,49 +89,21 @@ class CoilBitmapLoader @Inject constructor(
             }
         }
 
-    fun loadBitmapOrNull(uri: Uri): ListenableFuture<Bitmap?> =
-        scope.future(Dispatchers.IO) {
-            try {
-                // local images
-                val result = if (uri.toString().startsWith("/storage/")) {
-                    context.imageLoader.execute(
-                        ImageRequest.Builder(context)
-                            .data(LocalArtworkPath(uri.toString()))
-                            .allowHardware(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-                            .diskCachePolicy(CachePolicy.DISABLED)
-                            .build()
-                    )
-                } else {
-                    context.imageLoader.execute(
-                        ImageRequest.Builder(context)
-                            .data(uri)
-                            .allowHardware(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-                            .build()
-                    )
-                }
-                if (result is ErrorResult) {
-                    reportException(ExecutionException(result.throwable))
-                    return@future null
-                }
-
-                result.image!!.toBitmap()
-            } catch (e: Exception) {
-                reportException(ExecutionException(e))
-                return@future null
-            }
-        }
-
     override suspend fun fetch(): FetchResult? {
         return try {
             if (data.path?.startsWith("/storage/") == true) {
                 val mData = MediaMetadataRetriever()
-                val image: Bitmap = try {
+                var image: Bitmap = try {
                     mData.setDataSource(data.path)
                     val art = mData.embeddedPicture
                     BitmapFactory.decodeByteArray(art, 0, art!!.size)
                 } catch (e: Exception) {
                     drawPlaceholder(context)
                 } ?: drawPlaceholder(context)
+
+                if (data.x + data.y > 0) {
+                    image = image.scale(data.x, data.y)
+                }
 
                 ImageFetchResult(
                     image = image.asImage(),
@@ -189,4 +162,14 @@ class CoilBitmapLoader @Inject constructor(
     }
 }
 
-data class LocalArtworkPath(val path: String?)
+class LocalArtworkPathKeyer : Keyer<LocalArtworkPath> {
+    override fun key(
+        data: LocalArtworkPath,
+        options: Options
+    ): String? {
+        return data.path + ";" + data.x + ";" + data.y
+    }
+
+}
+
+data class LocalArtworkPath(val path: String?, val x: Int = -1, val y: Int = -1)

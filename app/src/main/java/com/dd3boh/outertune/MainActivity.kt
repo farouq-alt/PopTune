@@ -110,6 +110,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -139,6 +140,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.window.core.layout.WindowWidthSizeClass
+import coil3.imageLoader
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
+import coil3.toBitmap
 import com.dd3boh.outertune.constants.AppBarHeight
 import com.dd3boh.outertune.constants.AutomaticScannerKey
 import com.dd3boh.outertune.constants.DEFAULT_ENABLED_TABS
@@ -236,6 +241,7 @@ import com.dd3boh.outertune.ui.screens.settings.StorageSettings
 import com.dd3boh.outertune.ui.theme.ColorSaver
 import com.dd3boh.outertune.ui.theme.DefaultThemeColor
 import com.dd3boh.outertune.ui.theme.OuterTuneTheme
+import com.dd3boh.outertune.ui.theme.extractGradientColors
 import com.dd3boh.outertune.ui.theme.extractThemeColor
 import com.dd3boh.outertune.ui.utils.MEDIA_PERMISSION_LEVEL
 import com.dd3boh.outertune.ui.utils.Updater
@@ -245,6 +251,7 @@ import com.dd3boh.outertune.ui.utils.clearDtCache
 import com.dd3boh.outertune.ui.utils.resetHeightOffset
 import com.dd3boh.outertune.utils.ActivityLauncherHelper
 import com.dd3boh.outertune.utils.CoilBitmapLoader
+import com.dd3boh.outertune.utils.LocalArtworkPath
 import com.dd3boh.outertune.utils.NetworkConnectivityObserver
 import com.dd3boh.outertune.utils.SyncUtils
 import com.dd3boh.outertune.utils.compareVersion
@@ -394,7 +401,20 @@ class MainActivity : ComponentActivity() {
                         withContext(Dispatchers.IO) {
                             val uri = (if (song.isLocal) song.localPath else song.thumbnailUrl)?.toUri()
                             if (uri == null) return@withContext DefaultThemeColor
-                            bitmapLoader.loadBitmapOrNull(uri).get()?.extractThemeColor() ?: DefaultThemeColor
+                            val model = if (uri.toString().startsWith("/storage/")) {
+                                LocalArtworkPath(uri.toString(), x = 100, y = 100)
+                            } else {
+                                uri
+                            }
+
+                            val result = applicationContext.imageLoader.execute(
+                                ImageRequest.Builder(applicationContext)
+                                    .data(model)
+                                    .allowHardware(false)
+                                    .build()
+                            )
+
+                            result.image?.toBitmap()?.extractThemeColor() ?: DefaultThemeColor
                         }
                     } else DefaultThemeColor
                 }

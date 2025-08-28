@@ -99,7 +99,13 @@ data class MediaMetadata(
      */
     fun getDateModifiedLong(): Long? = dateModified?.toEpochSecond(ZoneOffset.UTC)
 
-    fun getThumbnailModel(): Any? = if (isLocal) LocalArtworkPath(thumbnailUrl?: localPath) else localPath
+    fun getThumbnailModel(resize: Boolean = true): Any? {
+        return if (isLocal) {
+            LocalArtworkPath(thumbnailUrl ?: localPath, x = if (resize) 100 else -1, y = if (resize) 100 else -1)
+        } else {
+            localPath
+        }
+    }
 }
 
 fun Song.toMediaMetadata() = MediaMetadata(

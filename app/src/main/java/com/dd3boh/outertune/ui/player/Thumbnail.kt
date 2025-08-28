@@ -107,7 +107,7 @@ fun Thumbnail(
                 ) {
                     // YTM thumbnail arts
                     AsyncImage(
-                        model = mediaMetadata?.getThumbnailModel(),
+                        model = mediaMetadata?.getThumbnailModel(false),
                         contentDescription = null,
                         contentScale = contentScale,
                         onSuccess = { success ->

@@ -663,7 +663,7 @@ fun ItemThumbnail(
 
         AsyncImage(
             imageLoader = context.imageLoader,
-            model = if (thumbnailUrl?.startsWith("/storage") == true) LocalArtworkPath(thumbnailUrl) else thumbnailUrl,
+            model = if (thumbnailUrl?.startsWith("/storage") == true) LocalArtworkPath(thumbnailUrl, x = 100, y = 100) else thumbnailUrl,
             contentDescription = null,
             contentScale = ContentScale.Crop,
             onSuccess = { success ->
