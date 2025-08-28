@@ -89,7 +89,6 @@ import androidx.media3.exoplayer.offline.DownloadService
 import androidx.navigation.NavController
 import com.dd3boh.outertune.LocalDatabase
 import com.dd3boh.outertune.LocalDownloadUtil
-import com.dd3boh.outertune.LocalImageCache
 import com.dd3boh.outertune.LocalMenuState
 import com.dd3boh.outertune.LocalNetworkConnected
 import com.dd3boh.outertune.LocalPlayerAwareWindowInsets
@@ -651,7 +650,6 @@ fun LocalPlaylistHeader(
     val playerConnection = LocalPlayerConnection.current ?: return
     val context = LocalContext.current
     val database = LocalDatabase.current
-    val imageCache = LocalImageCache.current
     val isNetworkConnected = LocalNetworkConnected.current
     val scope = rememberCoroutineScope()
     val syncUtils = LocalSyncUtils.current

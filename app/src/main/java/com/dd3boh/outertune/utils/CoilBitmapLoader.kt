@@ -14,15 +14,27 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
+import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.os.Build
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
+import androidx.media3.common.util.BitmapLoader
+import coil3.ImageLoader
+import coil3.asImage
+import coil3.decode.DataSource
+import coil3.fetch.FetchResult
+import coil3.fetch.Fetcher
+import coil3.fetch.ImageFetchResult
 import coil3.imageLoader
+import coil3.request.CachePolicy
 import coil3.request.ErrorResult
 import coil3.request.ImageRequest
+import coil3.request.ImageResult
+import coil3.request.Options
 import coil3.request.allowHardware
 import coil3.toBitmap
 import com.dd3boh.outertune.R
-import com.dd3boh.outertune.di.ImageCache
 import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,12 +42,13 @@ import kotlinx.coroutines.guava.future
 import java.util.concurrent.ExecutionException
 import javax.inject.Inject
 import kotlin.math.min
+import kotlin.toString
 
 class CoilBitmapLoader @Inject constructor(
     private val context: Context,
     private val scope: CoroutineScope,
-    @ImageCache private val imageCache: LmImageCacheMgr,
-) : androidx.media3.common.util.BitmapLoader {
+    private val data: LocalArtworkPath = LocalArtworkPath(null),
+) : Fetcher, BitmapLoader {
 
     override fun supportsMimeType(mimeType: String): Boolean {
         return mimeType.startsWith("image/")
@@ -43,31 +56,38 @@ class CoilBitmapLoader @Inject constructor(
 
     override fun decodeBitmap(data: ByteArray): ListenableFuture<Bitmap> =
         scope.future(Dispatchers.IO) {
-            BitmapFactory.decodeByteArray(data, 0, data.size) ?: imageCache.placeholderImage
+            BitmapFactory.decodeByteArray(data, 0, data.size) ?: drawPlaceholder(context)
         }
 
     override fun loadBitmap(uri: Uri): ListenableFuture<Bitmap> =
         scope.future(Dispatchers.IO) {
             try {
                 // local images
-                if (uri.toString().startsWith("/storage/")) {
-                    return@future imageCache.getLocalThumbnail(uri.toString()) ?: imageCache.placeholderImage
+                val result = if (uri.toString().startsWith("/storage/")) {
+                    context.imageLoader.execute(
+                        ImageRequest.Builder(context)
+                            .data(LocalArtworkPath(uri.toString()))
+                            .allowHardware(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                            .diskCachePolicy(CachePolicy.DISABLED)
+                            .build()
+                    )
+                } else {
+                    context.imageLoader.execute(
+                        ImageRequest.Builder(context)
+                            .data(uri)
+                            .allowHardware(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                            .build()
+                    )
                 }
-                val result = context.imageLoader.execute(
-                    ImageRequest.Builder(context)
-                        .data(uri)
-                        .allowHardware(false) // pixel access is not supported on Config#HARDWARE bitmaps
-                        .build()
-                )
                 if (result is ErrorResult) {
                     reportException(ExecutionException(result.throwable))
-                    return@future imageCache.placeholderImage
+                    return@future drawPlaceholder(context)
                 }
 
                 result.image!!.toBitmap()
             } catch (e: Exception) {
                 reportException(ExecutionException(e))
-                return@future imageCache.placeholderImage
+                return@future drawPlaceholder(context)
             }
         }
 
@@ -75,15 +95,22 @@ class CoilBitmapLoader @Inject constructor(
         scope.future(Dispatchers.IO) {
             try {
                 // local images
-                if (uri.toString().startsWith("/storage/")) {
-                    return@future imageCache.getLocalThumbnail(uri.toString()) ?: imageCache.placeholderImage
+                val result = if (uri.toString().startsWith("/storage/")) {
+                    context.imageLoader.execute(
+                        ImageRequest.Builder(context)
+                            .data(LocalArtworkPath(uri.toString()))
+                            .allowHardware(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                            .diskCachePolicy(CachePolicy.DISABLED)
+                            .build()
+                    )
+                } else {
+                    context.imageLoader.execute(
+                        ImageRequest.Builder(context)
+                            .data(uri)
+                            .allowHardware(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+                            .build()
+                    )
                 }
-                val result = context.imageLoader.execute(
-                    ImageRequest.Builder(context)
-                        .data(uri)
-                        .allowHardware(false) // pixel access is not supported on Config#HARDWARE bitmaps
-                        .build()
-                )
                 if (result is ErrorResult) {
                     reportException(ExecutionException(result.throwable))
                     return@future null
@@ -95,6 +122,36 @@ class CoilBitmapLoader @Inject constructor(
                 return@future null
             }
         }
+
+    override suspend fun fetch(): FetchResult? {
+        return try {
+            if (data.path?.startsWith("/storage/") == true) {
+                val mData = MediaMetadataRetriever()
+                val image: Bitmap = try {
+                    mData.setDataSource(data.path)
+                    val art = mData.embeddedPicture
+                    BitmapFactory.decodeByteArray(art, 0, art!!.size)
+                } catch (e: Exception) {
+                    drawPlaceholder(context)
+                } ?: drawPlaceholder(context)
+
+                ImageFetchResult(
+                    image = image.asImage(),
+                    isSampled = false,
+                    dataSource = DataSource.DISK
+                )
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            reportException(e)
+            ImageFetchResult(
+                image = drawPlaceholder(context).asImage(),
+                isSampled = false,
+                dataSource = DataSource.MEMORY
+            )
+        }
+    }
 
     companion object {
         // TODO: re eval dimens after a few months
@@ -125,4 +182,15 @@ class CoilBitmapLoader @Inject constructor(
             return bitmap
         }
     }
+
+    class Factory(
+        private val context: Context,
+    ) : Fetcher.Factory<LocalArtworkPath> {
+        override fun create(data: LocalArtworkPath, options: Options, imageLoader: ImageLoader): Fetcher? {
+            println("asshole are you fucking " + data.toString())
+            return CoilBitmapLoader(context, CoroutineScope(Dispatchers.IO), data)
+        }
+    }
 }
+
+data class LocalArtworkPath(val path: String?)

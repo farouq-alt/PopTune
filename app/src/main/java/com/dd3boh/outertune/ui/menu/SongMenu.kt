@@ -48,7 +48,6 @@ import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.dd3boh.outertune.LocalDatabase
 import com.dd3boh.outertune.LocalDownloadUtil
-import com.dd3boh.outertune.LocalImageCache
 import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.LocalSyncUtils
 import com.dd3boh.outertune.R
@@ -64,7 +63,6 @@ import com.dd3boh.outertune.extensions.toMediaItem
 import com.dd3boh.outertune.models.toMediaMetadata
 import com.dd3boh.outertune.playback.ExoDownloadService
 import com.dd3boh.outertune.playback.queues.YouTubeQueue
-import com.dd3boh.outertune.ui.component.AsyncImageLocal
 import com.dd3boh.outertune.ui.dialog.DetailsDialog
 import com.dd3boh.outertune.ui.component.button.IconButton
 import com.dd3boh.outertune.ui.component.items.ListItem
@@ -93,7 +91,6 @@ fun SongMenu(
     val database = LocalDatabase.current
     val downloadUtil = LocalDownloadUtil.current
     val clipboardManager = LocalClipboard.current
-    val imageCache = LocalImageCache.current
     val syncUtils = LocalSyncUtils.current
     val playerConnection = LocalPlayerConnection.current ?: return
 
@@ -135,22 +132,13 @@ fun SongMenu(
             makeTimeString(song.song.duration * 1000L)
         ),
         thumbnailContent = {
-            if (song.song.isLocal) {
-                AsyncImageLocal(
-                    image = { imageCache.getLocalThumbnail(song.song.localPath, true) },
-                    modifier = Modifier
-                        .size(ListThumbnailSize)
-                        .clip(RoundedCornerShape(ThumbnailCornerRadius))
-                )
-            } else {
-                AsyncImage(
-                    model = song.song.thumbnailUrl,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(ListThumbnailSize)
-                        .clip(RoundedCornerShape(ThumbnailCornerRadius))
-                )
-            }
+            AsyncImage(
+                model = song.song.getThumbnailModel(),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(ListThumbnailSize)
+                    .clip(RoundedCornerShape(ThumbnailCornerRadius))
+            )
         },
         trailingContent = {
             IconButton(

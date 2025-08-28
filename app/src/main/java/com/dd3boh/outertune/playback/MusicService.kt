@@ -106,8 +106,6 @@ import com.dd3boh.outertune.playback.queues.ListQueue
 import com.dd3boh.outertune.playback.queues.Queue
 import com.dd3boh.outertune.playback.queues.YouTubeQueue
 import com.dd3boh.outertune.utils.CoilBitmapLoader
-import com.dd3boh.outertune.utils.CoilBitmapLoader.Companion.drawPlaceholder
-import com.dd3boh.outertune.utils.LmImageCacheMgr
 import com.dd3boh.outertune.utils.NetworkConnectivityObserver
 import com.dd3boh.outertune.utils.SyncUtils
 import com.dd3boh.outertune.utils.YTPlayerUtils
@@ -209,8 +207,6 @@ class MusicService : MediaLibraryService(),
     @DownloadCache
     lateinit var downloadCache: SimpleCache
 
-    lateinit var imageCache: LmImageCacheMgr
-
     lateinit var player: ExoPlayer
     private lateinit var mediaSession: MediaLibrarySession
 
@@ -220,8 +216,6 @@ class MusicService : MediaLibraryService(),
 
     override fun onCreate() {
         super.onCreate()
-
-        imageCache = LmImageCacheMgr(this, drawPlaceholder(this, size = 0.4f))
 
         // network connectivity
         try {
@@ -367,7 +361,8 @@ class MusicService : MediaLibraryService(),
                     PendingIntent.FLAG_IMMUTABLE
                 )
             )
-            .setBitmapLoader(CoilBitmapLoader(this, scope, imageCache = imageCache))
+            // TODO: do i even want to have smaller art for media notification
+            .setBitmapLoader(CoilBitmapLoader(this, scope))
             .build()
 
         player.repeatMode = dataStore.get(RepeatModeKey, REPEAT_MODE_OFF)

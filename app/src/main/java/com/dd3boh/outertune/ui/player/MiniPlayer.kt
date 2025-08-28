@@ -56,7 +56,6 @@ import androidx.compose.ui.unit.sp
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import coil3.compose.AsyncImage
-import com.dd3boh.outertune.LocalImageCache
 import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.MiniPlayerHeight
@@ -147,7 +146,6 @@ fun MiniMediaInfo(
     error: PlaybackException?,
     modifier: Modifier = Modifier,
 ) {
-    val imageCache = LocalImageCache.current
     val playerConnection = LocalPlayerConnection.current
     val isWaitingForNetwork by playerConnection?.waitingForNetworkConnection?.collectAsState(initial = false)
         ?: remember { mutableStateOf(false) }
@@ -163,31 +161,21 @@ fun MiniMediaInfo(
         ) {
             var isRectangularImage by remember { mutableStateOf(false) }
 
-            if (mediaMetadata.isLocal) {
-                // local thumbnail arts
-                AsyncImageLocal(
-                    image = { imageCache.getLocalThumbnail(mediaMetadata.localPath, true) },
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(ThumbnailCornerRadius))
-                        .aspectRatio(ratio = 1f)
-                )
-            } else {
-                // YTM thumbnail arts
-                AsyncImage(
-                    model = mediaMetadata.thumbnailUrl,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    onSuccess = { success ->
-                        val width = success.result.image.width
-                        val height = success.result.image.height
+            // YTM thumbnail arts
+            AsyncImage(
+                model = mediaMetadata.getThumbnailModel(),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                onSuccess = { success ->
+                    val width = success.result.image.width
+                    val height = success.result.image.height
 
-                        isRectangularImage = width.toFloat() / height != 1f
-                    },
-                    modifier = Modifier
-                        .aspectRatio(1f)
-                        .clip(RoundedCornerShape(ThumbnailCornerRadius))
-                )
-            }
+                    isRectangularImage = width.toFloat() / height != 1f
+                },
+                modifier = Modifier
+                    .aspectRatio(1f)
+                    .clip(RoundedCornerShape(ThumbnailCornerRadius))
+            )
 
             if (isRectangularImage) {
                 val radial = Brush.radialGradient(

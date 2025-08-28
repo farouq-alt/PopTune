@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.dd3boh.outertune.db.entities.Song
 import com.dd3boh.outertune.db.entities.SongEntity
 import com.dd3boh.outertune.ui.utils.resize
+import com.dd3boh.outertune.utils.LocalArtworkPath
 import com.zionhuang.innertube.models.SongItem
 import java.io.Serializable
 import java.time.LocalDateTime
@@ -97,6 +98,8 @@ data class MediaMetadata(
      * Get the value of the date modified in Epoch Seconds
      */
     fun getDateModifiedLong(): Long? = dateModified?.toEpochSecond(ZoneOffset.UTC)
+
+    fun getThumbnailModel(): Any? = if (isLocal) LocalArtworkPath(thumbnailUrl?: localPath) else localPath
 }
 
 fun Song.toMediaMetadata() = MediaMetadata(

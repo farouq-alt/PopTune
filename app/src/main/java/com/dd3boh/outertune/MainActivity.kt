@@ -176,7 +176,6 @@ import com.dd3boh.outertune.constants.StopMusicOnTaskClearKey
 import com.dd3boh.outertune.constants.UpdateAvailableKey
 import com.dd3boh.outertune.db.MusicDatabase
 import com.dd3boh.outertune.db.entities.SearchHistory
-import com.dd3boh.outertune.di.ImageCache
 import com.dd3boh.outertune.extensions.tabMode
 import com.dd3boh.outertune.playback.DownloadUtil
 import com.dd3boh.outertune.playback.MusicService
@@ -246,7 +245,6 @@ import com.dd3boh.outertune.ui.utils.clearDtCache
 import com.dd3boh.outertune.ui.utils.resetHeightOffset
 import com.dd3boh.outertune.utils.ActivityLauncherHelper
 import com.dd3boh.outertune.utils.CoilBitmapLoader
-import com.dd3boh.outertune.utils.LmImageCacheMgr
 import com.dd3boh.outertune.utils.NetworkConnectivityObserver
 import com.dd3boh.outertune.utils.SyncUtils
 import com.dd3boh.outertune.utils.compareVersion
@@ -285,10 +283,6 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var syncUtils: SyncUtils
-
-    @Inject
-    @ImageCache
-    lateinit var imageCache: LmImageCacheMgr
 
     lateinit var activityLauncher: ActivityLauncherHelper
     lateinit var connectivityObserver: NetworkConnectivityObserver
@@ -360,7 +354,7 @@ class MainActivity : ComponentActivity() {
 
         activityLauncher = ActivityLauncherHelper(this)
 
-        val bitmapLoader = CoilBitmapLoader(this, CoroutineScope(Dispatchers.IO), imageCache = imageCache)
+        val bitmapLoader = CoilBitmapLoader(this, CoroutineScope(Dispatchers.IO))
 
         setContent {
             val coroutineScope = rememberCoroutineScope()
@@ -485,7 +479,6 @@ class MainActivity : ComponentActivity() {
                             // post scan actions
                             onLastLocalScanChange(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
                             clearDtCache()
-                            imageCache.purgeCache()
                             playerConnection?.service?.initQueue()
                         } else if (perms == PackageManager.PERMISSION_DENIED) {
                             // Request the permission using the permission launcher
@@ -849,7 +842,6 @@ class MainActivity : ComponentActivity() {
                         LocalSyncUtils provides syncUtils,
                         LocalNetworkConnected provides isNetworkConnected,
                         LocalSnackbarHostState provides snackbarHostState,
-                        LocalImageCache provides imageCache,
                     ) {
                         Box(
                             modifier = Modifier
@@ -1622,4 +1614,3 @@ val LocalDownloadUtil = staticCompositionLocalOf<DownloadUtil> { error("No Downl
 val LocalSyncUtils = staticCompositionLocalOf<SyncUtils> { error("No SyncUtils provided") }
 val LocalNetworkConnected = staticCompositionLocalOf<Boolean> { error("No Network Status provided") }
 val LocalSnackbarHostState = staticCompositionLocalOf<SnackbarHostState> { error("No SnackbarHostState provided") }
-val LocalImageCache = staticCompositionLocalOf<LmImageCacheMgr> { error("No LmImageCacheMgr provided") }

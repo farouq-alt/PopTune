@@ -5,6 +5,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.dd3boh.outertune.utils.LocalArtworkPath
 import com.zionhuang.innertube.YouTube
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -100,6 +101,8 @@ data class SongEntity(
      * Get the value of the date modified in Epoch Seconds
      */
     fun getDateModifiedLong(): Long? = dateModified?.toEpochSecond(ZoneOffset.UTC)
+
+    fun getThumbnailModel(): Any? = if (isLocal) LocalArtworkPath(thumbnailUrl?: localPath) else localPath
 
     companion object {
         fun generateSongId() = "LS" + RandomStringUtils.insecure().next(8, true, false)

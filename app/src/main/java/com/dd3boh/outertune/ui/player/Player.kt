@@ -11,7 +11,6 @@ package com.dd3boh.outertune.ui.player
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
-import android.graphics.drawable.BitmapDrawable
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearEasing
@@ -107,11 +106,11 @@ import androidx.media3.common.Player.REPEAT_MODE_ONE
 import androidx.media3.common.Player.STATE_ENDED
 import androidx.media3.common.Player.STATE_READY
 import androidx.navigation.NavController
-import coil3.ImageLoader
 import coil3.compose.AsyncImage
+import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
-import com.dd3boh.outertune.LocalImageCache
+import coil3.toBitmap
 import com.dd3boh.outertune.LocalMenuState
 import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.R
@@ -160,7 +159,6 @@ fun BottomSheetPlayer(
     modifier: Modifier = Modifier,
 ) {
     val haptic = LocalHapticFeedback.current
-    val imageCache = LocalImageCache.current
     val playerConnection = LocalPlayerConnection.current ?: return
     val menuState = LocalMenuState.current
     val context = LocalContext.current
@@ -272,21 +270,16 @@ fun BottomSheetPlayer(
         if (playerBackground != PlayerBackgroundStyle.GRADIENT || context.isPowerSaver()) return@LaunchedEffect
 
         withContext(Dispatchers.IO) {
-            if (mediaMetadata?.isLocal == true) {
-                imageCache.getLocalThumbnail(mediaMetadata?.localPath)?.extractGradientColors()?.let {
-                    gradientColors = it
-                }
-            } else {
-                val result = (ImageLoader(context).execute(
-                    ImageRequest.Builder(context)
-                        .data(mediaMetadata?.thumbnailUrl)
-                        .allowHardware(false)
-                        .build()
-                ).image as? BitmapDrawable)?.bitmap?.extractGradientColors()
+            val result = context.imageLoader.execute(
+                ImageRequest.Builder(context)
+                    .data(mediaMetadata?.getThumbnailModel())
+                    .allowHardware(false)
+                    .build()
+            )
 
-                result?.let {
-                    gradientColors = it
-                }
+            val bitmap = result.image?.toBitmap()?.extractGradientColors()
+            bitmap?.let {
+                gradientColors = it
             }
         }
     }
@@ -332,26 +325,14 @@ fun BottomSheetPlayer(
                     }
                 ) { metadata ->
                     if (playerBackground == PlayerBackgroundStyle.BLUR) {
-                        if (metadata?.isLocal == true) {
-                            metadata.let {
-                                AsyncImageLocal(
-                                    image = { imageCache.getLocalThumbnail(it.localPath) },
-                                    contentScale = ContentScale.FillBounds,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .blur(if (useDarkTheme) 150.dp else 100.dp)
-                                )
-                            }
-                        } else {
-                            AsyncImage(
-                                model = metadata?.thumbnailUrl,
-                                contentDescription = null,
-                                contentScale = ContentScale.FillBounds,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .blur(if (useDarkTheme) 150.dp else 100.dp)
-                            )
-                        }
+                        AsyncImage(
+                            model = metadata?.getThumbnailModel(),
+                            contentDescription = null,
+                            contentScale = ContentScale.FillBounds,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .blur(if (useDarkTheme) 150.dp else 100.dp)
+                        )
 
                         Box(
                             modifier = Modifier

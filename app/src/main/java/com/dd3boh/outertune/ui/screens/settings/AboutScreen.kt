@@ -76,8 +76,13 @@ import com.dd3boh.outertune.ui.component.button.IconButton
 import com.dd3boh.outertune.ui.component.button.IconLabelButton
 import com.dd3boh.outertune.ui.utils.backToMain
 import com.dd3boh.outertune.utils.rememberPreference
+<<<<<<< HEAD
 import com.dd3boh.outertune.utils.scanners.FFmpegScanner
 import io.github.anilbeesetti.nextlib.media3ext.ffdecoder.FfmpegLibrary
+=======
+import com.dd3boh.outertune.utils.scanners.FFMpegScanner
+//import io.github.anilbeesetti.nextlib.media3ext.ffdecoder.FfmpegLibrary
+>>>>>>> f4f26bce0 (app: Coil all the way)
 import java.text.DateFormat.getDateTimeInstance
 import java.util.Date
 

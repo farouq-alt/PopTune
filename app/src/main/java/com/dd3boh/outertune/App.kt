@@ -42,6 +42,7 @@ import com.dd3boh.outertune.constants.UseLoginForBrowse
 import com.dd3boh.outertune.constants.VisitorDataKey
 import com.dd3boh.outertune.extensions.toEnum
 import com.dd3boh.outertune.extensions.toInetSocketAddress
+import com.dd3boh.outertune.utils.CoilBitmapLoader
 import com.dd3boh.outertune.utils.dataStore
 import com.dd3boh.outertune.utils.get
 import com.dd3boh.outertune.utils.reportException
@@ -162,6 +163,9 @@ class App : Application(), SingletonImageLoader.Factory {
         // will crash app if you set to 0 after cache starts being used
         if (cacheSize == 0) {
             return ImageLoader.Builder(this)
+                .components {
+                    add(CoilBitmapLoader.Factory(this@App))
+                }
                 .crossfade(true)
                 .allowHardware(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
                 .diskCachePolicy(CachePolicy.DISABLED)
@@ -169,15 +173,19 @@ class App : Application(), SingletonImageLoader.Factory {
         }
 
         return ImageLoader.Builder(this)
-        .crossfade(true)
-        .allowHardware(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-        .diskCache(
-            DiskCache.Builder()
-                .directory(cacheDir.resolve("coil"))
-                .maxSizeBytes((cacheSize ?: 512) * 1024 * 1024L)
-                .build()
-        )
-        .build()
+            .components {
+                add(CoilBitmapLoader.Factory(this@App))
+            }
+            .crossfade(true)
+            .allowHardware(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+            .diskCache(
+                // Local images should bypass with DataSource.DISK
+                DiskCache.Builder()
+                    .directory(cacheDir.resolve("coil"))
+                    .maxSizeBytes((cacheSize ?: 512) * 1024 * 1024L)
+                    .build()
+            )
+            .build()
     }
 
     companion object {

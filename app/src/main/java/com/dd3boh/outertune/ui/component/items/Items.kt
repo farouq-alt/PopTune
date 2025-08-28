@@ -80,9 +80,9 @@ import androidx.media3.exoplayer.offline.Download.STATE_COMPLETED
 import androidx.media3.exoplayer.offline.Download.STATE_DOWNLOADING
 import androidx.media3.exoplayer.offline.Download.STATE_QUEUED
 import coil3.compose.AsyncImage
+import coil3.imageLoader
 import com.dd3boh.outertune.LocalDatabase
 import com.dd3boh.outertune.LocalDownloadUtil
-import com.dd3boh.outertune.LocalImageCache
 import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.GridThumbnailHeight
@@ -95,6 +95,7 @@ import com.dd3boh.outertune.models.MediaMetadata
 import com.dd3boh.outertune.models.MultiQueueObject
 import com.dd3boh.outertune.models.toMediaMetadata
 import com.dd3boh.outertune.playback.queues.ListQueue
+import com.dd3boh.outertune.utils.LocalArtworkPath
 import com.dd3boh.outertune.utils.joinByBullet
 import com.dd3boh.outertune.utils.makeTimeString
 import com.dd3boh.outertune.utils.reportException
@@ -653,7 +654,6 @@ fun ItemThumbnail(
 ) {
     // ehhhh make a nicer thing for later
     val context = LocalContext.current
-    val imageCache = LocalImageCache.current
 
     BoxWithConstraints(
         contentAlignment = Alignment.Center,
@@ -661,33 +661,21 @@ fun ItemThumbnail(
     ) {
         var isRectangularImage by remember { mutableStateOf(false) }
 
-        if (thumbnailUrl == null || thumbnailUrl.startsWith("/storage")) {
-            // local thumbnail arts
-            _root_ide_package_.com.dd3boh.outertune.ui.component.AsyncImageLocal(
-                image = { thumbnailUrl?.let { imageCache.getLocalThumbnail(thumbnailUrl, true) } },
-                placeholderIcon = placeholderIcon,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(shape)
-                    .aspectRatio(ratio = 1f)
-            )
-        } else {
-            AsyncImage(
-                model = thumbnailUrl,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                onSuccess = { success ->
-                    val width = success.result.image.width
-                    val height = success.result.image.height
+        AsyncImage(
+            imageLoader = context.imageLoader,
+            model = if (thumbnailUrl?.startsWith("/storage") == true) LocalArtworkPath(thumbnailUrl) else thumbnailUrl,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            onSuccess = { success ->
+                val width = success.result.image.width
+                val height = success.result.image.height
 
-                    isRectangularImage = width.toFloat() / height != 1f
-                },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(shape)
-            )
-        }
+                isRectangularImage = width.toFloat() / height != 1f
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(shape)
+        )
 
         if (albumIndex != null) {
             AnimatedVisibility(

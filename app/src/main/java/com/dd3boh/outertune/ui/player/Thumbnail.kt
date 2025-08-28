@@ -44,10 +44,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import coil3.compose.AsyncImage
-import com.dd3boh.outertune.LocalImageCache
 import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.constants.PlayerHorizontalPadding
 import com.dd3boh.outertune.constants.ShowLyricsKey
@@ -55,6 +55,7 @@ import com.dd3boh.outertune.constants.ThumbnailCornerRadius
 import com.dd3boh.outertune.models.MediaMetadata
 import com.dd3boh.outertune.ui.component.AsyncImageLocal
 import com.dd3boh.outertune.ui.component.Lyrics
+import com.dd3boh.outertune.utils.LocalArtworkPath
 import com.dd3boh.outertune.utils.rememberPreference
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
@@ -66,8 +67,8 @@ fun Thumbnail(
     contentScale: ContentScale = ContentScale.Fit,
     customMediaMetadata: MediaMetadata? = null
 ) {
+    val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
-    val imageCache = LocalImageCache.current
     val playerConnection = LocalPlayerConnection.current ?: return
     val currentView = LocalView.current
     val playerMediaMetadata by playerConnection.mediaMetadata.collectAsState()
@@ -106,40 +107,25 @@ fun Thumbnail(
                     modifier = Modifier
                         .weight(1f, false)
                 ) {
-                    if (mediaMetadata?.isLocal == true) {
-                        // local thumbnail arts
-//                        mediaMetadata.let { // required to re render when song changes
-                            AsyncImageLocal(
-                                image = { imageCache.getLocalThumbnail(mediaMetadata.localPath, false) },
-                                contentScale = contentScale,
-                                placeholderIcon = null,
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(ThumbnailCornerRadius * 2))
-                                    .aspectRatio(ratio = 1f)
-                                    .clickable(enabled = showLyricsOnClick) {
-                                        showLyrics = !showLyrics
-                                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    }
-                            )
-//                        }
-                    } else {
-                        // YTM thumbnail arts
-                        AsyncImage(
-                            model = mediaMetadata?.thumbnailUrl,
-                            contentDescription = null,
-                            contentScale = contentScale,
-                            onSuccess = { success ->
-                                val width = success.result.image.width
-                                val height = success.result.image.height
+                    // YTM thumbnail arts
+                    AsyncImage(
+                        model = mediaMetadata?.getThumbnailModel(),
+                        contentDescription = null,
+                        contentScale = contentScale,
+                        onSuccess = { success ->
+                            val width = success.result.image.width
+                            val height = success.result.image.height
 
-                                isRectangularImage = width.toFloat() / height != 1f
-                            },
-                            modifier = Modifier
-                                .aspectRatio(1f)
-                                .clip(RoundedCornerShape(ThumbnailCornerRadius * 2))
-                                .clickable(enabled = showLyricsOnClick) { showLyrics = !showLyrics }
-                        )
-                    }
+                            isRectangularImage = width.toFloat() / height != 1f
+                        },
+                        modifier = Modifier
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(ThumbnailCornerRadius * 2))
+                            .clickable(enabled = showLyricsOnClick) {
+                                showLyrics = !showLyrics
+                                haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+                            }
+                    )
 
                     if (isRectangularImage) {
                         val radial = Brush.radialGradient(

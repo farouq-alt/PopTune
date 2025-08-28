@@ -49,7 +49,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.dd3boh.outertune.LocalDatabase
-import com.dd3boh.outertune.LocalImageCache
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.DevSettingsKey
 import com.dd3boh.outertune.constants.OobeStatusKey
@@ -80,7 +79,6 @@ fun ExperimentalSettings(
     val coroutineScope = rememberCoroutineScope()
     val database = LocalDatabase.current
     val haptic = LocalHapticFeedback.current
-    val imageCache = LocalImageCache.current
 
     // state variables and such
     val (tabletUi, onTabletUiChange) = rememberPreference(TabletUiKey, defaultValue = false)
@@ -112,13 +110,6 @@ fun ExperimentalSettings(
 
         PreferenceGroupTitle(
             title = stringResource(R.string.settings_debug)
-        )
-        PreferenceEntry(
-            title = { Text("Flush local image cache") },
-            icon = { Icon(Icons.Rounded.Delete, null) },
-            onClick = {
-                imageCache.purgeCache()
-            }
         )
 
         // dev settings

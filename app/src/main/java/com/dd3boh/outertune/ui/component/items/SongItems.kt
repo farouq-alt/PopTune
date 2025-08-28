@@ -48,7 +48,6 @@ import coil3.compose.AsyncImage
 import com.dd3boh.outertune.BuildConfig
 import com.dd3boh.outertune.LocalDatabase
 import com.dd3boh.outertune.LocalDownloadUtil
-import com.dd3boh.outertune.LocalImageCache
 import com.dd3boh.outertune.LocalMenuState
 import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.R
@@ -61,7 +60,6 @@ import com.dd3boh.outertune.db.entities.Song
 import com.dd3boh.outertune.extensions.toMediaItem
 import com.dd3boh.outertune.extensions.togglePlayPause
 import com.dd3boh.outertune.models.DirectoryTree
-import com.dd3boh.outertune.ui.component.AsyncImageLocal
 import com.dd3boh.outertune.ui.component.PlayingIndicatorBox
 import com.dd3boh.outertune.ui.component.button.IconButton
 import com.dd3boh.outertune.ui.menu.FolderMenu
@@ -377,23 +375,13 @@ fun SongGridItem(
             contentAlignment = Alignment.Companion.Center,
             modifier = Modifier.size(GridThumbnailHeight)
         ) {
-            if (song.song.isLocal) {
-                val imageCache = LocalImageCache.current
-                AsyncImageLocal(
-                    image = { imageCache.getLocalThumbnail(song.song.localPath, true) },
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(ThumbnailCornerRadius))
-                )
-            } else {
-                AsyncImage(
-                    model = song.song.thumbnailUrl,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(ThumbnailCornerRadius))
-                )
-            }
+            AsyncImage(
+                model = song.song.getThumbnailModel(),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(ThumbnailCornerRadius))
+            )
             PlayingIndicatorBox(
                 isActive = isActive,
                 playWhenReady = isPlaying,

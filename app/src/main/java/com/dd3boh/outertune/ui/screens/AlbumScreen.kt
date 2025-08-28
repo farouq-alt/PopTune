@@ -79,7 +79,6 @@ import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.dd3boh.outertune.LocalDatabase
 import com.dd3boh.outertune.LocalDownloadUtil
-import com.dd3boh.outertune.LocalImageCache
 import com.dd3boh.outertune.LocalMenuState
 import com.dd3boh.outertune.LocalPlayerAwareWindowInsets
 import com.dd3boh.outertune.LocalPlayerConnection
@@ -110,6 +109,7 @@ import com.dd3boh.outertune.ui.menu.AlbumMenu
 import com.dd3boh.outertune.ui.menu.YouTubeAlbumMenu
 import com.dd3boh.outertune.ui.utils.backToMain
 import com.dd3boh.outertune.ui.utils.getNSongsString
+import com.dd3boh.outertune.utils.LocalArtworkPath
 import com.dd3boh.outertune.utils.joinByBullet
 import com.dd3boh.outertune.viewmodels.AlbumViewModel
 
@@ -122,7 +122,6 @@ fun AlbumScreen(
 ) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
-    val imageCache = LocalImageCache.current
     val menuState = LocalMenuState.current
     val database = LocalDatabase.current
     val playerConnection = LocalPlayerConnection.current ?: return
@@ -193,25 +192,16 @@ fun AlbumScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         val thumbnailUrl = albumWithSongsLocal.album.thumbnailUrl
-                        if (albumWithSongsLocal.album.thumbnailUrl != null) {
-                            if (albumWithSongsLocal.album.thumbnailUrl.startsWith("/storage")) {
-                                AsyncImageLocal(
-                                    image = { imageCache.getLocalThumbnail(thumbnailUrl) },
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(AlbumThumbnailSize)
-                                        .clip(RoundedCornerShape(ThumbnailCornerRadius))
-                                )
-                            } else {
-                                AsyncImage(
-                                    model = albumWithSongsLocal.album.thumbnailUrl,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(AlbumThumbnailSize)
-                                        .clip(RoundedCornerShape(ThumbnailCornerRadius))
-                                )
-                            }
+                        if (thumbnailUrl != null) {
+                            AsyncImage(
+                                model = if (thumbnailUrl.startsWith("/storage")) LocalArtworkPath(thumbnailUrl) else thumbnailUrl,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(AlbumThumbnailSize)
+                                    .clip(RoundedCornerShape(ThumbnailCornerRadius))
+                            )
                         } else {
+                            // TODO: use painter fallback
                             AsyncImageLocal(
                                 image = { null },
                                 placeholderIcon = Icons.Rounded.Album,

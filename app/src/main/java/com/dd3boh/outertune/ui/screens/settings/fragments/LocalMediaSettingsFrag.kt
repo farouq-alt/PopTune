@@ -60,7 +60,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat.requestPermissions
 import com.dd3boh.outertune.LocalDatabase
-import com.dd3boh.outertune.LocalImageCache
 import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.LocalSnackbarHostState
 import com.dd3boh.outertune.R
@@ -110,7 +109,6 @@ fun ColumnScope.LocalScannerFrag() {
     val context = LocalContext.current
     val database = LocalDatabase.current
     val coroutineScope = rememberCoroutineScope()
-    val imageCache = LocalImageCache.current
     val playerConnection = LocalPlayerConnection.current
     val snackbarHostState = LocalSnackbarHostState.current
 
@@ -295,7 +293,6 @@ fun ColumnScope.LocalScannerFrag() {
                     }
 
                     // post scan actions
-                    imageCache.purgeCache()
                     playerConnection?.service?.initQueue()
 
                     onLastLocalScanChange(LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
