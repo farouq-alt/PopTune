@@ -186,8 +186,7 @@ dependencies {
     // ui
     implementation(libs.coil)
     implementation(libs.coil.network.okhttp)
-//    implementation(libs.lazycolumnscrollbar)
-    implementation(files("../prebuilt/com.github.nanihadesuka_LazyColumnScrollbar_2.2.0.aar")) // prebuilt
+    implementation(libs.lazycolumnscrollbar)
     implementation(libs.shimmer)
 
     // material

@@ -34,13 +34,3 @@ Commit: 1d17c1928669610eb315310418c406d3bc7df981
 Source: https://android.googlesource.com/platform/frameworks/support/
 
 path: \app\src\main\java\androidx\documentfile\provider
-
-## LazyColumnScrollbar
-
-Commit: 096e153d4dd240706b71d42000a1365b868080c9
-
-Source: https://github.com/nanihadesuka/LazyColumnScrollbar
-
-Path: /prebuilt/com.github.nanihadesuka_LazyColumnScrollbar_2.2.0.aar
-
-Additional patches: /prebuilt/LazyColumnScrollbar_2.2.0-r1.patch
