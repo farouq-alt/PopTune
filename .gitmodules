@@ -6,3 +6,6 @@
 	path = media
 	url = https://github.com/nift4/media
 	branch = gramophone
+[submodule "taglib"]
+	path = taglib
+	url = ./taglib

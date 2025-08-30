@@ -19,14 +19,6 @@ Notes:
 - The lyrics parser has been modified to work with OuterTune (usually) where denoted
 
 
-## taglib library
-
-Commit: 912c219c0044eaa82c28e600ba315e16790460fa
-
-Source: https://github.com/OuterTune/taglib/releases/tag/1.0.2-outertune
-
-Path: /prebuilt
-
 ## TreeDocumentFile
 
 Commit: 1d17c1928669610eb315310418c406d3bc7df981 

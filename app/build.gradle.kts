@@ -222,15 +222,9 @@ dependencies {
     implementation(project(":kugou"))
     implementation(project(":lrclib"))
     implementation(project(":material-color-utilities"))
+    implementation(project(":taglib"))
 
     // misc
-    /*
-    "JitPack builds are broken with the latest CMake version.
-    Please download the [aar](https://github.com/Kyant0/taglib/releases) manually but not use maven."
-     */
-//    implementation(libs.taglib) // jitpack
-    implementation(files("../prebuilt/taglib-1.0.2-outertune-universal-release.aar")) // prebuilt
-//    implementation("com.kyant:taglib") // custom
 
     // sdk24 support
     // Support for N is officially unsupported even it the app should still work. Leave this outside of the version catalog.
