@@ -8,4 +8,35 @@
     <string name="remote_history">Serveris</string>
     <string name="library_empty">Sinu muusikakogu saab olema nähtav siin</string>
     <string name="queue_remote_history">Ajalugu (serveris)</string>
+    <string name="recent_activity">Hiljutised sündmused</string>
+    <string name="missing_media_permission_warning">Kohaliku meediumi kasutamiseks on vaja õigusi andmeruumi kasutamiseks. Lubamiseks klõpsa.</string>
+    <plurals name="scanner_n_song_processed">
+        <item quantity="one">%d töödeldud lugu</item>
+        <item quantity="other">%d töödeldud lugu</item>
+    </plurals>
+    <plurals name="scanner_n_song_found">
+        <item quantity="one">%d leitud lugu</item>
+        <item quantity="other">%d leitud lugu</item>
+    </plurals>
+    <string name="sort_by_date_modified">Muutmise kuupäev</string>
+    <string name="sort_by_date_released">Avaldamise kuupäev</string>
+    <string name="sort_by_like_date">Meeldivaks märkimise kuupäev</string>
+    <string name="sort_by_play_count">Esituskordade arv</string>
+    <string name="sort_by_track_number">Loo number</string>
+    <string name="check_for_update">Kontrolli uuendusi</string>
+    <string name="checking_for_update">Kontrollin uuendusi</string>
+    <string name="device_info_title">Seadme teave</string>
+    <string name="help_bug_report_action">Koosta veateade (GitHubis)</string>
+    <string name="help_contact_email_inquiries">Muud päringud (klõpsa e-posti aadressi kopeerimiseks)</string>
+    <string name="help_support_forum">Abiteave ja kasutajatugi (GitHubis)</string>
+    <string name="no_updates_available">Uuendusi pole saadaval</string>
+    <string name="oss_licenses_title">Avatud lähtekoodiga tarkvara litsentsid</string>
+    <string name="wiki">Viki</string>
+    <string name="all_contributors">Näita kõiki kaasautoreid</string>
+    <string name="att_contributor">Kaasautor</string>
+    <string name="att_lead_developer">Juhtiv arendaja</string>
+    <string name="att_maintainer">Hooldaja</string>
+    <string name="att_project_support">Projekti tugi</string>
+    <string name="att_translator">Tõlkija (%s)</string>
+    <string name="attrib_zhuang">Zion Huang InnerTune\'i eest</string>
 </resources>
