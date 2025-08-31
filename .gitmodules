@@ -8,4 +8,4 @@
 	branch = gramophone
 [submodule "taglib"]
 	path = taglib
-	url = ./taglib
+	url = https://github.com/OuterTune/taglib

@@ -1,5 +1,18 @@
 # Building
 
+When cloning the repository, please clone submodules recursively.
+
+```agsl
+git clone --recurse-submodules <url>
+```
+
+If any weird errors show up with modules, updating submodules may solve your issue. media and taglib are required
+modules. ffMetadataEx is required for only the "full" build variant
+
+```bash
+git submodule update --init --recursive
+```
+
 For most users, we recommend importing and building through Android Studio.
 
 ## Build flavors/variants
