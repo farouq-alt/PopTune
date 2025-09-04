@@ -12,6 +12,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.aboutlibraries)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -128,7 +129,6 @@ android {
     }
 
     tasks.withType<KotlinCompile> {
-        exclude("**/*LibrariesScreen.kt")
         if (!name.substringAfter("compile").lowercase().startsWith("full")) {
             exclude("**/*FFMpegScanner.kt")
         } else {
@@ -137,7 +137,37 @@ android {
     }
 
 
-    // for IzzyOnDroid
+    aboutLibraries {
+        offlineMode = true
+
+        collect {
+            fetchRemoteLicense = false
+            fetchRemoteFunding = false
+            filterVariants.addAll("release")
+        }
+
+        export {
+            // Remove the "generated" timestamp to allow for reproducible builds
+            excludeFields = listOf("generated")
+        }
+
+        license {
+            // Define the strict mode, will fail if the project uses licenses not allowed
+            strictMode = com.mikepenz.aboutlibraries.plugin.StrictMode.FAIL
+            // Allowed set of licenses, this project will be able to use without build failure
+            allowedLicenses.addAll("Apache-2.0", "BSD-3-Clause", "GNU LESSER GENERAL PUBLIC LICENSE, Version 2.1", "EPL-2.0", "MIT", "MPL-2.0", "Public Domain")
+
+            // Full license text for license IDs mentioned here will be included, even if no detected dependency uses them.
+             additionalLicenses.addAll("apache_2_0", "gpl_2_1") // taglib, ffMpeg in ffMetadataEx
+        }
+
+        library {
+            duplicationMode = com.mikepenz.aboutlibraries.plugin.DuplicateMode.MERGE
+            duplicationRule = com.mikepenz.aboutlibraries.plugin.DuplicateRule.SIMPLE
+        }
+    }
+
+    // for RB
     dependenciesInfo {
         // Disables dependency metadata when building APKs.
         includeInApk = false
@@ -225,6 +255,7 @@ dependencies {
     implementation(project(":taglib"))
 
     // misc
+    implementation(libs.aboutlibraries.compose.m3)
 
     // sdk24 support
     // Support for N is officially unsupported even it the app should still work. Leave this outside of the version catalog.

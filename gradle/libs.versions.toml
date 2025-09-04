@@ -1,4 +1,5 @@
 [versions]
+aboutLibraries = "12.2.4"
 adaptive = "1.1.0"
 androidGradlePlugin = "8.12.0"
 annotation = "1.9.1"
@@ -72,6 +73,8 @@ ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-conte
 ktor-client-encoding = { group = "io.ktor", name = "ktor-client-encoding", version.ref = "ktor" }
 ktor-serialization-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
 
+# misc
+aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutLibraries" }
 brotli = { group = "org.brotli", name = "dec", version = "0.1.2" }
 
 desugaring = { group = "com.android.tools", name = "desugar_jdk_libs", version = "2.1.5" }
@@ -84,6 +87,7 @@ newpipe-extractor = { group = "com.github.InfinityLoop1308", name = "PipePipeExt
 
 
 [plugins]
+aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
