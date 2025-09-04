@@ -23,7 +23,7 @@
     <string name="scanner_btn_idle">Сканирай</string>
     <string name="scanner_sensitivity_L3">Съпоставете заглавие, изпълнители, албуми</string>
     <string name="oobe_welcome_message">Добре дошли в OuterTune</string>
-    <string name="scanner_type_ffmpeg_ext">Използвайте инструмент за извличане на метаданни FFMpeg. Изисква инсталиране на външен пакет</string>
+    <string name="scanner_type_ffmpeg_ext">Използвайте инструмент за извличане на метаданни FFmpeg. Изисква инсталиране на външен пакет</string>
     <string name="grp_interface">Интерфейс</string>
     <string name="grp_layout">Оформление</string>
     <string name="grp_lyrics_parser">Анализатор</string>

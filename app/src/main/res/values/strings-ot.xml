@@ -229,7 +229,7 @@ while also allowing users to translate our app as well. New, specific strings to
 
     <string name="scanner_type_title">Metadata extractor</string>
     <string name="scanner_type_taglib">Use integrated TagLib metadata extractor</string>
-    <string name="scanner_type_ffmpeg_ext">Use FFMpeg metadata extractor. Requires external package to be installed</string>
+    <string name="scanner_type_ffmpeg_ext">Use FFmpeg metadata extractor. Requires external package to be installed</string>
 
     <string name="scanner_variant_rescan">Rescan the entire library and reload all songs\' metadata</string>
     <string name="scanner_online_artist_linking">Try to link local files\' artists with ones on YouTube Music</string>

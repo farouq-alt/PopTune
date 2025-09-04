@@ -114,7 +114,7 @@
     <string name="scanner_ytm_link_start">Начало привязки исполнителей к YouTube…</string>
     <string name="scanner_ytm_link_success">Привязка исполнителей к YouTube успешно завершена</string>
     <string name="scanner_type_taglib">Использовать встроенный экстрактор TagLib</string>
-    <string name="scanner_type_ffmpeg_ext">Использовать экстрактор метаданных FFMpeg. Требуется установка отдельного приложения</string>
+    <string name="scanner_type_ffmpeg_ext">Использовать экстрактор метаданных FFmpeg. Требуется установка отдельного приложения</string>
     <string name="queue_local_history">История (локальная)</string>
     <string name="queue_remote_history">История (удаленная)</string>
     <string name="keep_alive_description">Использовать постоянную службу на переднем плане, чтобы предотвратить закрытие OuterTune в фоновом режиме.</string>

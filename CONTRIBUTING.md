@@ -24,7 +24,7 @@ core
 full
 ```
 
-| Flavour | Architecture support                | Version update checker | FFMpeg tag extractor |
+| Flavour | Architecture support                | Version update checker | FFmpeg tag extractor |
 |---------|-------------------------------------|------------------------|----------------------|
 | core    | arm64-v8a, armeabi-v7a, x86, x84_64 | ❌                      | ❌                    |
 | full    | arm64-v8a, armeabi-v7a, x86, x84_64 | ✅                      | ✅                    |

@@ -106,7 +106,7 @@
     <string name="scanner_sensitivity_L3">匹配标题、音乐人、专辑</string>
     <string name="scanner_type_title">元数据提取器</string>
     <string name="scanner_type_taglib">使用集成的 TagLib 元数据提取器</string>
-    <string name="scanner_type_ffmpeg_ext">使用 FFMpeg 元数据提取器。需要安装外部软件包</string>
+    <string name="scanner_type_ffmpeg_ext">使用 FFmpeg 元数据提取器。需要安装外部软件包</string>
     <string name="scanner_variant_rescan">重新扫描整个音乐库并重新加载所有歌曲的元数据</string>
     <string name="scanner_online_artist_linking">尝试将本地文件的音乐人与 YouTube Music 上的音乐人相关联</string>
     <string name="import_failed_songs">无法导入：</string>

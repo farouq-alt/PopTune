@@ -76,7 +76,7 @@ import com.dd3boh.outertune.ui.component.button.IconButton
 import com.dd3boh.outertune.ui.component.button.IconLabelButton
 import com.dd3boh.outertune.ui.utils.backToMain
 import com.dd3boh.outertune.utils.rememberPreference
-import com.dd3boh.outertune.utils.scanners.FFMpegScanner
+import com.dd3boh.outertune.utils.scanners.FFmpegScanner
 import java.text.DateFormat.getDateTimeInstance
 import java.util.Date
 
@@ -244,7 +244,7 @@ fun AboutScreen(
                         )
                     }
                     if (ENABLE_FFMETADATAEX) {
-                        info.add("FFMetadataEx version: ${FFMpegScanner.VERSION_STRING}")
+                        info.add("FFMetadataEx version: ${FFmpegScanner.VERSION_STRING}")
                     }
 
                     Column(

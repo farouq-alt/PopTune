@@ -79,7 +79,7 @@
     <string name="scanner_sensitivity_L1">Combinar título</string>
     <string name="scanner_sensitivity_L2">Combinar título e artistas</string>
     <string name="scanner_type_title">Extrator de metadados</string>
-    <string name="scanner_type_ffmpeg_ext">Usar o extrator de metadados do FFMpeg. Requer que um pacote externo seja instalado</string>
+    <string name="scanner_type_ffmpeg_ext">Usar o extrator de metadados do FFmpeg. Requer que um pacote externo seja instalado</string>
     <string name="scanner_online_artist_linking">Tentar sincronizar os artistas dos arquivos locais com os no YouTube Music</string>
     <string name="experimental_settings_title">Experimentais</string>
     <string name="dev_settings_title">Ativar configurações de desenvolvedor</string>

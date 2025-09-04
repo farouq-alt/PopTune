@@ -169,7 +169,7 @@
     <string name="scanner_sensitivity_L3">Cocokkan judul, artis, dan album</string>
     <string name="scanner_type_title">Ekstraktor metadata</string>
     <string name="scanner_type_taglib">Gunakan ekstraktor metadata TagLib yang terintegrasi</string>
-    <string name="scanner_type_ffmpeg_ext">Gunakan ekstraktor metadata FFMpeg. Memerlukan paket eksternal untuk dipasang</string>
+    <string name="scanner_type_ffmpeg_ext">Gunakan ekstraktor metadata FFmpeg. Memerlukan paket eksternal untuk dipasang</string>
     <string name="scanner_variant_rescan">Pindai ulang seluruh pustaka dan muat ulang semua metadata lagu</string>
     <string name="scanner_online_artist_linking">Coba tautkan artis dari file lokal dengan yang ada di YouTube Music</string>
     <string name="clear_downloads_confirm">Apakah Anda yakin ingin menghapus semua unduhan? Hanya unduhan di folder unduhan utama yang akan dihapus.</string>
