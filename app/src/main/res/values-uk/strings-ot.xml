@@ -92,7 +92,7 @@
     <string name="grp_proxy">Проксі</string>
     <string name="lyrics_prefer_local_description">Надавати пріоритет локальним файлам текстів пісень перед використанням усіх хмарних провайдерів. Вимкніть це, щоби визначити пріоритетність хмарних провайдерів</string>
     <string name="scanner_strict_file_name_description">Якщо увімкнено, назви файлів НЕ ігноруватимуться. Наприклад, «Song.ogg» буде відрізнятися від «Song.flac». Налаштування чутливості сканера все одно буде застосовано</string>
-    <string name="scanner_type_ffmpeg_ext">Використовувати витягувач метаданих FFMpeg. Потребує встановлення зовнішнього пакета</string>
+    <string name="scanner_type_ffmpeg_ext">Використовувати витягувач метаданих FFmpeg. Потребує встановлення зовнішнього пакета</string>
     <string name="dev_settings_title">Увімкнути налаштування розробника</string>
     <string name="action_next">Вперед</string>
     <string name="dev_settings_description">Відкриває додаткові розширені налаштування, призначені для використання під час розробки</string>

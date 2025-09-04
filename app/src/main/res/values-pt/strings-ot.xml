@@ -175,7 +175,7 @@
     <string name="scanner_sensitivity_L3">Combinar título, artistas e álbuns</string>
     <string name="scanner_type_title">Extrator de metadados</string>
     <string name="scanner_type_taglib">Usar o extrator de metadados TagLib integrado</string>
-    <string name="scanner_type_ffmpeg_ext">Usar o extrator de metadados do FFMpeg. Requer que um pacote externo seja instalado</string>
+    <string name="scanner_type_ffmpeg_ext">Usar o extrator de metadados do FFmpeg. Requer que um pacote externo seja instalado</string>
     <string name="scanner_variant_rescan">Analisar a biblioteca inteira novamente e recarregar os metadados de todas as músicas</string>
     <string name="scanner_online_artist_linking">Tentar sincronizar os artistas dos ficheiros locais com os no YouTube Music</string>
     <string name="clear_downloads_confirm">Tem certeza que quer remover todas as descargas? Somente descargas na pasta principal de descargas serão removidos.</string>

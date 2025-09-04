@@ -111,7 +111,7 @@
     <string name="queues_empty">Sin colas</string>
     <string name="err_stop_on_error">Ha ocurrido un error. Reproducción detenida</string>
     <string name="scanner_strict_file_name_title">Nombres de archivo estrictos</string>
-    <string name="scanner_type_ffmpeg_ext">Usar extractor de metadatos FFMpeg. Requiere instalar un paquete externo</string>
+    <string name="scanner_type_ffmpeg_ext">Usar extractor de metadatos FFmpeg. Requiere instalar un paquete externo</string>
     <string name="auto_scanner_title">Escanear automáticamente</string>
     <string name="scanner_warning">Por defecto, el escáner NO recargará los metadatos de las canciones existentes a menos que especifiques lo contrario más arriba. Dependiendo del tamaño de tu biblioteca, puede llevar un tiempo.</string>
     <string name="scanner_ytm_link_start">Iniciando vinculación de artistas de YouTube…</string>
