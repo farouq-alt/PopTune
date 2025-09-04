@@ -70,6 +70,7 @@ android {
             initWith(getByName("release"))
             isMinifyEnabled = false
             isShrinkResources = false
+            matchingFallbacks += listOf("release")
         }
     }
 
