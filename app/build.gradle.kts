@@ -134,7 +134,7 @@ android {
             exclude("**/*NextRendersFactory.kt")
         } else {
             exclude("**/*FFmpegScannerDud.kt")
-            exclude("**/*NextRendersFactoryDud.kt")
+            exclude("**/*ffdecoderDud.kt")
         }
     }
 
