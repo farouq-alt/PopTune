@@ -240,4 +240,10 @@
     <string name="extra_details">جزئیات اضافی</string>
     <string name="file_path">مسیر فایل</string>
     <string name="track_number">شماره آهنگ</string>
+    <string name="ffmpeg_lgpl">این نرم‌افزار از کتابخانه‌های پروژه FFmpeg تحت LGPLv2.1 استفاده می‌کند</string>
+    <string name="seek_increment">میزان پرش</string>
+    <plurals name="second">
+        <item quantity="one">1 ثانیه</item>
+        <item quantity="other">%d ثانیه</item>
+    </plurals>
 </resources>
