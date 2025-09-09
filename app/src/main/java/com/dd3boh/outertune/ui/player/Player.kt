@@ -11,7 +11,6 @@ package com.dd3boh.outertune.ui.player
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
-import android.os.Build
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearEasing
@@ -749,7 +748,6 @@ fun BottomSheetPlayer(
                                 modifier = Modifier
                                     .width(horizontalLazyGridItemWidth)
                                     .animateContentSize(),
-                                contentScale = ContentScale.Crop,
                                 showLyricsOnClick = true,
                                 customMediaMetadata = it
                             )
@@ -804,7 +802,6 @@ fun BottomSheetPlayer(
                                 modifier = Modifier
                                     .width(horizontalLazyGridItemWidth)
                                     .animateContentSize(),
-                                contentScale = ContentScale.Crop,
                                 sliderPositionProvider = { sliderPosition },
                                 showLyricsOnClick = true,
                                 customMediaMetadata = it
