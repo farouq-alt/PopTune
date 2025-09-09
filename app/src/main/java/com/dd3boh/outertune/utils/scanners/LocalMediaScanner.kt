@@ -39,10 +39,10 @@ import com.dd3boh.outertune.models.DirectoryTree
 import com.dd3boh.outertune.models.MediaMetadata
 import com.dd3boh.outertune.models.SongTempData
 import com.dd3boh.outertune.models.toMediaMetadata
-import com.dd3boh.outertune.ui.utils.scannerSession
 import com.dd3boh.outertune.utils.closestAlbumMatch
 import com.dd3boh.outertune.utils.closestMatch
 import com.dd3boh.outertune.utils.dataStore
+import com.dd3boh.outertune.utils.lmScannerCoroutine
 import com.dd3boh.outertune.utils.reportException
 import com.zionhuang.innertube.YouTube
 import com.zionhuang.innertube.models.ArtistItem
@@ -451,7 +451,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                     if (!SYNC_SCANNER) {
                         // use async scanner
                         scannerJobs.add(
-                            async(scannerSession) {
+                            async(lmScannerCoroutine) {
                                 var ret: SongTempData?
                                 if (scannerRequestCancel) {
                                     Log.i(TAG, "WARNING: Canceling advanced scanner job.")
@@ -574,7 +574,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                     if (!SYNC_SCANNER) {
                         // use async scanner
                         scannerJobs.add(
-                            async(scannerSession) {
+                            async(lmScannerCoroutine) {
                                 if (scannerRequestCancel) {
                                     Log.i(TAG, "WARNING: Canceling advanced scanner job.")
                                     throw ScannerAbortException("")

@@ -44,7 +44,7 @@ import kotlin.math.min
 
 class CoilBitmapLoader @Inject constructor(
     private val context: Context,
-    private val scope: CoroutineScope,
+    private val scope: CoroutineScope = CoroutineScope(coilCoroutine),
     private val data: LocalArtworkPath = LocalArtworkPath(null),
 ) : Fetcher, BitmapLoader {
 
@@ -175,7 +175,7 @@ class CoilBitmapLoader @Inject constructor(
         private val context: Context,
     ) : Fetcher.Factory<LocalArtworkPath> {
         override fun create(data: LocalArtworkPath, options: Options, imageLoader: ImageLoader): Fetcher? {
-            return CoilBitmapLoader(context, CoroutineScope(Dispatchers.IO), data)
+            return CoilBitmapLoader(context, data = data)
         }
     }
 }

@@ -12,6 +12,7 @@ import com.dd3boh.outertune.db.entities.Song
 import com.dd3boh.outertune.models.SimilarRecommendation
 import com.dd3boh.outertune.utils.SyncUtils
 import com.dd3boh.outertune.utils.reportException
+import com.dd3boh.outertune.utils.syncCoroutine
 import com.zionhuang.innertube.YouTube
 import com.zionhuang.innertube.models.PlaylistItem
 import com.zionhuang.innertube.models.WatchEndpoint
@@ -111,7 +112,8 @@ class HomeViewModel @Inject constructor(
                 .filter { it.album != null }
                 .shuffled().take(2)
                 .mapNotNull { song ->
-                    val endpoint = YouTube.next(WatchEndpoint(videoId = song.id)).getOrNull()?.relatedEndpoint ?: return@mapNotNull null
+                    val endpoint = YouTube.next(WatchEndpoint(videoId = song.id)).getOrNull()?.relatedEndpoint
+                        ?: return@mapNotNull null
                     val page = YouTube.related(endpoint).getOrNull() ?: return@mapNotNull null
                     SimilarRecommendation(
                         title = song,
@@ -144,7 +146,7 @@ class HomeViewModel @Inject constructor(
 
         isLoading.value = false
     }
-    
+
     private val _isLoadingMore = MutableStateFlow(false)
     fun loadMoreYouTubeItems(continuation: String?) {
         if (continuation == null || _isLoadingMore.value) return
@@ -196,9 +198,9 @@ class HomeViewModel @Inject constructor(
     }
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(syncCoroutine) {
             load()
-            viewModelScope.launch(Dispatchers.IO) { syncUtils.tryAutoSync() }
+            syncUtils.tryAutoSync()
         }
     }
 }

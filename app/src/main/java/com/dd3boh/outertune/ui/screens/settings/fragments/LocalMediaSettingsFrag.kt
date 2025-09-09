@@ -85,6 +85,7 @@ import com.dd3boh.outertune.ui.dialog.ActionPromptDialog
 import com.dd3boh.outertune.ui.dialog.InfoLabel
 import com.dd3boh.outertune.ui.utils.MEDIA_PERMISSION_LEVEL
 import com.dd3boh.outertune.ui.utils.clearDtCache
+import com.dd3boh.outertune.utils.lmScannerCoroutine
 import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.utils.scanners.LocalMediaScanner.Companion.destroyScanner
@@ -97,7 +98,6 @@ import com.dd3boh.outertune.utils.scanners.ScannerAbortException
 import com.dd3boh.outertune.utils.scanners.absoluteFilePathFromUri
 import com.dd3boh.outertune.utils.scanners.stringFromUriList
 import com.dd3boh.outertune.utils.scanners.uriListFromString
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
@@ -201,7 +201,7 @@ fun ColumnScope.LocalScannerFrag() {
 
                 playerConnection?.player?.pause()
 
-                coroutineScope.launch(Dispatchers.IO) {
+                coroutineScope.launch(lmScannerCoroutine) {
                     // full rescan
                     if (fullRescan) {
                         try {
@@ -212,7 +212,7 @@ fun ColumnScope.LocalScannerFrag() {
                             delay(1000)
                             // start artist linking job
                             if (lookupYtmArtists && scannerState <= 0) {
-                                coroutineScope.launch(Dispatchers.IO) {
+                                coroutineScope.launch(lmScannerCoroutine) {
                                     try {
                                         snackbarHostState.showSnackbar(
                                             message = context.getString(R.string.scanner_ytm_link_start),
@@ -256,7 +256,7 @@ fun ColumnScope.LocalScannerFrag() {
                             delay(1000)
                             // start artist linking job
                             if (lookupYtmArtists && scannerState <= 0) {
-                                coroutineScope.launch(Dispatchers.IO) {
+                                coroutineScope.launch(lmScannerCoroutine) {
                                     try {
                                         snackbarHostState.showSnackbar(
                                             message = context.getString(R.string.scanner_ytm_link_start),

@@ -19,6 +19,7 @@ import com.dd3boh.outertune.constants.LastLibSongSyncKey
 import com.dd3boh.outertune.constants.LastLikeSongSyncKey
 import com.dd3boh.outertune.constants.LastPlaylistSyncKey
 import com.dd3boh.outertune.constants.LastRecentActivitySyncKey
+import com.dd3boh.outertune.constants.SYNC_CD
 import com.dd3boh.outertune.constants.SyncConflictResolution
 import com.dd3boh.outertune.constants.SyncContent
 import com.dd3boh.outertune.constants.YtmSyncConflictKey
@@ -42,7 +43,6 @@ import com.zionhuang.innertube.models.SongItem
 import com.zionhuang.innertube.utils.completed
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -54,7 +54,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -70,6 +69,10 @@ class SyncUtils @Inject constructor(
     private val downloadUtil: DownloadUtil,
     @ApplicationContext private val context: Context
 ) {
+    private val TAG = "SyncUtils"
+
+    private val scope =  CoroutineScope(syncCoroutine)
+
     private val _isSyncingRemoteLikedSongs = MutableStateFlow(false)
     private val _isSyncingRemoteSongs = MutableStateFlow(false)
     private val _isSyncingRemoteAlbums = MutableStateFlow(false)
@@ -84,12 +87,6 @@ class SyncUtils @Inject constructor(
     val isSyncingRemotePlaylists: StateFlow<Boolean> = _isSyncingRemotePlaylists.asStateFlow()
     val isSyncingRecentActivity: StateFlow<Boolean> = _isSyncingRecentActivity.asStateFlow()
 
-    @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
-    val syncCoroutine = newSingleThreadContext("syncUtils")
-
-    private val TAG = "SyncUtils"
-    private val syncCd = 60000 * 30
-
     companion object {
         const val DEFAULT_SYNC_CONTENT = "ARPLSC"
     }
@@ -102,7 +99,7 @@ class SyncUtils @Inject constructor(
         if (!bypassCd) {
             val lastSync = context.dataStore.get(LastFullSyncKey, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
             val currentTime = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
-            if (currentTime - lastSync > syncCd) {
+            if (currentTime - lastSync > SYNC_CD) {
                 Log.d(TAG, "Aborting auto sync. ${(currentTime - lastSync) * 60000} minutes until eligible")
                 return
             }
@@ -125,7 +122,7 @@ class SyncUtils @Inject constructor(
     private fun checkPartialSyncEligibility(key: Preferences.Key<Long>): Boolean {
         val lastSync = context.dataStore.get(key, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
         val currentTime = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
-        if (currentTime - lastSync > syncCd) {
+        if (currentTime - lastSync > SYNC_CD) {
             Log.d(TAG, "Aborting auto sync. ${(currentTime - lastSync) * 60000} minutes until eligible")
             return false
         }
@@ -142,7 +139,7 @@ class SyncUtils @Inject constructor(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun likeSong(s: SongEntity) {
-        CoroutineScope(syncCoroutine).launch {
+        scope.launch {
             YouTube.likeVideo(s.id, s.liked)
         }
     }
@@ -152,7 +149,7 @@ class SyncUtils @Inject constructor(
      */
     @OptIn(ExperimentalCoroutinesApi::class)
     fun changeInLibrary(s: SongEntity) {
-        CoroutineScope(syncCoroutine).launch {
+        scope.launch {
             // we don't have an api call yet
         }
     }

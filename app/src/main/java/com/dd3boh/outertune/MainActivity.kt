@@ -110,7 +110,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -241,7 +240,6 @@ import com.dd3boh.outertune.ui.screens.settings.StorageSettings
 import com.dd3boh.outertune.ui.theme.ColorSaver
 import com.dd3boh.outertune.ui.theme.DefaultThemeColor
 import com.dd3boh.outertune.ui.theme.OuterTuneTheme
-import com.dd3boh.outertune.ui.theme.extractGradientColors
 import com.dd3boh.outertune.ui.theme.extractThemeColor
 import com.dd3boh.outertune.ui.utils.MEDIA_PERMISSION_LEVEL
 import com.dd3boh.outertune.ui.utils.Updater
@@ -257,6 +255,7 @@ import com.dd3boh.outertune.utils.SyncUtils
 import com.dd3boh.outertune.utils.compareVersion
 import com.dd3boh.outertune.utils.dataStore
 import com.dd3boh.outertune.utils.get
+import com.dd3boh.outertune.utils.lmScannerCoroutine
 import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.utils.reportException
@@ -361,7 +360,7 @@ class MainActivity : ComponentActivity() {
 
         activityLauncher = ActivityLauncherHelper(this)
 
-        val bitmapLoader = CoilBitmapLoader(this, CoroutineScope(Dispatchers.IO))
+        val bitmapLoader = CoilBitmapLoader(this)
 
         setContent {
             val coroutineScope = rememberCoroutineScope()
@@ -452,7 +451,7 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(Unit) {
                 downloadUtil.resumeDownloadsOnStart()
 
-                CoroutineScope(Dispatchers.IO).launch {
+                CoroutineScope(lmScannerCoroutine).launch {
                     val perms = checkSelfPermission(MEDIA_PERMISSION_LEVEL)
                     // Check if the permissions for local media access
                     if (scannerState.value <= 0 && autoScan && oobeStatus >= OOBE_VERSION && localLibEnable) {
@@ -470,7 +469,7 @@ class MainActivity : ComponentActivity() {
 
                                 // start artist linking job
                                 if (lookupYtmArtists && scannerState.value <= 0) {
-                                    CoroutineScope(Dispatchers.IO).launch {
+                                    CoroutineScope(lmScannerCoroutine).launch {
                                         try {
                                             scanner.localToRemoteArtist(database)
                                         } catch (e: ScannerAbortException) {

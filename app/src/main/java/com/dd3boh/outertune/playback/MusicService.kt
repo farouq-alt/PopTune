@@ -363,7 +363,7 @@ class MusicService : MediaLibraryService(),
                 )
             )
             // TODO: do i even want to have smaller art for media notification
-            .setBitmapLoader(CoilBitmapLoader(this, scope))
+            .setBitmapLoader(CoilBitmapLoader(this))
             .build()
 
         player.repeatMode = dataStore.get(RepeatModeKey, REPEAT_MODE_OFF)

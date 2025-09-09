@@ -70,6 +70,7 @@ import com.dd3boh.outertune.LocalSnackbarHostState
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.HistorySource
 import com.dd3boh.outertune.constants.InnerTubeCookieKey
+import com.dd3boh.outertune.constants.SwipeToQueueKey
 import com.dd3boh.outertune.constants.TopBarInsets
 import com.dd3boh.outertune.db.entities.EventWithSong
 import com.dd3boh.outertune.extensions.toMediaItem
@@ -108,6 +109,8 @@ fun HistoryScreen(
     val playerConnection = LocalPlayerConnection.current ?: return
     val isPlaying by playerConnection.isPlaying.collectAsState()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
+
+    val swipeEnabled by rememberPreference(SwipeToQueueKey, true)
 
     val snackbarHostState = LocalSnackbarHostState.current
 
@@ -347,8 +350,9 @@ fun HistoryScreen(
 
                         SwipeToQueueBox(
                             item = song.toMediaItem(),
+                            swipeEnabled = swipeEnabled,
+                            snackbarHostState = snackbarHostState,
                             content = { content() },
-                            snackbarHostState = snackbarHostState
                         )
 
                     }
@@ -396,6 +400,7 @@ fun HistoryScreen(
                             },
                             inSelectMode = inSelectMode,
                             isSelected = selection.contains(event.event.id),
+                            swipeEnabled = swipeEnabled,
                             navController = navController,
                             snackbarHostState = snackbarHostState,
                             modifier = Modifier

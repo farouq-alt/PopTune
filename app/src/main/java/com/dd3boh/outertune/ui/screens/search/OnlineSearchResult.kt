@@ -42,6 +42,7 @@ import com.dd3boh.outertune.LocalSnackbarHostState
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.AppBarHeight
 import com.dd3boh.outertune.constants.SearchFilterHeight
+import com.dd3boh.outertune.constants.SwipeToQueueKey
 import com.dd3boh.outertune.extensions.toMediaItem
 import com.dd3boh.outertune.extensions.togglePlayPause
 import com.dd3boh.outertune.models.toMediaMetadata
@@ -59,6 +60,7 @@ import com.dd3boh.outertune.ui.menu.YouTubeAlbumMenu
 import com.dd3boh.outertune.ui.menu.YouTubeArtistMenu
 import com.dd3boh.outertune.ui.menu.YouTubePlaylistMenu
 import com.dd3boh.outertune.ui.menu.YouTubeSongMenu
+import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.viewmodels.OnlineSearchViewModel
 import com.zionhuang.innertube.YouTube.SearchFilter.Companion.FILTER_ALBUM
 import com.zionhuang.innertube.YouTube.SearchFilter.Companion.FILTER_ARTIST
@@ -83,6 +85,9 @@ fun OnlineSearchResult(
     val context = LocalContext.current
     val menuState = LocalMenuState.current
     val playerConnection = LocalPlayerConnection.current ?: return
+
+    val swipeEnabled by rememberPreference(SwipeToQueueKey, true)
+
     val isPlaying by playerConnection.isPlaying.collectAsState()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
 
@@ -210,8 +215,9 @@ fun OnlineSearchResult(
             if (item !is SongItem) content()
             else SwipeToQueueBox(
                 item = item.toMediaItem(),
+                swipeEnabled = swipeEnabled,
+                snackbarHostState = snackbarHostState,
                 content = { content() },
-                snackbarHostState = snackbarHostState
             )
         }
 

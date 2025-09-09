@@ -10,19 +10,13 @@ package com.dd3boh.outertune.ui.utils
 
 import android.Manifest
 import android.os.Build
-import com.dd3boh.outertune.constants.MAX_CONCURRENT_JOBS
 import com.dd3boh.outertune.models.CulmSongs
 import com.dd3boh.outertune.models.DirectoryTree
 import com.dd3boh.outertune.utils.fixFilePath
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 const val TAG = "LocalMediaUtils"
 
 const val EXTRACTOR_TAG = "MetadataExtractor"
-
-@OptIn(ExperimentalCoroutinesApi::class)
-val scannerSession = Dispatchers.IO.limitedParallelism(MAX_CONCURRENT_JOBS)
 
 // stuff to make this work
 val MEDIA_PERMISSION_LEVEL =

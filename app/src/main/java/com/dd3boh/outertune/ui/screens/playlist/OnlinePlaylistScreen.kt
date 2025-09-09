@@ -101,6 +101,7 @@ import com.dd3boh.outertune.LocalSnackbarHostState
 import com.dd3boh.outertune.LocalSyncUtils
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.AlbumThumbnailSize
+import com.dd3boh.outertune.constants.SwipeToQueueKey
 import com.dd3boh.outertune.constants.ThumbnailCornerRadius
 import com.dd3boh.outertune.constants.TopBarInsets
 import com.dd3boh.outertune.db.entities.PlaylistEntity
@@ -126,6 +127,7 @@ import com.dd3boh.outertune.ui.dialog.DefaultDialog
 import com.dd3boh.outertune.ui.menu.YouTubePlaylistMenu
 import com.dd3boh.outertune.ui.menu.YouTubeSongMenu
 import com.dd3boh.outertune.ui.utils.backToMain
+import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.viewmodels.OnlinePlaylistViewModel
 import com.zionhuang.innertube.models.SongItem
 import kotlinx.coroutines.Dispatchers
@@ -146,6 +148,9 @@ fun OnlinePlaylistScreen(
     val menuState = LocalMenuState.current
     val database = LocalDatabase.current
     val playerConnection = LocalPlayerConnection.current ?: return
+
+    val swipeEnabled by rememberPreference(SwipeToQueueKey, true)
+
     val isPlaying by playerConnection.isPlaying.collectAsState()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
 
@@ -586,68 +591,68 @@ fun OnlinePlaylistScreen(
 
                         SwipeToQueueBox(
                             item = song.toMediaItem(),
-                            content = {
-                                YouTubeListItem(
-                                    item = song,
-                                    isActive = mediaMetadata?.id == song.id,
-                                    isPlaying = isPlaying,
-                                    trailingContent = {
-                                        if (inSelectMode) {
-                                            Checkbox(
-                                                checked = index in selection,
-                                                onCheckedChange = onCheckedChange
-                                            )
-                                        } else {
-                                            IconButton(
-                                                onClick = {
-                                                    menuState.show {
-                                                        YouTubeSongMenu(
-                                                            song = song,
-                                                            navController = navController,
-                                                            onDismiss = menuState::dismiss
-                                                        )
-                                                    }
-                                                }
-                                            ) {
-                                                Icon(
-                                                    Icons.Rounded.MoreVert,
-                                                    contentDescription = null
-                                                )
-                                            }
-                                        }
-                                    },
-                                    isSelected = inSelectMode && index in selection,
-                                    modifier = Modifier
-                                        .combinedClickable(
+                            swipeEnabled = swipeEnabled,
+                            snackbarHostState = snackbarHostState
+                        ) {
+                            YouTubeListItem(
+                                item = song,
+                                isActive = mediaMetadata?.id == song.id,
+                                isPlaying = isPlaying,
+                                trailingContent = {
+                                    if (inSelectMode) {
+                                        Checkbox(
+                                            checked = index in selection,
+                                            onCheckedChange = onCheckedChange
+                                        )
+                                    } else {
+                                        IconButton(
                                             onClick = {
-                                                if (inSelectMode) {
-                                                    onCheckedChange(index !in selection)
-                                                } else if (song.id == mediaMetadata?.id) {
-                                                    playerConnection.player.togglePlayPause()
-                                                } else {
-                                                    playerConnection.playQueue(
-                                                        ListQueue(
-                                                            playlistId = playlist.id,
-                                                            title = playlist.title,
-                                                            items = filteredSongs.map { it.second.toMediaMetadata() },
-                                                            startIndex = index
-                                                        )
+                                                menuState.show {
+                                                    YouTubeSongMenu(
+                                                        song = song,
+                                                        navController = navController,
+                                                        onDismiss = menuState::dismiss
                                                     )
                                                 }
-                                            },
-                                            onLongClick = {
-                                                if (!inSelectMode) {
-                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                    inSelectMode = true
-                                                    onCheckedChange(true)
-                                                }
                                             }
-                                        )
-                                        .animateItem()
-                                )
-                            },
-                            snackbarHostState = snackbarHostState
-                        )
+                                        ) {
+                                            Icon(
+                                                Icons.Rounded.MoreVert,
+                                                contentDescription = null
+                                            )
+                                        }
+                                    }
+                                },
+                                isSelected = inSelectMode && index in selection,
+                                modifier = Modifier
+                                    .combinedClickable(
+                                        onClick = {
+                                            if (inSelectMode) {
+                                                onCheckedChange(index !in selection)
+                                            } else if (song.id == mediaMetadata?.id) {
+                                                playerConnection.player.togglePlayPause()
+                                            } else {
+                                                playerConnection.playQueue(
+                                                    ListQueue(
+                                                        playlistId = playlist.id,
+                                                        title = playlist.title,
+                                                        items = filteredSongs.map { it.second.toMediaMetadata() },
+                                                        startIndex = index
+                                                    )
+                                                )
+                                            }
+                                        },
+                                        onLongClick = {
+                                            if (!inSelectMode) {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                inSelectMode = true
+                                                onCheckedChange(true)
+                                            }
+                                        }
+                                    )
+                                    .animateItem()
+                            )
+                        }
                     }
 
                     if (viewModel.continuation != null && songs.isNotEmpty() && !isSearching) {

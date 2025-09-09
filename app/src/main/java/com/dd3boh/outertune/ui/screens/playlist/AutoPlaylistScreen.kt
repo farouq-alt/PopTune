@@ -84,6 +84,7 @@ import com.dd3boh.outertune.constants.CONTENT_TYPE_HEADER
 import com.dd3boh.outertune.constants.SongSortDescendingKey
 import com.dd3boh.outertune.constants.SongSortType
 import com.dd3boh.outertune.constants.SongSortTypeKey
+import com.dd3boh.outertune.constants.SwipeToQueueKey
 import com.dd3boh.outertune.constants.ThumbnailCornerRadius
 import com.dd3boh.outertune.constants.TopBarInsets
 import com.dd3boh.outertune.db.entities.PlaylistEntity
@@ -127,6 +128,8 @@ fun AutoPlaylistScreen(
     val database = LocalDatabase.current
     val syncUtils = LocalSyncUtils.current
     val playerConnection = LocalPlayerConnection.current ?: return
+
+    val swipeEnabled by rememberPreference(SwipeToQueueKey, true)
 
     val songs by viewModel.songs.collectAsState()
 
@@ -526,6 +529,7 @@ fun AutoPlaylistScreen(
                     },
                     inSelectMode = inSelectMode,
                     isSelected = selection.contains(song.id),
+                    swipeEnabled = swipeEnabled,
                     navController = navController,
                     snackbarHostState = snackbarHostState,
                     modifier = Modifier

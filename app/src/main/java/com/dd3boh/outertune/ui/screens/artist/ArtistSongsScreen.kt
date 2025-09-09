@@ -49,6 +49,7 @@ import com.dd3boh.outertune.constants.ArtistSongSortDescendingKey
 import com.dd3boh.outertune.constants.ArtistSongSortType
 import com.dd3boh.outertune.constants.ArtistSongSortTypeKey
 import com.dd3boh.outertune.constants.CONTENT_TYPE_HEADER
+import com.dd3boh.outertune.constants.SwipeToQueueKey
 import com.dd3boh.outertune.constants.TopBarInsets
 import com.dd3boh.outertune.models.toMediaMetadata
 import com.dd3boh.outertune.playback.queues.ListQueue
@@ -81,6 +82,7 @@ fun ArtistSongsScreen(
 
     val (sortType, onSortTypeChange) = rememberEnumPreference(ArtistSongSortTypeKey, ArtistSongSortType.CREATE_DATE)
     val (sortDescending, onSortDescendingChange) = rememberPreference(ArtistSongSortDescendingKey, true)
+    val swipeEnabled by rememberPreference(SwipeToQueueKey, true)
 
     val artist by viewModel.artist.collectAsState()
     val songs by viewModel.songs.collectAsState()
@@ -202,6 +204,7 @@ fun ArtistSongsScreen(
                     },
                     inSelectMode = inSelectMode,
                     isSelected = selection.contains(song.id),
+                    swipeEnabled = swipeEnabled,
                     navController = navController,
                     snackbarHostState = snackbarHostState,
                     modifier = Modifier

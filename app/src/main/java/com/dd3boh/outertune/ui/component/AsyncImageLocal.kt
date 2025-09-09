@@ -28,7 +28,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import com.dd3boh.outertune.constants.MAX_IMAGE_JOBS
+import com.dd3boh.outertune.constants.MAX_COIL_JOBS
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
@@ -36,7 +36,7 @@ import kotlinx.coroutines.newFixedThreadPoolContext
 
 
 @OptIn(DelicateCoroutinesApi::class)
-val imageSession = newFixedThreadPoolContext(MAX_IMAGE_JOBS, "ImageExtractor")
+val imageSession = newFixedThreadPoolContext(MAX_COIL_JOBS, "ImageExtractor")
 
 /**
  * Non-blocking image

@@ -62,7 +62,7 @@ import com.dd3boh.outertune.constants.ENABLE_UPDATE_CHECKER
 import com.dd3boh.outertune.constants.LYRIC_FETCH_TIMEOUT
 import com.dd3boh.outertune.constants.LastUpdateCheckKey
 import com.dd3boh.outertune.constants.LastVersionKey
-import com.dd3boh.outertune.constants.MAX_CONCURRENT_JOBS
+import com.dd3boh.outertune.constants.MAX_LM_SCANNER_JOBS
 import com.dd3boh.outertune.constants.OOBE_VERSION
 import com.dd3boh.outertune.constants.SNACKBAR_VERY_SHORT
 import com.dd3boh.outertune.constants.TopBarInsets
@@ -230,7 +230,7 @@ fun AboutScreen(
                     val info = mutableListOf<String>(
                         "Update checker: $ENABLE_UPDATE_CHECKER",
                         "FFMetadataEx: $ENABLE_FFMETADATAEX",
-                        "LM scanner concurrency: $MAX_CONCURRENT_JOBS",
+                        "LM scanner concurrency: $MAX_LM_SCANNER_JOBS",
                         "LYRIC_FETCH_TIMEOUT: $LYRIC_FETCH_TIMEOUT",
                         "OOBE_VERSION: $OOBE_VERSION",
                         "LYRIC_FETCH_TIMEOUT: $LYRIC_FETCH_TIMEOUT",

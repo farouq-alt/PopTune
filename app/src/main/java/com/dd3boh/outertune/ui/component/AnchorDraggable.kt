@@ -34,7 +34,6 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -54,8 +53,6 @@ import androidx.media3.common.MediaItem
 import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.SNACKBAR_VERY_SHORT
-import com.dd3boh.outertune.constants.SwipeToQueueKey
-import com.dd3boh.outertune.utils.rememberPreference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -69,9 +66,9 @@ import kotlin.math.roundToInt
 fun SwipeToQueueBox(
     modifier: Modifier = Modifier,
     item: MediaItem,
-    content: @Composable BoxScope.() -> Unit,
+    swipeEnabled: Boolean,
     snackbarHostState: SnackbarHostState? = null,
-    enabled: Boolean = true
+    content: @Composable BoxScope.() -> Unit,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -108,7 +105,7 @@ fun SwipeToQueueBox(
                 job.cancel()
             }
         }),
-        enabled = enabled,
+        enabled = swipeEnabled,
         modifier = modifier,
         content = content
     )
@@ -139,9 +136,7 @@ fun SwipeActionBox(
         swipeOffset.floatValue = (swipeOffset.floatValue + delta).coerceIn(0f, screenWidth.value)
     }
 
-    val swipeToQueueEnabled by rememberPreference(SwipeToQueueKey, true)
-
-    if (!enabled || !swipeToQueueEnabled) {
+    if (!enabled) {
         Box { content() }
     } else {
         Box(

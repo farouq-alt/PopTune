@@ -76,6 +76,7 @@ import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.LocalSnackbarHostState
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.AppBarHeight
+import com.dd3boh.outertune.constants.SwipeToQueueKey
 import com.dd3boh.outertune.constants.TopBarInsets
 import com.dd3boh.outertune.db.entities.ArtistEntity
 import com.dd3boh.outertune.extensions.toMediaItem
@@ -103,6 +104,7 @@ import com.dd3boh.outertune.ui.menu.YouTubeSongMenu
 import com.dd3boh.outertune.ui.utils.backToMain
 import com.dd3boh.outertune.ui.utils.fadingEdge
 import com.dd3boh.outertune.ui.utils.resize
+import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.viewmodels.ArtistViewModel
 import com.zionhuang.innertube.models.AlbumItem
 import com.zionhuang.innertube.models.ArtistItem
@@ -121,6 +123,9 @@ fun ArtistScreen(
     val menuState = LocalMenuState.current
     val coroutineScope = rememberCoroutineScope()
     val playerConnection = LocalPlayerConnection.current ?: return
+
+    val swipeEnabled by rememberPreference(SwipeToQueueKey, true)
+
     val isPlaying by playerConnection.isPlaying.collectAsState()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
 
@@ -309,6 +314,7 @@ fun ArtistScreen(
                                 onSelectedChange = { },
                                 inSelectMode = false,
                                 isSelected = false,
+                                swipeEnabled = swipeEnabled,
                                 navController = navController,
                                 snackbarHostState = snackbarHostState,
                                 modifier = Modifier
@@ -384,61 +390,61 @@ fun ArtistScreen(
                         ) { song ->
                             SwipeToQueueBox(
                                 item = (song as SongItem).toMediaItem(),
-                                content = {
-                                    YouTubeListItem(
-                                        item = song,
-                                        isActive = mediaMetadata?.id == song.id,
-                                        isPlaying = isPlaying,
-                                        trailingContent = {
-                                            IconButton(
-                                                onClick = {
-                                                    menuState.show {
-                                                        YouTubeSongMenu(
-                                                            song = song,
-                                                            navController = navController,
-                                                            onDismiss = menuState::dismiss
-                                                        )
-                                                    }
+                                swipeEnabled = swipeEnabled,
+                                snackbarHostState = snackbarHostState
+                            ) {
+                                YouTubeListItem(
+                                    item = song,
+                                    isActive = mediaMetadata?.id == song.id,
+                                    isPlaying = isPlaying,
+                                    trailingContent = {
+                                        IconButton(
+                                            onClick = {
+                                                menuState.show {
+                                                    YouTubeSongMenu(
+                                                        song = song,
+                                                        navController = navController,
+                                                        onDismiss = menuState::dismiss
+                                                    )
                                                 }
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Rounded.MoreVert,
-                                                    contentDescription = null
-                                                )
                                             }
-                                        },
-                                        modifier = Modifier
-                                            .combinedClickable(
-                                                onClick = {
-                                                    if (song.id == mediaMetadata?.id) {
-                                                        playerConnection.player.togglePlayPause()
-                                                    } else {
-                                                        playerConnection.playQueue(
-                                                            ListQueue(
-                                                                title = "Artist songs (preview): ${artistPage.artist.title}",
-                                                                items = section.items.map { (it as SongItem).toMediaMetadata() },
-                                                                startIndex = section.items.indexOf(
-                                                                    song
-                                                                )
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Rounded.MoreVert,
+                                                contentDescription = null
+                                            )
+                                        }
+                                    },
+                                    modifier = Modifier
+                                        .combinedClickable(
+                                            onClick = {
+                                                if (song.id == mediaMetadata?.id) {
+                                                    playerConnection.player.togglePlayPause()
+                                                } else {
+                                                    playerConnection.playQueue(
+                                                        ListQueue(
+                                                            title = "Artist songs (preview): ${artistPage.artist.title}",
+                                                            items = section.items.map { (it as SongItem).toMediaMetadata() },
+                                                            startIndex = section.items.indexOf(
+                                                                song
                                                             )
                                                         )
-                                                    }
-                                                },
-                                                onLongClick = {
-                                                    menuState.show {
-                                                        YouTubeSongMenu(
-                                                            song = song,
-                                                            navController = navController,
-                                                            onDismiss = menuState::dismiss
-                                                        )
-                                                    }
+                                                    )
                                                 }
-                                            )
-                                            .animateItem()
-                                    )
-                                },
-                                snackbarHostState = snackbarHostState
-                            )
+                                            },
+                                            onLongClick = {
+                                                menuState.show {
+                                                    YouTubeSongMenu(
+                                                        song = song,
+                                                        navController = navController,
+                                                        onDismiss = menuState::dismiss
+                                                    )
+                                                }
+                                            }
+                                        )
+                                        .animateItem()
+                                )
+                            }
 
                         }
                     } else {

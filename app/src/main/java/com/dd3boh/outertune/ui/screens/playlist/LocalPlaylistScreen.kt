@@ -103,6 +103,7 @@ import com.dd3boh.outertune.constants.PlaylistEditLockKey
 import com.dd3boh.outertune.constants.PlaylistSongSortDescendingKey
 import com.dd3boh.outertune.constants.PlaylistSongSortType
 import com.dd3boh.outertune.constants.PlaylistSongSortTypeKey
+import com.dd3boh.outertune.constants.SwipeToQueueKey
 import com.dd3boh.outertune.constants.SyncMode
 import com.dd3boh.outertune.constants.TopBarInsets
 import com.dd3boh.outertune.constants.YtmSyncModeKey
@@ -161,6 +162,7 @@ fun LocalPlaylistScreen(
     val (sortType, onSortTypeChange) = rememberEnumPreference(PlaylistSongSortTypeKey, PlaylistSongSortType.CUSTOM)
     val (sortDescending, onSortDescendingChange) = rememberPreference(PlaylistSongSortDescendingKey, true)
     var locked by rememberPreference(PlaylistEditLockKey, defaultValue = false)
+    val swipeEnabled by rememberPreference(SwipeToQueueKey, true)
     val syncMode by rememberEnumPreference(key = YtmSyncModeKey, defaultValue = SyncMode.RW)
 
     val snackbarHostState = LocalSnackbarHostState.current
@@ -527,6 +529,7 @@ fun LocalPlaylistScreen(
                         },
                         inSelectMode = inSelectMode,
                         isSelected = selection.contains(song.song.id),
+                        swipeEnabled = swipeEnabled,
                         playlistSong = song,
                         playlist = playlist,
                         navController = navController,

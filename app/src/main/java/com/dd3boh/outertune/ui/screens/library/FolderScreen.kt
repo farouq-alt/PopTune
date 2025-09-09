@@ -88,6 +88,7 @@ import com.dd3boh.outertune.constants.FolderSortType
 import com.dd3boh.outertune.constants.FolderSortTypeKey
 import com.dd3boh.outertune.constants.LastLocalScanKey
 import com.dd3boh.outertune.constants.LocalLibraryEnableKey
+import com.dd3boh.outertune.constants.SwipeToQueueKey
 import com.dd3boh.outertune.constants.TopBarInsets
 import com.dd3boh.outertune.db.entities.Song
 import com.dd3boh.outertune.models.DirectoryTree
@@ -149,6 +150,7 @@ fun FolderScreen(
     val (sortType, onSortTypeChange) = rememberEnumPreference(FolderSongSortTypeKey, FolderSongSortType.NAME)
     val (sortDescending, onSortDescendingChange) = rememberPreference(FolderSongSortDescendingKey, true)
     val (folderSortType, onFolderSortTypeChange) = rememberEnumPreference(FolderSortTypeKey, FolderSortType.NAME)
+    val swipeEnabled by rememberPreference(SwipeToQueueKey, true)
 
     val lazyListState = rememberLazyListState()
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -518,6 +520,7 @@ fun FolderScreen(
                     },
                     inSelectMode = inSelectMode,
                     isSelected = selection.contains(song.id),
+                    swipeEnabled = swipeEnabled,
                     navController = navController,
                     snackbarHostState = snackbarHostState,
                     modifier = Modifier

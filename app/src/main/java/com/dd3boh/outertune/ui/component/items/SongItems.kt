@@ -83,6 +83,7 @@ fun SongListItem(
     onSelectedChange: (Boolean) -> Unit,
     inSelectMode: Boolean?,
     isSelected: Boolean,
+    swipeEnabled: Boolean,
     navController: NavController,
     albumIndex: Int? = null,
     showLikedIcon: Boolean = true,
@@ -93,7 +94,6 @@ fun SongListItem(
     showDragHandle: Boolean = false,
     dragHandleModifier: Modifier? = null,
     disableShowMenu: Boolean = false,
-    enableSwipeToQueue: Boolean = true,
     snackbarHostState: SnackbarHostState? = null,
     modifier: Modifier = Modifier,
 ) {
@@ -221,7 +221,7 @@ fun SongListItem(
         item = song.toMediaItem(),
         content = { listItem() },
         snackbarHostState = snackbarHostState,
-        enabled = enableSwipeToQueue
+        swipeEnabled = swipeEnabled
     )
 }
 

@@ -85,6 +85,7 @@ import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.LocalSnackbarHostState
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.AlbumThumbnailSize
+import com.dd3boh.outertune.constants.SwipeToQueueKey
 import com.dd3boh.outertune.constants.ThumbnailCornerRadius
 import com.dd3boh.outertune.constants.TopBarInsets
 import com.dd3boh.outertune.db.entities.Album
@@ -111,6 +112,7 @@ import com.dd3boh.outertune.ui.utils.backToMain
 import com.dd3boh.outertune.ui.utils.getNSongsString
 import com.dd3boh.outertune.utils.LocalArtworkPath
 import com.dd3boh.outertune.utils.joinByBullet
+import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.viewmodels.AlbumViewModel
 import kotlin.math.roundToInt
 
@@ -127,6 +129,8 @@ fun AlbumScreen(
     val menuState = LocalMenuState.current
     val database = LocalDatabase.current
     val playerConnection = LocalPlayerConnection.current ?: return
+
+    val swipeEnabled by rememberPreference(SwipeToQueueKey, true)
 
     val scope = rememberCoroutineScope()
     val isPlaying by playerConnection.isPlaying.collectAsState()
@@ -448,6 +452,7 @@ fun AlbumScreen(
                     },
                     inSelectMode = inSelectMode,
                     isSelected = selection.contains(song.id),
+                    swipeEnabled = swipeEnabled,
                     navController = navController,
                     snackbarHostState = snackbarHostState,
                     modifier = Modifier
