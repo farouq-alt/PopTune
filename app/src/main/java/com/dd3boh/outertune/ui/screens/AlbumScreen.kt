@@ -59,6 +59,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -111,6 +112,7 @@ import com.dd3boh.outertune.ui.utils.getNSongsString
 import com.dd3boh.outertune.utils.LocalArtworkPath
 import com.dd3boh.outertune.utils.joinByBullet
 import com.dd3boh.outertune.viewmodels.AlbumViewModel
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -121,6 +123,7 @@ fun AlbumScreen(
 ) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
+    val density = LocalDensity.current
     val menuState = LocalMenuState.current
     val database = LocalDatabase.current
     val playerConnection = LocalPlayerConnection.current ?: return
@@ -192,8 +195,9 @@ fun AlbumScreen(
                     ) {
                         val thumbnailUrl = albumWithSongsLocal.album.thumbnailUrl
                         if (thumbnailUrl != null) {
+                            val px = (AlbumThumbnailSize.value * density.density).roundToInt()
                             AsyncImage(
-                                model = if (thumbnailUrl.startsWith("/storage")) LocalArtworkPath(thumbnailUrl, x = 500, y = 500) else thumbnailUrl,
+                                model = if (thumbnailUrl.startsWith("/storage")) LocalArtworkPath(thumbnailUrl, px, px) else thumbnailUrl,
                                 contentDescription = null,
                                 modifier = Modifier
                                     .size(AlbumThumbnailSize)

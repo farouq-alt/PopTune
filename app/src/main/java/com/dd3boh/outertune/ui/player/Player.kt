@@ -271,7 +271,7 @@ fun BottomSheetPlayer(
         withContext(Dispatchers.IO) {
             val result = context.imageLoader.execute(
                 ImageRequest.Builder(context)
-                    .data(mediaMetadata?.getThumbnailModel())
+                    .data(mediaMetadata?.getThumbnailModel(100, 100))
                     .allowHardware(false)
                     .build()
             )
@@ -325,7 +325,7 @@ fun BottomSheetPlayer(
                 ) { metadata ->
                     if (playerBackground == PlayerBackgroundStyle.BLUR) {
                         AsyncImage(
-                            model = metadata?.getThumbnailModel(),
+                            model = metadata?.getThumbnailModel(100, 100),
                             contentDescription = null,
                             contentScale = ContentScale.FillBounds,
                             modifier = Modifier

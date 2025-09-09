@@ -53,12 +53,12 @@ class CoilBitmapLoader @Inject constructor(
     }
 
     override fun decodeBitmap(data: ByteArray): ListenableFuture<Bitmap> =
-        scope.future(Dispatchers.IO) {
+        scope.future {
             BitmapFactory.decodeByteArray(data, 0, data.size) ?: drawPlaceholder(context)
         }
 
     override fun loadBitmap(uri: Uri): ListenableFuture<Bitmap> =
-        scope.future(Dispatchers.IO) {
+        scope.future {
             try {
                 // local images
                 val result = if (uri.toString().startsWith("/storage/")) {
@@ -102,7 +102,25 @@ class CoilBitmapLoader @Inject constructor(
                 } ?: drawPlaceholder(context)
 
                 if (data.x + data.y > 0) {
-                    image = image.scale(data.x, data.y)
+                    var realX = data.x
+                    var realY = data.y
+
+                    // scale maintaining aspect ratio
+                    if (image.width != image.height) {
+                        val frameW = data.x
+                        val frameH = data.y
+                        val imgW = image.width
+                        val imgH = image.height
+
+                        val scaleX = frameW.toFloat() / imgW
+                        val scaleY = frameH.toFloat() / imgH
+                        val scale = minOf(scaleX, scaleY)
+
+                        realX = (imgW * scale).toInt()
+                        realY = (imgH * scale).toInt()
+                    }
+
+                    image = image.scale(realX, realY)
                 }
 
                 ImageFetchResult(

@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -77,6 +78,7 @@ import com.zionhuang.innertube.YouTube
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @Composable
 fun SongMenu(
@@ -89,6 +91,7 @@ fun SongMenu(
 ) {
     val context = LocalContext.current
     val database = LocalDatabase.current
+    val density = LocalDensity.current
     val downloadUtil = LocalDownloadUtil.current
     val clipboardManager = LocalClipboard.current
     val syncUtils = LocalSyncUtils.current
@@ -132,8 +135,9 @@ fun SongMenu(
             makeTimeString(song.song.duration * 1000L)
         ),
         thumbnailContent = {
+            val px = (ListThumbnailSize.value * density.density).roundToInt()
             AsyncImage(
-                model = song.song.getThumbnailModel(),
+                model = song.song.getThumbnailModel(px, px),
                 contentDescription = null,
                 modifier = Modifier
                     .size(ListThumbnailSize)

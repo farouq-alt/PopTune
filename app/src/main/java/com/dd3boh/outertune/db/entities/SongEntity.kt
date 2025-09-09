@@ -102,9 +102,9 @@ data class SongEntity(
      */
     fun getDateModifiedLong(): Long? = dateModified?.toEpochSecond(ZoneOffset.UTC)
 
-    fun getThumbnailModel(resize: Boolean = true): Any? {
+    fun getThumbnailModel(sizeX: Int, sizeY: Int): Any? {
         return if (isLocal) {
-            LocalArtworkPath(thumbnailUrl ?: localPath, x = if (resize) 100 else -1, y = if (resize) 100 else -1)
+            LocalArtworkPath(thumbnailUrl ?: localPath, sizeX, sizeY)
         } else {
             localPath
         }

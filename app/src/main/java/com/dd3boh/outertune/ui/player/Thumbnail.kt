@@ -53,15 +53,15 @@ fun Thumbnail(
     customMediaMetadata: MediaMetadata? = null
 ) {
     val context = LocalContext.current
+    val currentView = LocalView.current
     val haptic = LocalHapticFeedback.current
     val playerConnection = LocalPlayerConnection.current ?: return
-    val currentView = LocalView.current
-    val playerMediaMetadata by playerConnection.mediaMetadata.collectAsState()
-    val error by playerConnection.error.collectAsState()
-
-    val mediaMetadata = customMediaMetadata ?: playerMediaMetadata
 
     var showLyrics by rememberPreference(ShowLyricsKey, defaultValue = false)
+
+    val playerMediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val error by playerConnection.error.collectAsState()
+    val mediaMetadata = customMediaMetadata ?: playerMediaMetadata
 
     DisposableEffect(showLyrics) {
         currentView.keepScreenOn = showLyrics
@@ -93,7 +93,7 @@ fun Thumbnail(
                 ) {
                     // YTM thumbnail arts
                     AsyncImage(
-                        model = mediaMetadata?.getThumbnailModel(false),
+                        model = mediaMetadata?.getThumbnailModel(),
                         contentDescription = null,
                         modifier = Modifier
                             .aspectRatio(1f)

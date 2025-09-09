@@ -402,7 +402,7 @@ class MainActivity : ComponentActivity() {
                             val uri = (if (song.isLocal) song.localPath else song.thumbnailUrl)?.toUri()
                             if (uri == null) return@withContext DefaultThemeColor
                             val model = if (uri.toString().startsWith("/storage/")) {
-                                LocalArtworkPath(uri.toString(), x = 100, y = 100)
+                                LocalArtworkPath(uri.toString(), 100, 100)
                             } else {
                                 uri
                             }

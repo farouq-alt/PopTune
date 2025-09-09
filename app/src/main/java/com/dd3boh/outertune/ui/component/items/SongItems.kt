@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -71,6 +72,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -371,12 +373,14 @@ fun SongGridItem(
     ),
     badges = badges,
     thumbnailContent = {
+        val density = LocalDensity.current
+        val px = (GridThumbnailHeight.value * density.density).roundToInt()
         Box(
             contentAlignment = Alignment.Companion.Center,
             modifier = Modifier.size(GridThumbnailHeight)
         ) {
             AsyncImage(
-                model = song.song.getThumbnailModel(),
+                model = song.song.getThumbnailModel(px, px),
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxSize()

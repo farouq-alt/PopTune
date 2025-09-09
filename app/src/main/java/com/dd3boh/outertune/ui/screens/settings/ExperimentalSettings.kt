@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Backup
 import androidx.compose.material.icons.rounded.ConfirmationNumber
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.DeveloperMode
 import androidx.compose.material.icons.rounded.Devices
 import androidx.compose.material.icons.rounded.ErrorOutline
@@ -47,6 +48,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil3.imageLoader
 import com.dd3boh.outertune.LocalDatabase
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.DevSettingsKey
@@ -109,6 +111,14 @@ fun ExperimentalSettings(
 
         PreferenceGroupTitle(
             title = stringResource(R.string.settings_debug)
+        )
+
+        PreferenceEntry(
+            title = { Text("Flush local image cache") },
+            icon = { Icon(Icons.Rounded.Delete, null) },
+            onClick = {
+                context.imageLoader.memoryCache?.clear()
+            }
         )
 
         // dev settings

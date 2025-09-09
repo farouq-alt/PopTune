@@ -344,7 +344,6 @@ fun LibrarySongsScreen(
                 ) { index, song ->
                     SongListItem(
                         song = song,
-                        showInLibraryIcon = filter != SongFilter.LIBRARY,
                         onPlay = {
                             playerConnection.playQueue(
                                 ListQueue(

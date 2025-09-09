@@ -9,6 +9,7 @@
 
 package com.dd3boh.outertune.ui.player
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -42,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -52,11 +54,13 @@ import androidx.media3.common.Player
 import coil3.compose.AsyncImage
 import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.R
+import com.dd3boh.outertune.constants.ListThumbnailSize
 import com.dd3boh.outertune.constants.MiniPlayerHeight
 import com.dd3boh.outertune.constants.ThumbnailCornerRadius
 import com.dd3boh.outertune.extensions.togglePlayPause
 import com.dd3boh.outertune.models.MediaMetadata
 import com.dd3boh.outertune.ui.component.button.IconButton
+import kotlin.math.roundToInt
 
 @Composable
 fun MiniPlayer(
@@ -64,12 +68,16 @@ fun MiniPlayer(
     duration: Long,
     modifier: Modifier = Modifier,
 ) {
+    val density = LocalDensity.current
+
     val playerConnection = LocalPlayerConnection.current ?: return
     val isPlaying by playerConnection.isPlaying.collectAsState()
     val playbackState by playerConnection.playbackState.collectAsState()
     val error by playerConnection.error.collectAsState()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val canSkipNext by playerConnection.canSkipNext.collectAsState()
+
+    val px = (ListThumbnailSize.value * density.density).roundToInt()
 
     Box(
         modifier = modifier
@@ -133,15 +141,19 @@ fun MiniPlayer(
     }
 }
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun MiniMediaInfo(
     mediaMetadata: MediaMetadata,
     error: PlaybackException?,
     modifier: Modifier = Modifier,
 ) {
+    val density = LocalDensity.current
     val playerConnection = LocalPlayerConnection.current
     val isWaitingForNetwork by playerConnection?.waitingForNetworkConnection?.collectAsState(initial = false)
         ?: remember { mutableStateOf(false) }
+
+    val px = (ListThumbnailSize.value * density.density).roundToInt()
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -155,7 +167,7 @@ fun MiniMediaInfo(
 
             // YTM thumbnail arts
             AsyncImage(
-                model = mediaMetadata.getThumbnailModel(),
+                model = mediaMetadata.getThumbnailModel(px, px),
                 contentDescription = null,
                 modifier = Modifier
                     .aspectRatio(1f)

@@ -63,6 +63,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -103,6 +104,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 
 const val ActiveBoxAlpha = 0.6f
 
@@ -645,8 +647,9 @@ fun ItemThumbnail(
     modifier: Modifier = Modifier,
     albumIndex: Int? = null,
 ) {
-    // ehhhh make a nicer thing for later
     val context = LocalContext.current
+    val density = LocalDensity.current
+    val px = (ListThumbnailSize.value * density.density).roundToInt()
 
     BoxWithConstraints(
         contentAlignment = Alignment.Center,
@@ -654,7 +657,12 @@ fun ItemThumbnail(
     ) {
         AsyncImage(
             imageLoader = context.imageLoader,
-            model = if (thumbnailUrl?.startsWith("/storage") == true) LocalArtworkPath(thumbnailUrl, x = 100, y = 100) else thumbnailUrl,
+            model = if (thumbnailUrl?.startsWith("/storage") == true) {
+                LocalArtworkPath(thumbnailUrl, px, px)
+            } else {
+                thumbnailUrl
+            },
+//            placeholder = rememberVectorPainter(placeholderIcon),
             contentDescription = null,
             modifier = Modifier
                 .fillMaxSize()
