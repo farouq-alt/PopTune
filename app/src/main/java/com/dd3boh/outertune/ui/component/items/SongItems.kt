@@ -62,6 +62,7 @@ import com.dd3boh.outertune.extensions.toMediaItem
 import com.dd3boh.outertune.extensions.togglePlayPause
 import com.dd3boh.outertune.models.DirectoryTree
 import com.dd3boh.outertune.ui.component.PlayingIndicatorBox
+import com.dd3boh.outertune.ui.component.SwipeToQueueBox
 import com.dd3boh.outertune.ui.component.button.IconButton
 import com.dd3boh.outertune.ui.menu.FolderMenu
 import com.dd3boh.outertune.ui.menu.MenuState
@@ -216,7 +217,7 @@ fun SongListItem(
         )
     }
 
-    _root_ide_package_.com.dd3boh.outertune.ui.component.SwipeToQueueBox(
+    SwipeToQueueBox(
         item = song.toMediaItem(),
         content = { listItem() },
         snackbarHostState = snackbarHostState,

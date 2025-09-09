@@ -89,6 +89,8 @@ import com.dd3boh.outertune.models.MediaMetadata
 import com.dd3boh.outertune.models.MultiQueueObject
 import com.dd3boh.outertune.models.toMediaMetadata
 import com.dd3boh.outertune.playback.queues.ListQueue
+import com.dd3boh.outertune.ui.component.PlayingIndicator
+import com.dd3boh.outertune.ui.component.PlayingIndicatorBox
 import com.dd3boh.outertune.utils.LocalArtworkPath
 import com.dd3boh.outertune.utils.joinByBullet
 import com.dd3boh.outertune.utils.makeTimeString
@@ -625,7 +627,7 @@ fun YouTubeCardItem(
                     )
                     .size(20.dp)
             ) {
-                _root_ide_package_.com.dd3boh.outertune.ui.component.PlayingIndicator(
+                PlayingIndicator(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.height(18.dp),
                     barWidth = 3.dp,
@@ -706,7 +708,7 @@ fun ItemThumbnail(
             }
         }
 
-        _root_ide_package_.com.dd3boh.outertune.ui.component.PlayingIndicatorBox(
+        PlayingIndicatorBox(
             isActive = isActive && !context.isPowerSaver(),
             playWhenReady = isPlaying,
             color = Color.White,
