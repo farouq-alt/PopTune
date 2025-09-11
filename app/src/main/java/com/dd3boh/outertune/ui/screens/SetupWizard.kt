@@ -126,6 +126,7 @@ import com.dd3boh.outertune.ui.screens.settings.fragments.LocalScannerFrag
 import com.dd3boh.outertune.ui.screens.settings.fragments.LocalizationFrag
 import com.dd3boh.outertune.ui.screens.settings.fragments.ThemeAppFrag
 import com.dd3boh.outertune.ui.utils.backToMain
+import com.dd3boh.outertune.utils.dlCoroutine
 import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.utils.scanners.stringFromUriList
@@ -633,7 +634,7 @@ fun SetupWizard(
                                     showDlPathDialog = false
                                     tempFilePath = null
 
-                                    coroutineScope.launch {
+                                    coroutineScope.launch(dlCoroutine) {
                                         delay(1000)
                                         downloadUtil.cd()
                                         downloadUtil.scanDownloads()

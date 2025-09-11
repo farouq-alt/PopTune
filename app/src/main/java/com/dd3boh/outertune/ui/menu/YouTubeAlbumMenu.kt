@@ -45,6 +45,7 @@ import com.dd3boh.outertune.ui.dialog.AddToPlaylistDialog
 import com.dd3boh.outertune.ui.dialog.AddToQueueDialog
 import com.dd3boh.outertune.ui.dialog.ArtistDialog
 import com.dd3boh.outertune.utils.reportException
+import com.dd3boh.outertune.utils.syncCoroutine
 import com.zionhuang.innertube.YouTube
 import com.zionhuang.innertube.models.AlbumItem
 import kotlinx.coroutines.Dispatchers
@@ -241,7 +242,7 @@ fun YouTubeAlbumMenu(
         AddToPlaylistDialog(
             navController = navController,
             onGetSong = { playlist ->
-                coroutineScope.launch(Dispatchers.IO) {
+                coroutineScope.launch(syncCoroutine) {
                     playlist.playlist.browseId?.let { playlistId ->
                         album?.album?.playlistId?.let { addPlaylistId ->
                             YouTube.addPlaylistToPlaylist(playlistId, addPlaylistId)

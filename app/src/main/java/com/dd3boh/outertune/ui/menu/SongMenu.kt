@@ -74,6 +74,7 @@ import com.dd3boh.outertune.ui.dialog.TextFieldDialog
 import com.dd3boh.outertune.utils.joinByBullet
 import com.dd3boh.outertune.utils.makeTimeString
 import com.dd3boh.outertune.utils.rememberEnumPreference
+import com.dd3boh.outertune.utils.syncCoroutine
 import com.zionhuang.innertube.YouTube
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -103,7 +104,7 @@ fun SongMenu(
     val song = songState.value ?: originalSong
     val download by LocalDownloadUtil.current.getDownload(originalSong.id).collectAsState(initial = null)
     val coroutineScope =
-        CoroutineScope(Dispatchers.IO) // rememberCoroutineScope has exception "rememberCoroutineScope left the composition"
+        CoroutineScope(syncCoroutine) // rememberCoroutineScope has exception "rememberCoroutineScope left the composition"
 
     val currentFormatState = database.format(originalSong.id).collectAsState(initial = null)
     val currentFormat = currentFormatState.value
@@ -218,17 +219,18 @@ fun SongMenu(
                 title = R.string.remove_from_playlist
             ) {
                 database.transaction {
-                    coroutineScope.launch {
-                        playlist?.playlist?.browseId?.let { playlistId ->
-                            if (playlistSong.map.setVideoId != null) {
-                                YouTube.removeFromPlaylist(
-                                    playlistId, playlistSong.map.songId, playlistSong.map.setVideoId
-                                )
-                            }
-                        }
-                    }
                     move(playlistSong.map.playlistId, playlistSong.map.position, Int.MAX_VALUE)
                     delete(playlistSong.map.copy(position = Int.MAX_VALUE))
+                }
+
+                coroutineScope.launch {
+                    playlist?.playlist?.browseId?.let { playlistId ->
+                        if (playlistSong.map.setVideoId != null) {
+                            YouTube.removeFromPlaylist(
+                                playlistId, playlistSong.map.songId, playlistSong.map.setVideoId
+                            )
+                        }
+                    }
                 }
 
                 onDismiss()
@@ -371,7 +373,7 @@ fun SongMenu(
         AddToPlaylistDialog(
             navController = navController,
             onGetSong = { playlist ->
-                CoroutineScope(Dispatchers.IO).launch {
+                CoroutineScope(syncCoroutine).launch {
                     playlist.playlist.browseId?.let { browseId ->
                         YouTube.addToPlaylist(browseId, song.id)
                     }

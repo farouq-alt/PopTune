@@ -252,6 +252,7 @@ import com.dd3boh.outertune.utils.CoilBitmapLoader
 import com.dd3boh.outertune.utils.LocalArtworkPath
 import com.dd3boh.outertune.utils.NetworkConnectivityObserver
 import com.dd3boh.outertune.utils.SyncUtils
+import com.dd3boh.outertune.utils.coilCoroutine
 import com.dd3boh.outertune.utils.compareVersion
 import com.dd3boh.outertune.utils.dataStore
 import com.dd3boh.outertune.utils.get
@@ -396,26 +397,29 @@ class MainActivity : ComponentActivity() {
                     return@LaunchedEffect
                 }
                 playerConnection.service.currentMediaMetadata.collectLatest { song ->
-                    themeColor = if (song != null) {
-                        withContext(Dispatchers.IO) {
+                    coroutineScope.launch(coilCoroutine) {
+                        var ret = DefaultThemeColor
+                        if (song != null) {
                             val uri = (if (song.isLocal) song.localPath else song.thumbnailUrl)?.toUri()
-                            if (uri == null) return@withContext DefaultThemeColor
-                            val model = if (uri.toString().startsWith("/storage/")) {
-                                LocalArtworkPath(uri.toString(), 100, 100)
-                            } else {
-                                uri
+                            if (uri != null) {
+                                val model = if (uri.toString().startsWith("/storage/")) {
+                                    LocalArtworkPath(uri.toString(), 100, 100)
+                                } else {
+                                    uri
+                                }
+
+                                val result = applicationContext.imageLoader.execute(
+                                    ImageRequest.Builder(applicationContext)
+                                        .data(model)
+                                        .allowHardware(false)
+                                        .build()
+                                )
+
+                                ret = result.image?.toBitmap()?.extractThemeColor() ?: DefaultThemeColor
                             }
-
-                            val result = applicationContext.imageLoader.execute(
-                                ImageRequest.Builder(applicationContext)
-                                    .data(model)
-                                    .allowHardware(false)
-                                    .build()
-                            )
-
-                            result.image?.toBitmap()?.extractThemeColor() ?: DefaultThemeColor
                         }
-                    } else DefaultThemeColor
+                        themeColor = ret
+                    }
                 }
             }
 
@@ -451,7 +455,7 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(Unit) {
                 downloadUtil.resumeDownloadsOnStart()
 
-                CoroutineScope(lmScannerCoroutine).launch {
+                coroutineScope.launch((lmScannerCoroutine)) {
                     val perms = checkSelfPermission(MEDIA_PERMISSION_LEVEL)
                     // Check if the permissions for local media access
                     if (scannerState.value <= 0 && autoScan && oobeStatus >= OOBE_VERSION && localLibEnable) {
@@ -506,19 +510,21 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                if (!ENABLE_UPDATE_CHECKER) return@LaunchedEffect
-                if (compareVersion(lastVer, BuildConfig.VERSION_NAME) <= 0) {
-                    onLastVerChange(BuildConfig.VERSION_NAME)
-                    onUpdateAvailableChange(false)
-                    Log.d(MAIN_TAG, "App version is >= latest. Tracking current version")
-                }
+                coroutineScope.launch(Dispatchers.IO) {
+                    if (!ENABLE_UPDATE_CHECKER) return@launch
+                    if (compareVersion(lastVer, BuildConfig.VERSION_NAME) <= 0) {
+                        onLastVerChange(BuildConfig.VERSION_NAME)
+                        onUpdateAvailableChange(false)
+                        Log.d(MAIN_TAG, "App version is >= latest. Tracking current version")
+                    }
 
-                Updater.tryCheckUpdate(this@MainActivity as Context)?.let {
-                    if (compareVersion(lastVer, it) < 0) {
-                        onUpdateAvailableChange(true)
-                        Log.d(MAIN_TAG, "Update available. UpdateAvailable set to true")
-                    } else {
-                        Log.d(MAIN_TAG, "No new updates available")
+                    Updater.tryCheckUpdate(this@MainActivity as Context)?.let {
+                        if (compareVersion(lastVer, it) < 0) {
+                            onUpdateAvailableChange(true)
+                            Log.d(MAIN_TAG, "Update available. UpdateAvailable set to true")
+                        } else {
+                            Log.d(MAIN_TAG, "No new updates available")
+                        }
                     }
                 }
             }
@@ -587,7 +593,6 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    val coroutineScope = rememberCoroutineScope()
                     var sharedSong: SongItem? by remember {
                         mutableStateOf(null)
                     }

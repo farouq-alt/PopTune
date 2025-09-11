@@ -75,6 +75,7 @@ import com.dd3boh.outertune.ui.component.button.ResizableIconButton
 import com.dd3boh.outertune.ui.dialog.ActionPromptDialog
 import com.dd3boh.outertune.ui.dialog.DefaultDialog
 import com.dd3boh.outertune.ui.dialog.InfoLabel
+import com.dd3boh.outertune.utils.dlCoroutine
 import com.dd3boh.outertune.utils.formatFileSize
 import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.utils.scanners.absoluteFilePathFromUri
@@ -541,7 +542,7 @@ fun ColumnScope.DownloadsFrag() {
             },
             onConfirm = {
                 onDlPathExtraChange(stringFromUriList(tempScanPaths.toList()))
-                coroutineScope.launch {
+                coroutineScope.launch(dlCoroutine) {
                     delay(1000)
                     downloadUtil.cd()
                     downloadUtil.scanDownloads()
@@ -661,7 +662,9 @@ fun ColumnScope.DownloadsFrag() {
                 TextButton(
                     onClick = {
                         showImportDialog = false
-                        downloadUtil.scanDownloads()
+                        coroutineScope.launch(dlCoroutine) {
+                            downloadUtil.scanDownloads()
+                        }
                     }
                 ) {
                     Text(text = stringResource(android.R.string.ok))
@@ -696,7 +699,9 @@ fun ColumnScope.DownloadsFrag() {
                     onClick = {
                         showMigrationDialog = false
 
-                        downloadUtil.migrateDownloads()
+                        coroutineScope.launch(dlCoroutine) {
+                            downloadUtil.migrateDownloads()
+                        }
                     }
                 ) {
                     Text(text = stringResource(android.R.string.ok))

@@ -65,7 +65,9 @@ import com.dd3boh.outertune.ui.dialog.AddToPlaylistDialog
 import com.dd3boh.outertune.ui.dialog.AddToQueueDialog
 import com.dd3boh.outertune.ui.dialog.DefaultDialog
 import com.dd3boh.outertune.ui.dialog.TextFieldDialog
+import com.dd3boh.outertune.utils.lmScannerCoroutine
 import com.dd3boh.outertune.utils.reportException
+import com.dd3boh.outertune.utils.syncCoroutine
 import com.zionhuang.innertube.YouTube
 import com.zionhuang.innertube.models.WatchEndpoint
 import kotlinx.coroutines.CoroutineScope
@@ -94,7 +96,7 @@ fun PlaylistMenu(
         contract = ActivityResultContracts.CreateDocument("audio/x-mpegurl")
     ) { uri: Uri? ->
         uri?.let {
-            CoroutineScope(Dispatchers.IO).launch {
+            CoroutineScope(lmScannerCoroutine).launch {
                 try {
                     var result = "#EXTM3U\n"
                     songs.forEach { s ->
@@ -332,7 +334,7 @@ fun PlaylistMenu(
                     update(playlist.playlist.copy(name = name))
                 }
 
-                coroutineScope.launch(Dispatchers.IO) {
+                coroutineScope.launch(syncCoroutine) {
                     playlist.playlist.browseId?.let { YouTube.renamePlaylist(it, name) }
                 }
             }
@@ -411,7 +413,7 @@ fun PlaylistMenu(
                         }
 
                         if (!playlist.playlist.isLocal) {
-                            coroutineScope.launch(Dispatchers.IO) {
+                            coroutineScope.launch(syncCoroutine) {
                                 playlist.playlist.browseId?.let { YouTube.deletePlaylist(it) }
                             }
                         }
@@ -446,7 +448,7 @@ fun PlaylistMenu(
             navController = navController,
 
             onGetSong = {
-                coroutineScope.launch(Dispatchers.IO) {
+                coroutineScope.launch(syncCoroutine) {
                     // add songs to playlist and push to ytm
                     songs.let { playlist.playlist.browseId?.let { YouTube.addPlaylistToPlaylist(it, playlist.id) } }
 

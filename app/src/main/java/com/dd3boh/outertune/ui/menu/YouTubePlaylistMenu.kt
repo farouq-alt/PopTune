@@ -54,6 +54,7 @@ import com.dd3boh.outertune.ui.component.items.YouTubeListItem
 import com.dd3boh.outertune.ui.dialog.AddToPlaylistDialog
 import com.dd3boh.outertune.ui.dialog.AddToQueueDialog
 import com.dd3boh.outertune.ui.dialog.DefaultDialog
+import com.dd3boh.outertune.utils.syncCoroutine
 import com.zionhuang.innertube.YouTube
 import com.zionhuang.innertube.models.PlaylistItem
 import com.zionhuang.innertube.models.SongItem
@@ -329,7 +330,7 @@ fun YouTubePlaylistMenu(
                     allSongs.forEach(::insert)
                 }
 
-                coroutineScope.launch(Dispatchers.IO) {
+                coroutineScope.launch(syncCoroutine) {
                     targetPlaylist.playlist.browseId?.let { playlistId ->
                         YouTube.addPlaylistToPlaylist(playlistId, targetPlaylist.id)
                     }

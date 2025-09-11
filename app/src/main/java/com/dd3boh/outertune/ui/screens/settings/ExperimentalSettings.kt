@@ -63,6 +63,7 @@ import com.dd3boh.outertune.ui.component.PreferenceGroupTitle
 import com.dd3boh.outertune.ui.component.SwitchPreference
 import com.dd3boh.outertune.ui.component.button.IconButton
 import com.dd3boh.outertune.ui.utils.backToMain
+import com.dd3boh.outertune.utils.lmScannerCoroutine
 import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.utils.scanners.LocalMediaScanner
 import kotlinx.coroutines.Dispatchers
@@ -137,7 +138,7 @@ fun ExperimentalSettings(
                 onClick = {
                     Toast.makeText(context, context.getString(R.string.scanner_ytm_link_start), Toast.LENGTH_SHORT)
                         .show()
-                    coroutineScope.launch(Dispatchers.IO) {
+                    coroutineScope.launch(lmScannerCoroutine) {
                         val scanner = LocalMediaScanner.getScanner(context, ScannerImpl.TAGLIB, SCANNER_OWNER_LM)
                         Log.i(SETTINGS_TAG, "Force Migrating local artists to YTM (MANUAL TRIGGERED)")
                         scanner.localToRemoteArtist(database)

@@ -285,6 +285,7 @@ fun SelectionMediaMetadataMenu(
             navController = navController,
             onGetSong = {
                 selection.map {
+                    // TODO: wth is this code quality???
                     runBlocking {
                         withContext(Dispatchers.IO) {
                             database.insert(it)

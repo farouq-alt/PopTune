@@ -721,7 +721,7 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
     }
 
     /**
-     * Load a queue into the media player
+     * Load a queue into the media player. This should ran exclusively on the main thread.
      *
      * @param item Queue object
      * @param shouldResume Set to true for the player should resume playing at the current song's last save position or

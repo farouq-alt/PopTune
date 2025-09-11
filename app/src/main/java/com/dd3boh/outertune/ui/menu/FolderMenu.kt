@@ -46,6 +46,7 @@ import com.dd3boh.outertune.ui.component.items.SongFolderItem
 import com.dd3boh.outertune.ui.dialog.AddToPlaylistDialog
 import com.dd3boh.outertune.ui.dialog.AddToQueueDialog
 import com.dd3boh.outertune.utils.joinByBullet
+import com.dd3boh.outertune.utils.lmScannerCoroutine
 import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.utils.reportException
@@ -79,7 +80,7 @@ fun FolderMenu(
         contract = ActivityResultContracts.CreateDocument("audio/x-mpegurl")
     ) { uri: Uri? ->
         uri?.let {
-            CoroutineScope(Dispatchers.IO).launch {
+            CoroutineScope(lmScannerCoroutine).launch {
                 try {
                     var result = "#EXTM3U\n"
                     allFolderSongs.forEach { s ->

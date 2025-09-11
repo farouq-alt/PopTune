@@ -131,6 +131,7 @@ import com.dd3boh.outertune.ui.utils.getNSongsString
 import com.dd3boh.outertune.utils.makeTimeString
 import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
+import com.dd3boh.outertune.utils.syncCoroutine
 import com.dd3boh.outertune.viewmodels.LocalPlaylistViewModel
 import com.zionhuang.innertube.YouTube
 import kotlinx.coroutines.Dispatchers
@@ -243,7 +244,7 @@ fun LocalPlaylistScreen(
                         update(playlistEntity.copy(name = name))
                     }
 
-                    viewModel.viewModelScope.launch(Dispatchers.IO) {
+                    viewModel.viewModelScope.launch(syncCoroutine) {
                         playlistEntity.browseId?.let { YouTube.renamePlaylist(it, name) }
                     }
                 }

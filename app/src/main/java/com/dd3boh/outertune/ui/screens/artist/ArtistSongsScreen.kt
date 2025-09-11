@@ -69,6 +69,7 @@ import com.zionhuang.innertube.YouTube
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -181,8 +182,7 @@ fun ArtistSongsScreen(
                             val playlistId = YouTube.artist(artist?.id!!).getOrNull()
                                 ?.artist?.shuffleEndpoint?.playlistId
 
-                            // for some reason this get called on the wrong thread and crashes, use main
-                            CoroutineScope(Dispatchers.Main).launch {
+                            withContext(Dispatchers.Main) {
                                 playerConnection.playQueue(
                                     ListQueue(
                                         title = artist?.artist?.name,

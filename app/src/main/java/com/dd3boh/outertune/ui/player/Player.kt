@@ -140,6 +140,7 @@ import com.dd3boh.outertune.ui.component.rememberBottomSheetState
 import com.dd3boh.outertune.ui.menu.PlayerMenu
 import com.dd3boh.outertune.ui.theme.extractGradientColors
 import com.dd3boh.outertune.ui.utils.SnapLayoutInfoProvider
+import com.dd3boh.outertune.utils.coilCoroutine
 import com.dd3boh.outertune.utils.makeTimeString
 import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
@@ -268,7 +269,7 @@ fun BottomSheetPlayer(
     LaunchedEffect(mediaMetadata) {
         if (playerBackground != PlayerBackgroundStyle.GRADIENT || context.isPowerSaver()) return@LaunchedEffect
 
-        withContext(Dispatchers.IO) {
+        withContext(coilCoroutine) {
             val result = context.imageLoader.execute(
                 ImageRequest.Builder(context)
                     .data(mediaMetadata?.getThumbnailModel(100, 100))

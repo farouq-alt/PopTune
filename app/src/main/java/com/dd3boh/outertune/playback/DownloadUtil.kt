@@ -37,6 +37,7 @@ import com.dd3boh.outertune.playback.downloadManager.DownloadDirectoryManagerOt
 import com.dd3boh.outertune.playback.downloadManager.DownloadManagerOt
 import com.dd3boh.outertune.utils.YTPlayerUtils
 import com.dd3boh.outertune.utils.dataStore
+import com.dd3boh.outertune.utils.dlCoroutine
 import com.dd3boh.outertune.utils.enumPreference
 import com.dd3boh.outertune.utils.get
 import com.dd3boh.outertune.utils.reportException
@@ -273,70 +274,69 @@ class DownloadUtil @Inject constructor(
     /**
      * Migrated existing downloads from the download cache to the new system in external storage
      */
-    fun migrateDownloads() {
+    suspend fun migrateDownloads() {
         if (isProcessingDownloads.value) return
         isProcessingDownloads.value = true
-        CoroutineScope(Dispatchers.IO).launch {
-            var runs = 0
-            try {
-                // "skeleton" of old download manager to access old download data
-                val dataSourceFactory = ResolvingDataSource.Factory(
-                    CacheDataSource.Factory()
-                        .setCache(playerCache)
-                        .setUpstreamDataSourceFactory(
-                            OkHttpDataSource.Factory(
-                                OkHttpClient.Builder()
-                                    .proxy(YouTube.proxy)
-                                    .build()
-                            )
+
+        var runs = 0
+        try {
+            // "skeleton" of old download manager to access old download data
+            val dataSourceFactory = ResolvingDataSource.Factory(
+                CacheDataSource.Factory()
+                    .setCache(playerCache)
+                    .setUpstreamDataSourceFactory(
+                        OkHttpDataSource.Factory(
+                            OkHttpClient.Builder()
+                                .proxy(YouTube.proxy)
+                                .build()
                         )
-                ) { dataSpec ->
-                    return@Factory dataSpec
-                }
+                    )
+            ) { dataSpec ->
+                return@Factory dataSpec
+            }
 
-                val downloadManager: DownloadManager = DownloadManager(
-                    context,
-                    databaseProvider,
-                    downloadCache,
-                    dataSourceFactory,
-                    Executor(Runnable::run)
-                ).apply {
-                    maxParallelDownloads = 3
-                }
+            val downloadManager: DownloadManager = DownloadManager(
+                context,
+                databaseProvider,
+                downloadCache,
+                dataSourceFactory,
+                Executor(Runnable::run)
+            ).apply {
+                maxParallelDownloads = 3
+            }
 
-                // actual migration code
-                val downloadedSongs = mutableMapOf<String, Download>()
-                val cursor = downloadManager.downloadIndex.getDownloads()
-                while (cursor.moveToNext()) {
-                    downloadedSongs[cursor.download.request.id] = cursor.download
-                }
+            // actual migration code
+            val downloadedSongs = mutableMapOf<String, Download>()
+            val cursor = downloadManager.downloadIndex.getDownloads()
+            while (cursor.moveToNext()) {
+                downloadedSongs[cursor.download.request.id] = cursor.download
+            }
 
-                // copy all completed downloads
-                val toMigrate = downloadedSongs.filter { it.value.state == Download.STATE_COMPLETED }
-                toMigrate.forEach { s ->
-                    if (runs++ % 10 == 0) {
-                        Log.d(TAG, "Migrating download: $runs/${toMigrate.size}")
-                        if (runs % 20 == 0) {
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(context, "$runs/${toMigrate.size}", LENGTH_SHORT).show()
-                            }
+            // copy all completed downloads
+            val toMigrate = downloadedSongs.filter { it.value.state == Download.STATE_COMPLETED }
+            toMigrate.forEach { s ->
+                if (runs++ % 10 == 0) {
+                    Log.d(TAG, "Migrating download: $runs/${toMigrate.size}")
+                    if (runs % 20 == 0) {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(context, "$runs/${toMigrate.size}", LENGTH_SHORT).show()
                         }
                     }
-                    val songFromCache = getFromCache(downloadCache, s.key)
-                    if (songFromCache != null) {
-                        downloadCache.removeResource(s.key)
-                        downloadMgr.enqueue(
-                            mediaId = s.key,
-                            data = songFromCache,
-                            displayName = runBlocking { database.song(s.key).first()?.title ?: "" })
-                    }
                 }
-                scanDownloads()
-            } catch (e: Exception) {
-                reportException(e)
-            } finally {
-                isProcessingDownloads.value = false
+                val songFromCache = getFromCache(downloadCache, s.key)
+                if (songFromCache != null) {
+                    downloadCache.removeResource(s.key)
+                    downloadMgr.enqueue(
+                        mediaId = s.key,
+                        data = songFromCache,
+                        displayName = runBlocking { database.song(s.key).first()?.title ?: "" })
+                }
             }
+            scanDownloads()
+        } catch (e: Exception) {
+            reportException(e)
+        } finally {
+            isProcessingDownloads.value = false
         }
     }
 
@@ -352,15 +352,17 @@ class DownloadUtil @Inject constructor(
     /**
      * Rescan download directory and updates songs
      */
-    fun rescanDownloads() {
+    suspend fun rescanDownloads() {
         isProcessingDownloads.value = true
-        var dbDownloads = runBlocking(Dispatchers.IO) { database.downloadedOrQueuedSongs().first() }
+        var dbDownloads = database.downloadedOrQueuedSongs().first()
         val result = mutableMapOf<String, LocalDateTime>()
 
         // remove missing files
         val missingFiles = localMgr.getMissingFiles(dbDownloads.filterNot { it.song.dateDownload == null })
-        missingFiles.forEach {
-            runBlocking(Dispatchers.IO) { database.removeDownloadSong(it.song.id) }
+        database.transaction {
+            missingFiles.forEach {
+                removeDownloadSong(it.song.id)
+            }
         }
 
         // register new files
@@ -373,7 +375,7 @@ class DownloadUtil @Inject constructor(
         customDownloads.value = result
 
         // Re scan internal downloads
-        dbDownloads = runBlocking(Dispatchers.IO) { database.downloadRelinkableSongs().first() }
+        dbDownloads = database.downloadRelinkableSongs().first()
         val cursor = downloadManager.downloadIndex.getDownloads()
         val candidates = ArrayList<Download>()
         while (cursor.moveToNext()) {
@@ -382,7 +384,7 @@ class DownloadUtil @Inject constructor(
             }
         }
 
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(dlCoroutine).launch {
             database.transaction {
                 for (d in candidates) {
                     val updateTime = Instant.ofEpochMilli(d.updateTimeMs).atZone(ZoneOffset.UTC).toLocalDateTime()
@@ -399,57 +401,53 @@ class DownloadUtil @Inject constructor(
      * This is intended for re-importing existing songs (ex. songs get moved, after restoring app backup), thus all
      * songs will already need to exist in the database.
      */
-    fun scanDownloads() {
+    suspend fun scanDownloads() {
         if (isProcessingDownloads.value) return
         isProcessingDownloads.value = true
-        CoroutineScope(Dispatchers.IO).launch {
-//            val scanner = LocalMediaScanner.getScanner(context, ScannerImpl.TAGLIB, SCANNER_OWNER_DL)
-            runBlocking(Dispatchers.IO) { database.removeAllDownloadedSongs() }
-            val result = mutableMapOf<String, LocalDateTime>()
-            val timeNow = LocalDateTime.now()
 
-            // remove missing files
-            val availableFiles = localMgr.getAvailableFiles(false)
-            availableFiles.forEach { f ->
-                runBlocking(Dispatchers.IO) {
-                    try {
-                        val file = fileFromUri(context, f.value)
-                        if (file == null) throw (InvalidAudioFileException("Hello darkness my old friend"))
-                        // TODO: validate files in download folder
+//            val scanner = LocalMediaScanner.getScanner(context, ScannerImpl.TAGLIB, SCANNER_OWNER_DL)
+        database.removeAllDownloadedSongs()
+        val result = mutableMapOf<String, LocalDateTime>()
+        val timeNow = LocalDateTime.now()
+
+        // remove missing files
+        val availableFiles = localMgr.getAvailableFiles(false)
+        availableFiles.forEach { f ->
+            try {
+                val file = fileFromUri(context, f.value)
+                if (file == null) throw (InvalidAudioFileException("Hello darkness my old friend"))
+                // TODO: validate files in download folder
 //                        val format: FormatEntity? = scanner.advancedScan(f.value).format
 //                        if (format != null) {
 //                            database.upsert(format)
 //                        }
-                        database.registerDownloadSong(f.key, timeNow, file.absolutePath)
+                database.registerDownloadSong(f.key, timeNow, file.absolutePath)
 
-                    } catch (e: InvalidAudioFileException) {
-                        reportException(e)
-                    }
-                }
+            } catch (e: InvalidAudioFileException) {
+                reportException(e)
             }
+        }
 //            LocalMediaScanner.destroyScanner(SCANNER_OWNER_DL)
 
-            // pull from db again
-            val dbDownloads = runBlocking(Dispatchers.IO) { database.downloadedSongs().first() }
-            dbDownloads.forEach { s ->
-                result[s.song.id] = timeNow
-            }
-
-            isProcessingDownloads.value = false
-            customDownloads.value = result
+        // pull from db again
+        val dbDownloads = database.downloadedSongs().first()
+        dbDownloads.forEach { s ->
+            result[s.song.id] = timeNow
         }
+
+        isProcessingDownloads.value = false
+        customDownloads.value = result
     }
 
 
     init {
         val result = mutableMapOf<String, Download>()
-        val cursor = downloadManager.downloadIndex.getDownloads()
-        while (cursor.moveToNext()) {
-            result[cursor.download.request.id] = cursor.download
-        }
 
-        // custom download location
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(dlCoroutine).launch {
+            val cursor = downloadManager.downloadIndex.getDownloads()
+            while (cursor.moveToNext()) {
+                result[cursor.download.request.id] = cursor.download
+            }
             rescanDownloads()
         }
 

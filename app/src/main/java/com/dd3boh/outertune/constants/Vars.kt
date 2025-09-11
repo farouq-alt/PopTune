@@ -16,17 +16,20 @@ const val ENABLE_FFMETADATAEX = BuildConfig.FLAVOR == "full"
  * Extra configuration
  */
 
-// Maximum concurrent image resolution jobs
+// maximum concurrent image resolution jobs
 const val MAX_COIL_JOBS = 16
 
-// maximum parallel download jobs allowed
-const val MAX_CONCURRENT_DOWNLOAD_JOBS = 3 // ytm defaults to 3
+// maximum concurrent download jobs allowed
+const val MAX_DL_JOBS = 5
 
-// maximum parallel scanner jobs allowed
-const val MAX_LM_SCANNER_JOBS = 4
+// maximum concurrent scanner jobs allowed
+const val MAX_LM_SCANNER_JOBS = 7 // 1 dispatcher + 6 workers
 
-// maximum parallel scanner jobs allowed
+// maximum concurrent scanner jobs allowed
 const val MAX_YTM_SYNC_JOBS = 3
+
+// maximum concurrent scanner jobs allowed
+const val MAX_YTM_CONTENT_JOBS = 16
 
 
 /**
@@ -34,11 +37,16 @@ const val MAX_YTM_SYNC_JOBS = 3
  */
 const val LYRIC_FETCH_TIMEOUT = 60000L
 const val SNACKBAR_VERY_SHORT = 2000L
+
 const val OOBE_VERSION = 5
+
 const val SCANNER_OWNER_DL = 32
 const val SCANNER_OWNER_LM = 1
 const val SCANNER_OWNER_M3U = 2
+
 const val SYNC_CD = 60000 * 30
+
+const val MAX_PLAYER_CONSECUTIVE_ERR = 3
 
 val DEFAULT_PLAYER_BACKGROUND =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PlayerBackgroundStyle.BLUR else PlayerBackgroundStyle.GRADIENT

@@ -59,6 +59,7 @@ import com.dd3boh.outertune.ui.dialog.AddToQueueDialog
 import com.dd3boh.outertune.ui.dialog.ArtistDialog
 import com.dd3boh.outertune.utils.joinByBullet
 import com.dd3boh.outertune.utils.makeTimeString
+import com.dd3boh.outertune.utils.syncCoroutine
 import com.zionhuang.innertube.YouTube
 import com.zionhuang.innertube.models.SongItem
 import kotlinx.coroutines.Dispatchers
@@ -279,7 +280,7 @@ fun YouTubeSongMenu(
                     insert(song.toMediaMetadata())
                 }
 
-                coroutineScope.launch(Dispatchers.IO) {
+                coroutineScope.launch(syncCoroutine) {
                     playlist.playlist.browseId?.let { browseId ->
                         YouTube.addToPlaylist(browseId, song.id)
                     }

@@ -6,6 +6,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.dd3boh.outertune.utils.LocalArtworkPath
+import com.dd3boh.outertune.utils.syncCoroutine
 import com.zionhuang.innertube.YouTube
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -60,7 +61,7 @@ data class SongEntity(
         likedDate = if (!liked) LocalDateTime.now() else null,
         inLibrary = if (!liked) inLibrary ?: LocalDateTime.now() else inLibrary
     ).also {
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(syncCoroutine).launch {
             YouTube.likeVideo(id, !liked)
             this.cancel()
         }
@@ -102,11 +103,11 @@ data class SongEntity(
      */
     fun getDateModifiedLong(): Long? = dateModified?.toEpochSecond(ZoneOffset.UTC)
 
-    fun getThumbnailModel(sizeX: Int, sizeY: Int): Any? {
+    fun getThumbnailModel(sizeX: Int = -1, sizeY: Int = -1): Any? {
         return if (isLocal) {
             LocalArtworkPath(thumbnailUrl ?: localPath, sizeX, sizeY)
         } else {
-            localPath
+            thumbnailUrl
         }
     }
 

@@ -63,6 +63,7 @@ import com.dd3boh.outertune.db.entities.Song
 import com.dd3boh.outertune.db.entities.SongEntity
 import com.dd3boh.outertune.ui.component.EnumListPreference
 import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
+import com.dd3boh.outertune.utils.lmScannerCoroutine
 import com.dd3boh.outertune.utils.reportException
 import com.dd3boh.outertune.utils.scanners.LocalMediaScanner
 import com.dd3boh.outertune.utils.scanners.LocalMediaScanner.Companion.compareM3uSong
@@ -70,7 +71,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.io.InputStream
 
 @Composable
@@ -96,15 +96,15 @@ fun ImportM3uDialog(
     val rejectedSongs = remember { mutableStateListOf<String>() }
 
     val importM3uLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(lmScannerCoroutine).launch {
             try {
                 isLoading = true
                 if (uri != null) {
                     val result = loadM3u(
-                        context,
-                        database,
-                        snackbarHostState,
-                        uri,
+                        context = context,
+                        database = database,
+                        snackbarHostState = snackbarHostState,
+                        uri = uri,
                         matchStrength = scannerSensitivity,
                         searchOnline = remoteLookup
                     )
@@ -308,7 +308,7 @@ fun ImportM3uDialog(
  * @param matchStrength How lax should the scanner be
  * @param searchOnline Whether to enable fallback for trying to find the song on YTM
  */
-fun loadM3u(
+suspend fun loadM3u(
     context: Context,
     database: MusicDatabase,
     snackbarHostState: SnackbarHostState,
@@ -345,30 +345,25 @@ fun loadM3u(
                         // now find the best match
                         // first, search for songs in the database. Supplement with remote songs if no results are found
                         val matches = if (source == null) {
-                            runBlocking(Dispatchers.IO) {
-                                database.searchSongsInDb(title).first().toMutableList()
-                            }
+                            database.searchSongsInDb(title).first().toMutableList()
                         } else {
-                            runBlocking(Dispatchers.IO) {
-                                // local songs have a source format of "<id>, <path>", YTM songs have "<url>
-                                var id = source.substringBefore(',')
-                                if (id.isEmpty()) {
-                                    id = source.substringAfter("watch?").substringAfter("=").substringBefore('?')
-                                }
-                                val dbResult = mutableListOf(database.song(id).first())
-                                dbResult.addAll(database.searchSongsInDb(title).first())
-                                dbResult.filterNotNull().toMutableList()
+                            // local songs have a source format of "<id>, <path>", YTM songs have "<url>
+                            var id = source.substringBefore(',')
+                            if (id.isEmpty()) {
+                                id = source.substringAfter("watch?").substringAfter("=").substringBefore('?')
                             }
+                            val dbResult = mutableListOf(database.song(id).first())
+                            dbResult.addAll(database.searchSongsInDb(title).first())
+                            dbResult.filterNotNull().toMutableList()
                         }
                         // do not search for local songs
                         if (searchOnline && matches.isEmpty() && source?.contains(',') == false) {
-                            val onlineResult = runBlocking(Dispatchers.IO) {
+                            val onlineResult =
                                 LocalMediaScanner.youtubeSongLookup("$title ${artists.joinToString(" ")}", source)
-                            }
-                            onlineResult.forEach {
+                            onlineResult.forEach { result ->
                                 val result = Song(
-                                    song = it.toSongEntity(),
-                                    artists = it.artists.map {
+                                    song = result.toSongEntity(),
+                                    artists = result.artists.map {
                                         ArtistEntity(
                                             id = it.id ?: ArtistEntity.generateArtistId(),
                                             name = it.name

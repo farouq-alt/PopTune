@@ -106,6 +106,7 @@ import com.dd3boh.outertune.ui.utils.getNSongsString
 import com.dd3boh.outertune.utils.makeTimeString
 import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
+import com.dd3boh.outertune.utils.syncCoroutine
 import com.dd3boh.outertune.viewmodels.AutoPlaylistViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -216,7 +217,7 @@ fun AutoPlaylistScreen(
     }
 
     LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
+        withContext(syncCoroutine) {
             if (playlistType == PlaylistType.LIKE) syncUtils.syncRemoteLikedSongs()
         }
     }

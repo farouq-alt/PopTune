@@ -32,9 +32,9 @@ interface QueueDao {
     @Query("SELECT song.*, queue_song_map.shuffledIndex from queue_song_map JOIN song ON queue_song_map.songId = song.id WHERE queueId = :queueId ORDER BY `index`")
     fun getQueueSongs(queueId: Long): Flow<List<QueueSong>>
 
-    fun readQueue(): List<MultiQueueObject> {
+    suspend fun readQueue(): List<MultiQueueObject> {
         val resultQueues = ArrayList<MultiQueueObject>()
-        val queues = runBlocking { getAllQueues().first() }
+        val queues = getAllQueues().first()
 
         queues.forEach { queue ->
             val shuffledSongs = runBlocking { getQueueSongs(queue.id).first() }
