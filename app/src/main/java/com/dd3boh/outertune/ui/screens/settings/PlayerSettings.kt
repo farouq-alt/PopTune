@@ -61,7 +61,6 @@ fun PlayerSettings(
     navController: NavController,
     scrollBehavior: TopAppBarScrollBehavior,
 ) {
-    val (audioOffload, onAudioOffloadChange) = rememberPreference(key = AudioOffloadKey, defaultValue = false)
     val (audioDecoder, onAudioDecoderChange) = rememberPreference(
         key = AudioDecoderKey,
         defaultValue = DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF
@@ -152,14 +151,6 @@ fun PlayerSettings(
                     )
                     InfoLabel(stringResource(R.string.restart_to_apply_changes))
                 }
-                SwitchPreference(
-                    title = { Text(stringResource(R.string.audio_offload)) },
-                    description = stringResource(R.string.audio_offload_description),
-                    icon = { Icon(Icons.Rounded.Bolt, null) },
-                    checked = audioOffload,
-                    onCheckedChange = onAudioOffloadChange
-                )
-                InfoLabel(stringResource(R.string.restart_to_apply_changes))
                 SwitchPreference(
                     title = { Text(stringResource(R.string.keep_alive_title)) },
                     description = stringResource(R.string.keep_alive_description),
