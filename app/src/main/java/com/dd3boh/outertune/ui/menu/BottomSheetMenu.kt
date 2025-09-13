@@ -12,8 +12,10 @@ package com.dd3boh.outertune.ui.menu
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ShapeDefaults
@@ -68,7 +70,10 @@ fun BottomSheetMenu(
             },
             sheetState = state.sheetState,
             dragHandle = null,
-            modifier = modifier.fillMaxHeight()
+            contentWindowInsets = { WindowInsets.safeDrawing },
+            modifier = modifier
+                .fillMaxHeight()
+
         ) {
             Column(
                 modifier = Modifier
