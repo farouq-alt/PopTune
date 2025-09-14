@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.AudioFile
-import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.NoCell
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,7 +35,6 @@ import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.navigation.NavController
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.AudioDecoderKey
-import com.dd3boh.outertune.constants.AudioOffloadKey
 import com.dd3boh.outertune.constants.ENABLE_FFMETADATAEX
 import com.dd3boh.outertune.constants.KeepAliveKey
 import com.dd3boh.outertune.constants.PersistentQueueKey

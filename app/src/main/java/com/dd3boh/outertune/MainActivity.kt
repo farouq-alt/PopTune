@@ -248,7 +248,6 @@ import com.dd3boh.outertune.ui.utils.backToMain
 import com.dd3boh.outertune.ui.utils.clearDtCache
 import com.dd3boh.outertune.ui.utils.resetHeightOffset
 import com.dd3boh.outertune.utils.ActivityLauncherHelper
-import com.dd3boh.outertune.utils.CoilBitmapLoader
 import com.dd3boh.outertune.utils.LocalArtworkPath
 import com.dd3boh.outertune.utils.NetworkConnectivityObserver
 import com.dd3boh.outertune.utils.SyncUtils
@@ -360,8 +359,6 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         activityLauncher = ActivityLauncherHelper(this)
-
-        val bitmapLoader = CoilBitmapLoader(this)
 
         setContent {
             val coroutineScope = rememberCoroutineScope()

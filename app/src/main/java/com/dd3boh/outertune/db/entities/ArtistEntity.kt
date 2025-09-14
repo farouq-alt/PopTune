@@ -7,7 +7,6 @@ import androidx.room.PrimaryKey
 import com.dd3boh.outertune.utils.syncCoroutine
 import com.zionhuang.innertube.YouTube
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.apache.commons.lang3.RandomStringUtils

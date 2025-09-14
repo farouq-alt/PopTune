@@ -26,8 +26,8 @@ full
 
 | Flavour | Architecture support                | Version update checker | FFmpeg metadata tag extractor | FFmpeg audio decoders | 
 |---------|-------------------------------------|------------------------|-------------------------------|-----------------------|
-| core    | arm64-v8a, armeabi-v7a, x86, x84_64 | ❌                      | ❌                             | ❌                     |
-| full    | arm64-v8a, armeabi-v7a, x86, x84_64 | ✅                      | ✅                             | ✅                     |
+| core    | arm64-v8a, armeabi-v7a, x86, x86_64 | ❌                      | ❌                             | ❌                     |
+| full    | arm64-v8a, armeabi-v7a, x86, x86_64 | ✅                      | ✅                             | ✅                     |
 
 **Extra setup is required for the `full` variant.** Please
 see https://github.com/OuterTune/ffMetadataEx/blob/main/README.md#building
