@@ -38,7 +38,6 @@ import com.dd3boh.outertune.constants.FolderSongSortType
 import com.dd3boh.outertune.constants.FolderSongSortTypeKey
 import com.dd3boh.outertune.db.entities.Song
 import com.dd3boh.outertune.extensions.toMediaItem
-import com.dd3boh.outertune.models.CulmSongs
 import com.dd3boh.outertune.models.DirectoryTree
 import com.dd3boh.outertune.models.toMediaMetadata
 import com.dd3boh.outertune.playback.queues.ListQueue
@@ -50,11 +49,9 @@ import com.dd3boh.outertune.utils.lmScannerCoroutine
 import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.utils.reportException
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.io.IOException
 
 @Composable
@@ -80,7 +77,7 @@ fun FolderMenu(
         contract = ActivityResultContracts.CreateDocument("audio/x-mpegurl")
     ) { uri: Uri? ->
         uri?.let {
-            CoroutineScope(lmScannerCoroutine).launch {
+            coroutineScope.launch(lmScannerCoroutine) {
                 try {
                     var result = "#EXTM3U\n"
                     allFolderSongs.forEach { s ->
@@ -100,7 +97,7 @@ fun FolderMenu(
     }
 
     fun fetchAllSongsRecursive(onFetch: (() -> Unit)? = null) {
-        CoroutineScope(Dispatchers.IO).launch {
+        coroutineScope.launch(Dispatchers.IO) {
             val dbSongs = database.localSongsInDirDeep(folder.getFullSquashedDir()).first()
             allFolderSongs.clear()
             allFolderSongs.addAll(dbSongs)
@@ -111,7 +108,7 @@ fun FolderMenu(
     }
 
     LaunchedEffect(Unit) {
-        CoroutineScope(Dispatchers.IO).launch {
+        coroutineScope.launch(Dispatchers.IO) {
             database.localSongCountInPath(folder.getFullPath()).first()
             subDirSongCount = database.localSongCountInPath(folder.getFullPath()).first()
         }
@@ -153,7 +150,7 @@ fun FolderMenu(
         ) {
             onDismiss()
             fetchAllSongsRecursive {
-                CoroutineScope(Dispatchers.Main).launch {
+                coroutineScope.launch(Dispatchers.IO) {
                     playerConnection.playQueue(
                         ListQueue(
                             title = folder.getSquashedDir().substringAfterLast('/'),
@@ -169,7 +166,7 @@ fun FolderMenu(
         ) {
             onDismiss()
             fetchAllSongsRecursive {
-                CoroutineScope(Dispatchers.Main).launch {
+                coroutineScope.launch(Dispatchers.IO) {
                     playerConnection.enqueueNext(allFolderSongs.map { it.toMediaItem() })
                 }
             }
@@ -185,19 +182,16 @@ fun FolderMenu(
             icon = Icons.Rounded.Shuffle,
             title = R.string.shuffle
         ) {
-            coroutineScope.launch {
-                val songs = runBlocking(Dispatchers.IO) { database.localSongsInDirDeep(folder.getFullPath()) }
-                playerConnection.playQueue(
-                    ListQueue(
-                        title = folder.currentDir.substringAfterLast('/'),
-                        items = DirectoryTree(
-                            path = "",
-                            culmSongs = CulmSongs(0),
-                            files = ArrayList(songs.first())
-                        ).toSortedList(sortType, sortDescending).map { it.toMediaMetadata() },
-                        startShuffled = true
+            coroutineScope.launch(Dispatchers.IO) {
+                fetchAllSongsRecursive {
+                    playerConnection.playQueue(
+                        ListQueue(
+                            title = folder.currentDir.substringAfterLast('/'),
+                            items = allFolderSongs.map { it.toMediaMetadata() },
+                            startShuffled = true
+                        )
                     )
-                )
+                }
             }
             onDismiss()
         }

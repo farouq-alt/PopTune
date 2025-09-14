@@ -511,21 +511,23 @@ class MusicService : MediaLibraryService(),
      * Add items to queue, right after current playing item
      */
     fun enqueueNext(items: List<MediaItem>) {
-        if (!queueBoard.initialized) {
+        scope.launch {
+            if (!queueBoard.initialized) {
 
-            // when enqueuing next when player isn't active, play as a new song
-            if (items.isNotEmpty()) {
-                playQueue(
-                    ListQueue(
-                        title = items.first().mediaMetadata.title.toString(),
-                        items = items.mapNotNull { it.metadata }
+                // when enqueuing next when player isn't active, play as a new song
+                if (items.isNotEmpty()) {
+                    playQueue(
+                        ListQueue(
+                            title = items.first().mediaMetadata.title.toString(),
+                            items = items.mapNotNull { it.metadata }
+                        )
                     )
-                )
-            }
-        } else {
-            // enqueue next
-            queueBoard.getCurrentQueue()?.let {
-                queueBoard.addSongsToQueue(it, player.currentMediaItemIndex + 1, items.mapNotNull { it.metadata })
+                }
+            } else {
+                // enqueue next
+                queueBoard.getCurrentQueue()?.let {
+                    queueBoard.addSongsToQueue(it, player.currentMediaItemIndex + 1, items.mapNotNull { it.metadata })
+                }
             }
         }
     }

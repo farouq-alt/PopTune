@@ -115,7 +115,6 @@ import com.dd3boh.outertune.utils.numberToAlpha
 import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.viewmodels.LibraryFoldersViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
@@ -176,7 +175,7 @@ fun FolderScreen(
         }
 
         if (!viewModel.uiInit) {
-            CoroutineScope(Dispatchers.IO).launch {
+            coroutineScope.launch(Dispatchers.IO) {
                 viewModel.getLocalSongs()
                 viewModel.getSongCount()
                 viewModel.uiInit = true
