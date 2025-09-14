@@ -23,7 +23,7 @@ interface MetadataScanner {
      *
      * @param file Full file path
      */
-    fun getAllMetadataFromFile(file: File): SongTempData
+    suspend fun getAllMetadataFromFile(file: File): SongTempData
 }
 
 /**

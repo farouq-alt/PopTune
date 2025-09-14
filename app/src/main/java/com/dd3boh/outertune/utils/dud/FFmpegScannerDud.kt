@@ -4,7 +4,7 @@ import com.dd3boh.outertune.models.SongTempData
 import java.io.File
 
 class FFmpegScanner() : MetadataScanner {
-    override fun getAllMetadataFromFile(file: File): SongTempData {
+    override suspend fun getAllMetadataFromFile(file: File): SongTempData {
         throw NotImplementedError()
     }
 

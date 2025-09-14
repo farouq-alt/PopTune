@@ -38,7 +38,7 @@ class TagLibScanner : MetadataScanner {
      *
      * @param file Full file path
      */
-    override fun getAllMetadataFromFile(file: File): SongTempData {
+    override suspend fun getAllMetadataFromFile(file: File): SongTempData {
         if (EXTRACTOR_DEBUG)
             Log.v(EXTRACTOR_TAG, "Starting Full Extractor session on: ${file.absolutePath}")
 
