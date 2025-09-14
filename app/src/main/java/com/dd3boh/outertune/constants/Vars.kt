@@ -48,6 +48,8 @@ const val SYNC_CD = 60000 * 30
 
 const val MAX_PLAYER_CONSECUTIVE_ERR = 3
 
+const val MAX_QUEUES = 20
+
 val DEFAULT_PLAYER_BACKGROUND =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PlayerBackgroundStyle.BLUR else PlayerBackgroundStyle.GRADIENT
 
@@ -68,3 +70,5 @@ const val EXTRACTOR_DEBUG = false
 
 // enable printing of *ALL* data that extractor reads
 const val DEBUG_SAVE_OUTPUT = false // ignored (will be false) when EXTRACTOR_DEBUG IS false
+
+const val QUEUE_DEBUG = false

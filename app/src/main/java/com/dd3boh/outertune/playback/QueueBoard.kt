@@ -15,7 +15,9 @@ import androidx.compose.ui.util.fastFirst
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.media3.common.C
+import com.dd3boh.outertune.constants.MAX_QUEUES
 import com.dd3boh.outertune.constants.PersistentQueueKey
+import com.dd3boh.outertune.constants.QUEUE_DEBUG
 import com.dd3boh.outertune.db.entities.QueueEntity
 import com.dd3boh.outertune.extensions.currentMetadata
 import com.dd3boh.outertune.extensions.move
@@ -24,6 +26,7 @@ import com.dd3boh.outertune.models.MediaMetadata
 import com.dd3boh.outertune.models.MultiQueueObject
 import com.dd3boh.outertune.utils.dataStore
 import com.dd3boh.outertune.utils.get
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -32,13 +35,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
-import okhttp3.internal.toImmutableList
 import java.util.PriorityQueue
 import kotlin.math.max
 import kotlin.math.min
 
-const val QUEUE_DEBUG = false
-const val MAX_QUEUES = 20
 
 /**
  * Multiple queues manager. Methods will not automatically (re)load queues into the player unless
