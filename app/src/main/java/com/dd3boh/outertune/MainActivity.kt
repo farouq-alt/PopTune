@@ -775,6 +775,14 @@ class MainActivity : ComponentActivity() {
                         }
                     )
 
+                    //Getting song from deep link when app is not running does not work otherwise
+                    LaunchedEffect(Unit) {
+                        val initIntentUri = intent.data ?: intent.extras?.getString(Intent.EXTRA_TEXT)?.toUri()
+                        if (initIntentUri != null) {
+                            youtubeNavigator(initIntentUri)
+                        }
+                    }
+
                     LaunchedEffect(navBackStackEntry) {
                         if (navBackStackEntry?.destination?.route?.startsWith("search/") == true) {
                             val searchQuery = withContext(Dispatchers.IO) {
