@@ -457,6 +457,7 @@ class MusicService : MediaLibraryService(),
         val preloadItem = queue.preloadItem
 
         scope.launch {
+            Log.d(TAG, "playQueue: Resolving additional queue data...")
             try {
                 if (preloadItem != null) {
                     q = queueBoard.addQueue(
@@ -480,22 +481,24 @@ class MusicService : MediaLibraryService(),
                 }
 
                 val items = ArrayList<MediaMetadata>()
-                if (initialStatus.items.isEmpty()) return@launch
-                if (preloadItem != null) {
-                    items.add(preloadItem)
-                    items.addAll(initialStatus.items.subList(1, initialStatus.items.size))
-                } else {
-                    items.addAll(initialStatus.items)
+                Log.d(TAG, "playQueue: Queue initial status item count: ${initialStatus.items.size}")
+                if (!initialStatus.items.isEmpty()) {
+                    if (preloadItem != null) {
+                        items.add(preloadItem)
+                        items.addAll(initialStatus.items.subList(1, initialStatus.items.size))
+                    } else {
+                        items.addAll(initialStatus.items)
+                    }
+                    val q = queueBoard.addQueue(
+                        queueTitle ?: getString(R.string.queue),
+                        items,
+                        shuffled = queue.startShuffled,
+                        startIndex = if (initialStatus.mediaItemIndex > 0) initialStatus.mediaItemIndex else 0,
+                        replace = replace || preloadItem != null,
+                        isRadio = isRadio
+                    )
+                    queueBoard.setCurrQueue(q, shouldResume)
                 }
-                val q = queueBoard.addQueue(
-                    queueTitle ?: getString(R.string.queue),
-                    items,
-                    shuffled = queue.startShuffled,
-                    startIndex = if (initialStatus.mediaItemIndex > 0) initialStatus.mediaItemIndex else 0,
-                    replace = replace || preloadItem != null,
-                    isRadio = isRadio
-                )
-                queueBoard.setCurrQueue(q, shouldResume)
 
                 player.prepare()
                 player.playWhenReady = playWhenReady
@@ -504,6 +507,8 @@ class MusicService : MediaLibraryService(),
                 Toast.makeText(this@MusicService, "plr: ${e.message}", Toast.LENGTH_LONG)
                     .show()
             }
+
+            Log.d(TAG, "playQueue: Queue additional data resolution complete")
         }
     }
 
@@ -907,16 +912,17 @@ class MusicService : MediaLibraryService(),
 
         // Auto load more songs
         val q = queueBoard.getCurrentQueue()
-        val songId = q?.playlistId
+        val songCount = q?.getSize() ?: -1
+        val playlistId = q?.playlistId
         if (dataStore.get(AutoLoadMoreKey, true) &&
             reason != Player.MEDIA_ITEM_TRANSITION_REASON_REPEAT &&
             player.mediaItemCount - player.currentMediaItemIndex <= 5 &&
-            songId != null // aka "hasNext"
+            playlistId != null // aka "hasNext"
         ) {
+            Log.d(TAG, "onMediaItemTransition: Triggering queue auto load more")
             scope.launch(SilentHandler) {
-                delay(200) // TODO: Maybe fixes weird issue of radio sometimes not working in some languages???
-                val mediaItems = YouTubeQueue(WatchEndpoint(songId)).nextPage()
-                if (player.playbackState != STATE_IDLE) {
+                val mediaItems = YouTubeQueue(WatchEndpoint(playlistId)).nextPage()
+                if (player.playbackState != STATE_IDLE && songCount > 1) { // initial radio loading is handled by playQueue()
                     queueBoard.enqueueEnd(mediaItems.drop(1), isRadio = true)
                 }
             }
