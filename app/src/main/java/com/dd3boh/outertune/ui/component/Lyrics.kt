@@ -329,7 +329,7 @@ fun Lyrics(
                                 currentLineIndex = index
                                 currentPos = item.start.toLong()
                                 lastPreviewTime = 0L
-                                haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
+                                haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
                             }
                     ) {
                         if (currentPos.toULong() in item.start..item.end + 100.toULong() && lyricsFancy

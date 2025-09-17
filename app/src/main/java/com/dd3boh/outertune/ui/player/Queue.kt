@@ -963,7 +963,7 @@ fun BoxScope.QueueContent(
                             enabled = !detachedHead,
                             onClick = {
                                 playerConnection.triggerShuffle()
-                                haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
+                                haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
                             }
                         )
                     }
@@ -978,7 +978,7 @@ fun BoxScope.QueueContent(
                             enabled = !detachedHead && canSkipPrevious,
                             onClick = {
                                 playerConnection.player.seekToPrevious()
-                                haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
+                                haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
                             }
                         )
                     }
@@ -1046,7 +1046,7 @@ fun BoxScope.QueueContent(
                             enabled = !detachedHead && canSkipNext,
                             onClick = {
                                 playerConnection.player.seekToNext()
-                                haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
+                                haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
                             }
                         )
                     }
@@ -1067,7 +1067,7 @@ fun BoxScope.QueueContent(
                             enabled = !detachedHead,
                             onClick = {
                                 playerConnection.player.toggleRepeatMode()
-                                haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
+                                haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
                             }
                         )
                     }

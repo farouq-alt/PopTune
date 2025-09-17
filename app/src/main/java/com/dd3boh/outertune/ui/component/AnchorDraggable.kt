@@ -172,7 +172,7 @@ fun SwipeActionBox(
             if (swipeOffset.floatValue >= firstThreshold) {
                 if (progress.intValue != 1) {
                     if (swipeOffset.floatValue < secondThreshold) {
-                        haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
+                        haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
                         progress.intValue = 1
                     }
                 }

@@ -587,7 +587,7 @@ fun BottomSheetPlayer(
                         color = onBackgroundColor,
                         onClick = {
                             playerConnection.triggerShuffle()
-                            haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
+                            haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
                         }
                     )
                 }
@@ -602,7 +602,7 @@ fun BottomSheetPlayer(
                         color = onBackgroundColor,
                         onClick = {
                             playerConnection.player.seekToPrevious()
-                            haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
+                            haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
                         }
                     )
                 }
@@ -682,7 +682,7 @@ fun BottomSheetPlayer(
                         color = onBackgroundColor,
                         onClick = {
                             playerConnection.player.seekToNext()
-                            haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
+                            haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
                         }
                     )
                 }
@@ -702,7 +702,7 @@ fun BottomSheetPlayer(
                         color = onBackgroundColor,
                         onClick = {
                             playerConnection.player.toggleRepeatMode()
-                            haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
+                            haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
                         }
                     )
                 }
