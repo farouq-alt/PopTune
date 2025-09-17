@@ -54,6 +54,7 @@ val LastRecentActivitySyncKey = longPreferencesKey("lastRecentActivitySync")
 val AudioDecoderKey = intPreferencesKey("audioDecoder")
 val AudioQualityKey = stringPreferencesKey("audioQuality")
 val AudioOffloadKey = booleanPreferencesKey("enableOffload")
+val AudioGaplessOffloadKey = booleanPreferencesKey("enableGaplessOffload")
 
 val PersistentQueueKey = booleanPreferencesKey("persistentQueue")
 val SeekIncrementKey = stringPreferencesKey("seekIncrement")

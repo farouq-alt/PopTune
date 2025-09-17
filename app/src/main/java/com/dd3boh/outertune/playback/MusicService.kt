@@ -65,6 +65,7 @@ import androidx.media3.session.SessionToken
 import com.dd3boh.outertune.MainActivity
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.AudioDecoderKey
+import com.dd3boh.outertune.constants.AudioGaplessOffloadKey
 import com.dd3boh.outertune.constants.AudioNormalizationKey
 import com.dd3boh.outertune.constants.AudioOffloadKey
 import com.dd3boh.outertune.constants.AudioQuality
@@ -211,6 +212,7 @@ class MusicService : MediaLibraryService(),
     private val normalizeFactor = MutableStateFlow(1f)
 
     private val audioDecoder = dataStore.get(AudioDecoderKey, DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF)
+    private val isGaplessOffloadAllowed = dataStore.get(AudioGaplessOffloadKey, false)
     val playerVolume = MutableStateFlow(dataStore.get(PlayerVolumeKey, 1f).coerceIn(0f, 1f))
 
     private var isAudioEffectSessionOpened = false
@@ -222,7 +224,7 @@ class MusicService : MediaLibraryService(),
 
         player = ExoPlayer.Builder(this)
             .setMediaSourceFactory(DefaultMediaSourceFactory(createDataSourceFactory()))
-            .setRenderersFactory(createRenderersFactory())
+            .setRenderersFactory(createRenderersFactory(isGaplessOffloadAllowed))
             .setHandleAudioBecomingNoisy(true)
             .setWakeMode(C.WAKE_MODE_NETWORK)
             .setAudioAttributes(
@@ -752,7 +754,7 @@ class MusicService : MediaLibraryService(),
         }
     }
 
-    private fun createRenderersFactory(): DefaultRenderersFactory {
+    private fun createRenderersFactory(gaplessOffloadAllowed: Boolean): DefaultRenderersFactory {
         if (ENABLE_FFMETADATAEX) {
             return NextRenderersFactory(this)
                 .setEnableDecoderFallback(true)
@@ -775,7 +777,7 @@ class MusicService : MediaLibraryService(),
                                 SonicAudioProcessor()
                             )
                         )
-                        .setAudioOffloadSupportProvider(DefaultAudioOffloadSupportProvider(context))
+                        .setAudioOffloadSupportProvider(if (!gaplessOffloadAllowed) OtOffloadSupportProvider(context) else DefaultAudioOffloadSupportProvider(context))
                         .build()
                 }
             }

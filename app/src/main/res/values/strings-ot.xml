@@ -153,6 +153,8 @@ while also allowing users to translate our app as well. New, specific strings to
     <string name="audio_decoder_preference">Audio decoder</string>
     <string name="audio_decoder_system_only">System decoders only</string>
     <string name="audio_decoder_system_with_ffmpeg">Prioritize system decoders</string>
+    <string name="audio_gapless_offload" translatable="false">Gapless offload</string>
+    <string name="audio_gapless_offload_description" translatable="false">Allow gapless offload if supported by the device and audio format. Some devices advertise support (Ex. Google Pixel 9 series), but the feature is good as useless in ExoPlayer because playback breaks after playing one song. When troubleshooting issues with offload, we suggest turning gapless offload off</string>
     <string name="audio_offload">Enable offload</string>
     <string name="audio_offload_description">Use the offload audio path for audio playback. Enabling this may reduce power usage but can lead experience issues with audio playback or post processing. This preference has no effect for unsupported codecs or devices</string>
     <string name="keep_alive_title">Prevent system killing app</string>

@@ -24,6 +24,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Backup
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.ConfirmationNumber
+import androidx.compose.material.icons.rounded.Coronavirus
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.DeveloperMode
 import androidx.compose.material.icons.rounded.Devices
@@ -53,6 +54,7 @@ import androidx.navigation.NavController
 import coil3.imageLoader
 import com.dd3boh.outertune.LocalDatabase
 import com.dd3boh.outertune.R
+import com.dd3boh.outertune.constants.AudioGaplessOffloadKey
 import com.dd3boh.outertune.constants.AudioOffloadKey
 import com.dd3boh.outertune.constants.DevSettingsKey
 import com.dd3boh.outertune.constants.OobeStatusKey
@@ -87,6 +89,7 @@ fun ExperimentalSettings(
     val uriHandler = LocalUriHandler.current
 
     // state variables and such
+    val (audioGaplessOffload, onAudioGaplessOffloadChange) = rememberPreference(key = AudioGaplessOffloadKey, defaultValue = false)
     val (audioOffload, onAudioOffloadChange) = rememberPreference(key = AudioOffloadKey, defaultValue = false)
     val (tabletUi, onTabletUiChange) = rememberPreference(TabletUiKey, defaultValue = false)
 
@@ -143,6 +146,14 @@ fun ExperimentalSettings(
                 icon = { Icon(Icons.Rounded.Bolt, null) },
                 checked = audioOffload,
                 onCheckedChange = onAudioOffloadChange
+            )
+            SwitchPreference(
+                title = { Text(stringResource(R.string.audio_gapless_offload)) },
+                description = stringResource(R.string.audio_gapless_offload_description),
+                icon = { Icon(Icons.Rounded.Coronavirus, null) },
+                checked = audioGaplessOffload,
+                onCheckedChange = onAudioGaplessOffloadChange,
+                isEnabled = audioOffload // media3 supports only > SDK 32
             )
             PreferenceEntry(
                 title = { Text("Important: About audio offload compatibility and issues") },
