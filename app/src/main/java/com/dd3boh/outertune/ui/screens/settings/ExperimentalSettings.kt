@@ -11,12 +11,16 @@ package com.dd3boh.outertune.ui.screens.settings
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -30,7 +34,6 @@ import androidx.compose.material.icons.rounded.DeveloperMode
 import androidx.compose.material.icons.rounded.Devices
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.WarningAmber
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,13 +46,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil3.imageLoader
 import com.dd3boh.outertune.LocalDatabase
@@ -89,7 +97,10 @@ fun ExperimentalSettings(
     val uriHandler = LocalUriHandler.current
 
     // state variables and such
-    val (audioGaplessOffload, onAudioGaplessOffloadChange) = rememberPreference(key = AudioGaplessOffloadKey, defaultValue = false)
+    val (audioGaplessOffload, onAudioGaplessOffloadChange) = rememberPreference(
+        key = AudioGaplessOffloadKey,
+        defaultValue = false
+    )
     val (audioOffload, onAudioOffloadChange) = rememberPreference(key = AudioOffloadKey, defaultValue = false)
     val (tabletUi, onTabletUiChange) = rememberPreference(TabletUiKey, defaultValue = false)
 
@@ -197,195 +208,238 @@ fun ExperimentalSettings(
 
 
             Spacer(Modifier.height(20.dp))
-            Text("Material colours test")
-
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "Material colours",
+                    fontWeight = FontWeight.ExtraBold,
+                )
+            }
+            Spacer(Modifier.height(20.dp))
 
             Column {
-                Row(
-                    Modifier
-                        .padding(10.dp)
-                        .background(MaterialTheme.colorScheme.primary)
-                ) {
-                    Text("Primary", color = MaterialTheme.colorScheme.onPrimary)
-                }
-                Row(
-                    Modifier
-                        .padding(10.dp)
-                        .background(MaterialTheme.colorScheme.secondary)
-                ) {
-                    Text("Secondary", color = MaterialTheme.colorScheme.onSecondary)
-                }
-                Row(
-                    Modifier
-                        .padding(10.dp)
-                        .background(MaterialTheme.colorScheme.tertiary)
-                ) {
-                    Text("Tertiary", color = MaterialTheme.colorScheme.onTertiary)
-                }
-                Row(
-                    Modifier
-                        .padding(10.dp)
-                        .background(MaterialTheme.colorScheme.surface)
-                ) {
-                    Text("Surface", color = MaterialTheme.colorScheme.onSurface)
-                }
-                Row(
-                    Modifier
-                        .padding(10.dp)
-                        .background(MaterialTheme.colorScheme.inverseSurface)
-                ) {
-                    Text("Inverse Surface", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                Row(
-                    Modifier
-                        .padding(10.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    Text("Surface Variant", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                Row(
-                    Modifier
-                        .padding(10.dp)
-                        .background(MaterialTheme.colorScheme.surfaceBright)
-                ) {
-                    Text("Surface Bright", color = MaterialTheme.colorScheme.onSurface)
-                }
-                Row(
-                    Modifier
-                        .padding(10.dp)
-                        .background(MaterialTheme.colorScheme.surfaceTint)
-                ) {
-                    Text("Surface Tint", color = MaterialTheme.colorScheme.onSurface)
-                }
-                Row(
-                    Modifier
-                        .padding(10.dp)
-                        .background(MaterialTheme.colorScheme.surfaceDim)
-                ) {
-                    Text("Surface Dim", color = MaterialTheme.colorScheme.onSurface)
-                }
-                Row(
-                    Modifier
-                        .padding(10.dp)
-                        .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                ) {
-                    Text("Surface Container Highest", color = MaterialTheme.colorScheme.onSurface)
-                }
-                Row(
-                    Modifier
-                        .padding(10.dp)
-                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                ) {
-                    Text("Surface Container High", color = MaterialTheme.colorScheme.onSurface)
-                }
-                Row(
-                    Modifier
-                        .padding(10.dp)
-                        .background(MaterialTheme.colorScheme.surfaceContainerLow)
-                ) {
-                    Text("Surface Container Low", color = MaterialTheme.colorScheme.onSurface)
-                }
-                Row(
-                    Modifier
-                        .padding(10.dp)
-                        .background(MaterialTheme.colorScheme.errorContainer)
-                ) {
-                    Text("Error Container", color = MaterialTheme.colorScheme.onErrorContainer)
-                }
+                ColorBox(
+                    sampleColor = MaterialTheme.colorScheme.onPrimary,
+                    backgroundColor = MaterialTheme.colorScheme.primary,
+                    text = "primary"
+                )
+                ColorBox(
+                    sampleColor = MaterialTheme.colorScheme.onSecondary,
+                    backgroundColor = MaterialTheme.colorScheme.secondary,
+                    text = "secondary"
+                )
+                ColorBox(
+                    sampleColor = MaterialTheme.colorScheme.onTertiary,
+                    backgroundColor = MaterialTheme.colorScheme.tertiary,
+                    text = "tertiary"
+                )
+                Spacer(Modifier.height(60.dp))
+
+                ColorBox(
+                    sampleColor = MaterialTheme.colorScheme.onSurface,
+                    backgroundColor = MaterialTheme.colorScheme.surface,
+                    text = "surface"
+                )
+                ColorBox(
+                    sampleColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                    text = "surfaceVariant"
+                )
+                ColorBox(
+                    sampleColor = MaterialTheme.colorScheme.inverseOnSurface,
+                    backgroundColor = MaterialTheme.colorScheme.inverseSurface,
+                    text = "inverseSurface"
+                )
+                Spacer(Modifier.height(60.dp))
+
+                ColorBox(
+                    sampleColor = MaterialTheme.colorScheme.onSurface,
+                    backgroundColor = MaterialTheme.colorScheme.surfaceBright,
+                    text = "surfaceBright"
+                )
+                ColorBox(
+                    sampleColor = MaterialTheme.colorScheme.onSurface,
+                    backgroundColor = MaterialTheme.colorScheme.surfaceDim,
+                    text = "surfaceDim"
+                )
+                ColorBox(
+                    sampleColor = MaterialTheme.colorScheme.surfaceTint,
+                    backgroundColor = MaterialTheme.colorScheme.onSurface,
+                    text = "surfaceTint"
+                )
+                Spacer(Modifier.height(60.dp))
+
+                ColorBox(
+                    sampleColor = MaterialTheme.colorScheme.onSurface,
+                    backgroundColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    text = "surfaceContainerHighest"
+                )
+                ColorBox(
+                    sampleColor = MaterialTheme.colorScheme.onSurface,
+                    backgroundColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    text = "surfaceContainerHigh"
+                )
+                ColorBox(
+                    sampleColor = MaterialTheme.colorScheme.onSurface,
+                    backgroundColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    text = "surfaceContainerLow"
+                )
+                ColorBox(
+                    sampleColor = MaterialTheme.colorScheme.onSurface,
+                    backgroundColor = MaterialTheme.colorScheme.surfaceContainerLowest,
+                    text = "surfaceContainerLowest"
+                )
+                Spacer(Modifier.height(60.dp))
+
+                ColorBox(
+                    sampleColor = MaterialTheme.colorScheme.onErrorContainer,
+                    backgroundColor = MaterialTheme.colorScheme.errorContainer,
+                    text = "errorContainer"
+                )
+                ColorBox(
+                    sampleColor = MaterialTheme.colorScheme.scrim,
+                    backgroundColor = Color.Transparent,
+                    text = "scrim"
+                )
+                ColorBox(
+                    sampleColor = MaterialTheme.colorScheme.onBackground,
+                    backgroundColor = MaterialTheme.colorScheme.background,
+                    text = "background"
+                )
+                ColorBox(
+                    sampleColor = MaterialTheme.colorScheme.outline,
+                    backgroundColor = Color.Transparent,
+                    text = "outline"
+                )
+                ColorBox(
+                    sampleColor = MaterialTheme.colorScheme.outlineVariant,
+                    backgroundColor = Color.Transparent,
+                    text = "outlineVariant"
+                )
+
             }
 
+            Spacer(Modifier.height(60.dp))
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "Haptics test",
+                    fontWeight = FontWeight.ExtraBold,
+                )
+            }
             Spacer(Modifier.height(20.dp))
-            Text("Haptics test")
 
             Column {
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    }
+                HapticBox(
+                    sampleColor = MaterialTheme.colorScheme.onPrimary,
+                    backgroundColor = MaterialTheme.colorScheme.primary,
+                    text = "LongPress"
                 ) {
-                    Text("LongPress")
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 }
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    }
+                HapticBox(
+                    sampleColor = MaterialTheme.colorScheme.onPrimary,
+                    backgroundColor = MaterialTheme.colorScheme.primary,
+                    text = "TextHandleMove"
                 ) {
-                    Text("TextHandleMove")
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 }
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
-                    }
+                HapticBox(
+                    sampleColor = MaterialTheme.colorScheme.onPrimary,
+                    backgroundColor = MaterialTheme.colorScheme.primary,
+                    text = "ContextClick"
                 ) {
-                    Text("VirtualKey")
+                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                 }
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.GestureEnd)
-                    }
-                ) {
-                    Text("GestureEnd")
-                }
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
-                    }
-                ) {
-                    Text("GestureThresholdActivate")
-                }
+                Spacer(Modifier.height(32.dp))
 
-                Spacer(Modifier.height(16.dp))
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
-                    }
-                ) {
-                    Text("SegmentTick")
-                }
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
-                    }
-                ) {
-                    Text("SegmentFrequentTick")
-                }
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
-                    }
-                ) {
-                    Text("ContextClick")
-                }
 
-                Spacer(Modifier.height(16.dp))
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.Confirm)
-                    }
+                HapticBox(
+                    sampleColor = MaterialTheme.colorScheme.onSecondary,
+                    backgroundColor = MaterialTheme.colorScheme.secondary,
+                    text = "SegmentTick"
                 ) {
-                    Text("Confirm")
+                    haptic.performHapticFeedback(HapticFeedbackType.SegmentTick)
                 }
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.Reject)
-                    }
+                HapticBox(
+                    sampleColor = MaterialTheme.colorScheme.onSecondary,
+                    backgroundColor = MaterialTheme.colorScheme.secondary,
+                    text = "SegmentFrequentTick"
                 ) {
-                    Text("Reject")
+                    haptic.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
                 }
+                Spacer(Modifier.height(32.dp))
 
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
-                    }
+                HapticBox(
+                    sampleColor = MaterialTheme.colorScheme.onTertiary,
+                    backgroundColor = MaterialTheme.colorScheme.tertiary,
+                    text = "Confirm"
                 ) {
-                    Text("ToggleOn")
+                    haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                 }
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.ToggleOff)
-                    }
+                HapticBox(
+                    sampleColor = MaterialTheme.colorScheme.onTertiary,
+                    backgroundColor = MaterialTheme.colorScheme.tertiary,
+                    text = "Reject"
                 ) {
-                    Text("ToggleOff")
+                    haptic.performHapticFeedback(HapticFeedbackType.Reject)
+                }
+                HapticBox(
+                    sampleColor = MaterialTheme.colorScheme.onTertiary,
+                    backgroundColor = MaterialTheme.colorScheme.tertiary,
+                    text = "ToggleOn"
+                ) {
+                    haptic.performHapticFeedback(HapticFeedbackType.ToggleOn)
+                }
+                HapticBox(
+                    sampleColor = MaterialTheme.colorScheme.onTertiary,
+                    backgroundColor = MaterialTheme.colorScheme.tertiary,
+                    text = "ToggleOff"
+                ) {
+                    haptic.performHapticFeedback(HapticFeedbackType.ToggleOff)
+                }
+                Spacer(Modifier.height(32.dp))
+
+                HapticBox(
+                    sampleColor = MaterialTheme.colorScheme.onSurface,
+                    backgroundColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    text = "TextHandleMove"
+                ) {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                }
+                HapticBox(
+                    sampleColor = MaterialTheme.colorScheme.onSurface,
+                    backgroundColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    text = "VirtualKey"
+                ) {
+                    haptic.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                }
+                HapticBox(
+                    sampleColor = MaterialTheme.colorScheme.onSurface,
+                    backgroundColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    text = "GestureEnd"
+                ) {
+                    haptic.performHapticFeedback(HapticFeedbackType.GestureEnd)
+                }
+                HapticBox(
+                    sampleColor = MaterialTheme.colorScheme.onSurface,
+                    backgroundColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    text = "GestureThresholdActivate"
+                ) {
+                    haptic.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
+                }
+                HapticBox(
+                    sampleColor = MaterialTheme.colorScheme.onSurface,
+                    backgroundColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    text = "KeyboardTap"
+                ) {
+                    haptic.performHapticFeedback(HapticFeedbackType.KeyboardTap)
                 }
             }
 
@@ -395,11 +449,23 @@ fun ExperimentalSettings(
                 title = { Text("Tap to show nuke options") },
                 icon = { Icon(Icons.Rounded.ErrorOutline, null) },
                 onClick = {
-                    nukeEnabled = true
+                    nukeEnabled = !nukeEnabled
                 }
             )
 
             if (nukeEnabled) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        text = "WARNING: These options have NO confirmation and will apply immediately!",
+                        fontWeight = FontWeight.ExtraBold,
+                    )
+                }
+                Spacer(Modifier.height(20.dp))
+
                 PreferenceEntry(
                     title = { Text("DEBUG: Nuke local lib") },
                     icon = { Icon(Icons.Rounded.ErrorOutline, null) },
@@ -481,4 +547,70 @@ fun ExperimentalSettings(
         windowInsets = TopBarInsets,
         scrollBehavior = scrollBehavior
     )
+}
+
+@Composable
+fun ColorBox(
+    sampleColor: Color,
+    backgroundColor: Color,
+    text: String,
+    padding: Dp = 10.dp,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(64.dp)
+            .background(backgroundColor)
+    ) {
+        Row(
+            modifier = Modifier
+                .background(sampleColor)
+                .padding(padding)
+                .width(140.dp)
+        ) {
+            Text(
+                text = text,
+                fontSize = 12.sp,
+                color = backgroundColor,
+                fontWeight = FontWeight.ExtraBold
+            )
+        }
+        Spacer(Modifier.width(32.dp))
+        Text(
+            text = text,
+            color = sampleColor,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.ExtraBold
+        )
+    }
+}
+
+@Composable
+fun HapticBox(
+    sampleColor: Color,
+    backgroundColor: Color,
+    text: String,
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .padding(vertical = 4.dp)
+            .background(backgroundColor)
+    ) {
+        Text(
+            text = text,
+            color = sampleColor,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.ExtraBold,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .clickable(
+                    onClick = onClick
+                )
+        )
+    }
 }
