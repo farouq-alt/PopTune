@@ -25,8 +25,11 @@ class AlbumViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
     val otherVersions = MutableStateFlow<List<AlbumItem>>(emptyList())
 
+    val isLoading = MutableStateFlow(true)
+
     init {
         viewModelScope.launch {
+            isLoading.value = true
             val album = database.album(albumId).first()
             if (album?.album?.isLocal == true) return@launch
             YouTube.album(albumId).onSuccess {
@@ -38,6 +41,7 @@ class AlbumViewModel @Inject constructor(
                 }
                 otherVersions.value = it.otherVersions
             }.onFailure {
+                isLoading.value = false
                 reportException(it)
                 if (it.message?.contains("NOT_FOUND") == true) {
                     // This album no longer exists in YouTube Music

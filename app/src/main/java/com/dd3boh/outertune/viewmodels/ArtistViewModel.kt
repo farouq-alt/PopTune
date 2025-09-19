@@ -11,6 +11,7 @@ import com.dd3boh.outertune.utils.reportException
 import com.zionhuang.innertube.YouTube
 import com.zionhuang.innertube.pages.ArtistPage
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -30,18 +31,23 @@ class ArtistViewModel @Inject constructor(
     val libraryAlbums = database.artistAlbumsPreview(artistId)
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
+    val isLoading = MutableStateFlow(true)
+
     init {
         fetchArtistsFromYTM()
     }
 
     fun fetchArtistsFromYTM() {
         viewModelScope.launch {
+            isLoading.value = true
             YouTube.artist(artistId)
                 .onSuccess {
                     artistPage = it
                 }.onFailure {
                     reportException(it)
                 }
+
+            isLoading.value = false
         }
     }
 }

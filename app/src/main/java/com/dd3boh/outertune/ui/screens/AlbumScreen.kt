@@ -139,6 +139,7 @@ fun AlbumScreen(
     val albumWithSongs by viewModel.albumWithSongs.collectAsState()
     val otherVersions by viewModel.otherVersions.collectAsState()
     val state = rememberLazyListState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     // multiselect
     var inSelectMode by rememberSaveable { mutableStateOf(false) }
@@ -498,7 +499,7 @@ fun AlbumScreen(
                     }
                 }
             }
-        } else {
+        } else if (isLoading) {
             item {
                 ShimmerHost {
                     Column(Modifier.padding(12.dp)) {

@@ -133,6 +133,7 @@ fun ArtistScreen(
     val libraryArtist by viewModel.libraryArtist.collectAsState()
     val librarySongs by viewModel.librarySongs.collectAsState()
     val libraryAlbums by viewModel.libraryAlbums.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     val lazyListState = rememberLazyListState()
     val snackbarHostState = LocalSnackbarHostState.current
@@ -276,7 +277,7 @@ fun ArtistScreen(
                 )
                 .asPaddingValues()
         ) {
-            if (artistPage == null && !showLocal) {
+            if (isLoading && artistPage == null && !showLocal) {
                 item(key = "shimmer") {
                     ArtistPagePlaceholder()
                 }
