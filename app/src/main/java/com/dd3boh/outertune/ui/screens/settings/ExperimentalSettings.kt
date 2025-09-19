@@ -207,7 +207,7 @@ fun ExperimentalSettings(
             )
 
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(100.dp))
             Row(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier

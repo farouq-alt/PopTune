@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.documentfile.provider.DocumentFile
 import androidx.documentfile.provider.TreeDocumentFileOt
 import com.dd3boh.outertune.db.entities.Song
-import com.dd3boh.outertune.utils.reportException
 import com.dd3boh.outertune.utils.scanners.LocalMediaScanner.Companion.scanDfRecursive
 import com.dd3boh.outertune.utils.scanners.documentFileFromUri
 import java.io.IOException
@@ -48,10 +47,17 @@ class DownloadDirectoryManagerOt(private var context: Context, private var dir: 
             allDirs = newAllDirs.toList()
             Log.i(TAG, "Download manager initialized successfully. ${allDirs.size}")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to initiate download manager: " + e.message)
+            if (mainDir == null) {
+                Log.w(TAG, "Failed to initiate download manager: No directory provided")
+            } else if (!mainDir!!.isDirectory) {
+                Log.w(TAG, "Failed to initiate download manager: Not a valid directory")
+            } else {
+                Log.e(TAG, "Failed to initiate download manager: " + e.message)
+            }
+
             mainDir = null
             allDirs = mutableListOf()
-            reportException(e)
+//            reportException(e)
 //            Toast.makeText(context, "Failed to initiate download manager: " + e.message, Toast.LENGTH_LONG).show()
             // TODO: snackbar for failed uri or not set up?
         }
