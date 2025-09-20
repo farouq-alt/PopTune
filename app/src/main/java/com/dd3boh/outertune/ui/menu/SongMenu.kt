@@ -17,6 +17,7 @@ import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LibraryAdd
 import androidx.compose.material.icons.rounded.LibraryAddCheck
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.PlaylistRemove
 import androidx.compose.material.icons.rounded.Radio
 import androidx.compose.material.icons.rounded.Share
@@ -63,6 +64,7 @@ import com.dd3boh.outertune.db.entities.Song
 import com.dd3boh.outertune.extensions.toMediaItem
 import com.dd3boh.outertune.models.toMediaMetadata
 import com.dd3boh.outertune.playback.ExoDownloadService
+import com.dd3boh.outertune.playback.queues.ListQueue
 import com.dd3boh.outertune.playback.queues.YouTubeQueue
 import com.dd3boh.outertune.ui.component.button.IconButton
 import com.dd3boh.outertune.ui.component.items.ListItem
@@ -184,6 +186,19 @@ fun SongMenu(
                 onDismiss()
                 playerConnection.playQueue(YouTubeQueue.radio(song.toMediaMetadata()), isRadio = true)
             }
+
+        GridMenuItem(
+            icon = Icons.Rounded.PlayArrow,
+            title = R.string.play
+        ) {
+            playerConnection.playQueue(
+                queue = ListQueue(
+                    title = song.title,
+                    items = listOf(song.toMediaMetadata())
+                )
+            )
+            onDismiss()
+        }
         GridMenuItem(
             icon = Icons.AutoMirrored.Rounded.PlaylistPlay,
             title = R.string.play_next
