@@ -8,6 +8,8 @@
 package com.dd3boh.outertune.ui.screens.settings.fragments
 
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.rounded.Person
@@ -25,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.dd3boh.outertune.App.Companion.forgetAccount
@@ -58,7 +61,6 @@ fun ColumnScope.AccountFrag(navController: NavController) {
     val isLoggedIn = remember(innerTubeCookie) {
         "SAPISID" in parseCookieString(innerTubeCookie)
     }
-    val (useLoginForBrowse, onUseLoginForBrowseChange) = rememberPreference(UseLoginForBrowse, true)
 
     // temp vars
     var showToken: Boolean by remember {
@@ -85,6 +87,9 @@ fun ColumnScope.AccountFrag(navController: NavController) {
                 forgetAccount(context)
             }
         )
+        Spacer(Modifier.height(8.dp))
+        InfoLabel(stringResource(R.string.action_logout_tooltip))
+        Spacer(Modifier.height(24.dp))
     }
 
     PreferenceEntry(
@@ -109,16 +114,6 @@ fun ColumnScope.AccountFrag(navController: NavController) {
                 showTokenEditor = true
             }
         },
-    )
-    SwitchPreference(
-        title = { Text(stringResource(R.string.use_login_for_browse)) },
-        description = stringResource(R.string.use_login_for_browse_desc),
-        icon = { Icon(Icons.Rounded.Person, null) },
-        checked = useLoginForBrowse,
-        onCheckedChange = {
-            YouTube.useLoginForBrowse = it
-            onUseLoginForBrowseChange(it)
-        }
     )
 
 
@@ -169,4 +164,20 @@ fun ColumnScope.AccountFrag(navController: NavController) {
             }
         )
     }
+}
+
+@Composable
+fun ColumnScope.AccountExtrasFrag() {
+    val (useLoginForBrowse, onUseLoginForBrowseChange) = rememberPreference(UseLoginForBrowse, true)
+
+    SwitchPreference(
+        title = { Text(stringResource(R.string.use_login_for_browse)) },
+        description = stringResource(R.string.use_login_for_browse_desc),
+        icon = { Icon(Icons.Rounded.Person, null) },
+        checked = useLoginForBrowse,
+        onCheckedChange = {
+            YouTube.useLoginForBrowse = it
+            onUseLoginForBrowseChange(it)
+        }
+    )
 }

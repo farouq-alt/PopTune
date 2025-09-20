@@ -59,6 +59,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.datastore.preferences.core.edit
 import androidx.navigation.NavController
 import coil3.imageLoader
 import com.dd3boh.outertune.LocalDatabase
@@ -73,6 +74,7 @@ import com.dd3boh.outertune.constants.SCANNER_OWNER_LM
 import com.dd3boh.outertune.constants.ScannerImpl
 import com.dd3boh.outertune.constants.TabletUiKey
 import com.dd3boh.outertune.constants.TopBarInsets
+import com.dd3boh.outertune.constants.VisitorDataKey
 import com.dd3boh.outertune.ui.component.ColumnWithContentPadding
 import com.dd3boh.outertune.ui.component.PreferenceEntry
 import com.dd3boh.outertune.ui.component.PreferenceGroupTitle
@@ -80,6 +82,7 @@ import com.dd3boh.outertune.ui.component.SwitchPreference
 import com.dd3boh.outertune.ui.component.button.IconButton
 import com.dd3boh.outertune.ui.dialog.CounterDialog
 import com.dd3boh.outertune.ui.utils.backToMain
+import com.dd3boh.outertune.utils.dataStore
 import com.dd3boh.outertune.utils.lmScannerCoroutine
 import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.utils.scanners.LocalMediaScanner
@@ -211,6 +214,18 @@ fun ExperimentalSettings(
                 }
             )
 
+            Spacer(Modifier.height(20.dp))
+
+            PreferenceEntry(
+                title = { Text("Delete VisitorData: This may (or may not) help resolve \"Sign in to confirm you're not a bot\" issues. Not recommended for logged in users.") },
+                onClick = {
+                    runBlocking {
+                        context.dataStore.edit { settings ->
+                            settings.remove(VisitorDataKey)
+                        }
+                    }
+                }
+            )
 
             PreferenceEntry(
                 title = { Text("DEBUG: Force local to remote artist migration NOW") },
