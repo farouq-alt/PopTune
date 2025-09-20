@@ -74,6 +74,7 @@ import com.dd3boh.outertune.constants.AutoLoadMoreKey
 import com.dd3boh.outertune.constants.ENABLE_FFMETADATAEX
 import com.dd3boh.outertune.constants.KeepAliveKey
 import com.dd3boh.outertune.constants.MAX_PLAYER_CONSECUTIVE_ERR
+import com.dd3boh.outertune.constants.MaxQueuesKey
 import com.dd3boh.outertune.constants.MediaSessionConstants.CommandToggleLike
 import com.dd3boh.outertune.constants.MediaSessionConstants.CommandToggleRepeatMode
 import com.dd3boh.outertune.constants.MediaSessionConstants.CommandToggleShuffle
@@ -174,7 +175,7 @@ class MusicService : MediaLibraryService(),
     private val binder = MusicBinder()
     private lateinit var connectivityManager: ConnectivityManager
 
-    var queueBoard = QueueBoard(this)
+    var queueBoard = QueueBoard(this, maxQueues = 1)
     var queuePlaylistId: String? = null
 
     @Inject
@@ -563,13 +564,14 @@ class MusicService : MediaLibraryService(),
     }
 
     suspend fun initQueue() {
+        val maxQueues = dataStore.get(MaxQueuesKey, 19)
         if (dataStore.get(PersistentQueueKey, true)) {
-            queueBoard = QueueBoard(this, database.readQueue().toMutableList())
+            queueBoard = QueueBoard(this, database.readQueue().toMutableList(), maxQueues)
             queueBoard.getCurrentQueue()?.let {
                 queueBoard.initialized = true
             }
         } else {
-            queueBoard = QueueBoard(this)
+            queueBoard = QueueBoard(this, maxQueues = maxQueues)
         }
     }
 

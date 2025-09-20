@@ -33,6 +33,7 @@ import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.DeveloperMode
 import androidx.compose.material.icons.rounded.Devices
 import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.material.icons.rounded.Queue
 import androidx.compose.material.icons.rounded.WarningAmber
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -61,10 +62,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil3.imageLoader
 import com.dd3boh.outertune.LocalDatabase
+import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.AudioGaplessOffloadKey
 import com.dd3boh.outertune.constants.AudioOffloadKey
 import com.dd3boh.outertune.constants.DevSettingsKey
+import com.dd3boh.outertune.constants.MaxQueuesKey
 import com.dd3boh.outertune.constants.OobeStatusKey
 import com.dd3boh.outertune.constants.SCANNER_OWNER_LM
 import com.dd3boh.outertune.constants.ScannerImpl
@@ -75,6 +78,7 @@ import com.dd3boh.outertune.ui.component.PreferenceEntry
 import com.dd3boh.outertune.ui.component.PreferenceGroupTitle
 import com.dd3boh.outertune.ui.component.SwitchPreference
 import com.dd3boh.outertune.ui.component.button.IconButton
+import com.dd3boh.outertune.ui.dialog.CounterDialog
 import com.dd3boh.outertune.ui.utils.backToMain
 import com.dd3boh.outertune.utils.lmScannerCoroutine
 import com.dd3boh.outertune.utils.rememberPreference
@@ -94,6 +98,7 @@ fun ExperimentalSettings(
     val coroutineScope = rememberCoroutineScope()
     val database = LocalDatabase.current
     val haptic = LocalHapticFeedback.current
+    val playerConnection = LocalPlayerConnection.current
     val uriHandler = LocalUriHandler.current
 
     // state variables and such
@@ -102,12 +107,17 @@ fun ExperimentalSettings(
         defaultValue = false
     )
     val (audioOffload, onAudioOffloadChange) = rememberPreference(key = AudioOffloadKey, defaultValue = false)
+    val (maxQueues, onMaxQueuesChange) = rememberPreference(MaxQueuesKey, defaultValue = 19)
     val (tabletUi, onTabletUiChange) = rememberPreference(TabletUiKey, defaultValue = false)
 
     val (devSettings, onDevSettingsChange) = rememberPreference(DevSettingsKey, defaultValue = false)
     val (oobeStatus, onOobeStatusChange) = rememberPreference(OobeStatusKey, defaultValue = 0)
 
     var nukeEnabled by remember {
+        mutableStateOf(false)
+    }
+
+    var showMaxQueuesDialog by remember {
         mutableStateOf(false)
     }
 
@@ -126,8 +136,36 @@ fun ExperimentalSettings(
             checked = tabletUi,
             onCheckedChange = onTabletUiChange
         )
+        PreferenceEntry(
+            title = { Text(stringResource(R.string.max_queues_title)) },
+            icon = { Icon(Icons.Rounded.Queue, null) },
+            onClick = { showMaxQueuesDialog = true }
+        )
+
         Spacer(modifier = Modifier.height(16.dp))
 
+        if (showMaxQueuesDialog) {
+            CounterDialog(
+                title = stringResource(R.string.max_queues_title),
+                initialValue = maxQueues,
+                upperBound = 30,
+                lowerBound = 1,
+                onDismiss = { showMaxQueuesDialog = false },
+                onConfirm = {
+                    showMaxQueuesDialog = false
+                    coroutineScope.launch(Dispatchers.IO) {
+                        onMaxQueuesChange(it)
+                        delay(500)
+                        // the queues get reloaded, but not cleared by the database
+                        // this will allow the user to (immediately) revert any accidental changes
+                        playerConnection?.service?.initQueue()
+                    }
+                },
+                onCancel = {
+                    showMaxQueuesDialog = false
+                }
+            )
+        }
 
         PreferenceGroupTitle(
             title = stringResource(R.string.settings_debug)

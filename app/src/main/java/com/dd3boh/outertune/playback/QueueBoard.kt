@@ -15,7 +15,6 @@ import androidx.compose.ui.util.fastFirst
 import androidx.compose.ui.util.fastFirstOrNull
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.media3.common.C
-import com.dd3boh.outertune.constants.MAX_QUEUES
 import com.dd3boh.outertune.constants.PersistentQueueKey
 import com.dd3boh.outertune.constants.QUEUE_DEBUG
 import com.dd3boh.outertune.db.entities.QueueEntity
@@ -44,7 +43,11 @@ import kotlin.math.min
  * Multiple queues manager. Methods will not automatically (re)load queues into the player unless
  * otherwise explicitly stated.
  */
-class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueueObject> = ArrayList()) {
+class QueueBoard(
+    private val player: MusicService,
+    queues: MutableList<MultiQueueObject> = ArrayList(),
+    private var maxQueues: Int
+) {
     private val TAG = QueueBoard::class.simpleName.toString()
 
     val masterQueues: SnapshotStateList<MultiQueueObject> = mutableStateListOf()
@@ -53,7 +56,14 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
     var initialized = false
 
     init {
-        masterQueues.addAll(queues)
+        if (maxQueues < 0) {
+            maxQueues = 1
+        }
+        if (!queues.isEmpty()) {
+            masterQueues.addAll(
+                queues.subList((queues.lastIndex - maxQueues).coerceIn(0, queues.lastIndex), queues.lastIndex)
+            )
+        }
     }
 
     /**
@@ -256,7 +266,7 @@ class QueueBoard(private val player: MusicService, queues: MutableList<MultiQueu
         } else {
             // add entirely new queue
             // Precondition(s): radio queues never include local songs
-            if (masterQueues.size > MAX_QUEUES) {
+            if (masterQueues.size > maxQueues) {
                 deleteQueue(masterQueues.first())
             }
             val q = ArrayList(mediaList.filterNotNull())

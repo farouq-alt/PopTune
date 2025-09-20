@@ -285,6 +285,8 @@ while also allowing users to translate our app as well. New, specific strings to
     <string name="swipe_to_skip_title">Swipe horizontally to change song</string>
     <string name="swipe_to_skip_description">Enable swiping horizontally in the player to switch songs</string>
 
+    <string name="max_queues_title">Maximum number of queues</string>
+
 <!-- Setup wizard -->
     <string name="oobe_welcome_message">Welcome to OuterTune</string>
     <string name="oobe_welcome_tip">For the best experience, we recommend completing a quick setup to personalize key settings like theme, YouTube account, local media, and downloads.</string>
