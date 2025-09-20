@@ -1336,7 +1336,7 @@ class MainActivity : ComponentActivity() {
                                             )
                                     ) {
                                         NavigationRail(
-                                            containerColor = Color.Transparent,
+                                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp),
                                             header = {
                                                 Spacer(Modifier.height(8.dp))
                                                 Image(
@@ -1439,8 +1439,8 @@ class MainActivity : ComponentActivity() {
                                                     y = (slideOffset + hideOffset).roundToPx()
                                                 )
                                             }
-                                        }
-                                        .background(MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp))
+                                        },
+                                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp)
                                 ) {
                                     navigationItems.fastForEach { screen ->
                                         // TODO: display selection when based on root page user entered

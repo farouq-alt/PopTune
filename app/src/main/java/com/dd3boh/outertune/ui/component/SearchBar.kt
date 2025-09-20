@@ -16,7 +16,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -56,6 +55,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.contentColorFor
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
@@ -176,8 +176,7 @@ fun SearchBar(
         modifier = modifier
             .offset {
                 IntOffset(x = 0, y = scrollBehavior.state.heightOffset.roundToInt())
-            }
-            .background(MaterialTheme.colorScheme.background),
+            },
         propagateMinConstraints = true
     ) {
         val height: Dp
@@ -200,7 +199,7 @@ fun SearchBar(
 
         Surface(
             shape = animatedShape,
-            color = colors.containerColor,
+            color = if (animationProgress > 0) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp),
             contentColor = contentColorFor(colors.containerColor),
             tonalElevation = tonalElevation,
             modifier = Modifier
