@@ -287,6 +287,7 @@ while also allowing users to translate our app as well. New, specific strings to
 
 <!-- Setup wizard -->
     <string name="oobe_welcome_message">Welcome to OuterTune</string>
+    <string name="oobe_welcome_tip">For the best experience, we recommend completing a quick setup to personalize key settings like theme, YouTube account, local media, and downloads.</string>
 
     <!-- Landing -->
     <string name="oobe_ytm_integration">YouTube Music Integration</string>
@@ -311,6 +312,8 @@ while also allowing users to translate our app as well. New, specific strings to
     <string name="oobe_local_media_subtitle">Choose folders that contain your music. We\'ll scan them for songs to import.</string>
 
     <!-- Downloads -->
+    <string name="oobe_cache_title">Song cache</string>
+    <string name="oobe_cache_subtitle">Choose a song cache size. This can help reduce internet or YouTube API playback issues</string>
     <string name="oobe_downloads_title">Song downloads</string>
     <string name="oobe_downloads_subtitle">Choose a folder where downloaded songs will be saved.</string>
 

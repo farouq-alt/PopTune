@@ -50,6 +50,7 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.Autorenew
 import androidx.compose.material.icons.rounded.Block
+import androidx.compose.material.icons.rounded.Cached
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.DarkMode
@@ -110,10 +111,12 @@ import com.dd3boh.outertune.constants.InnerTubeCookieKey
 import com.dd3boh.outertune.constants.LibraryFilterKey
 import com.dd3boh.outertune.constants.LocalLibraryEnableKey
 import com.dd3boh.outertune.constants.LyricTrimKey
+import com.dd3boh.outertune.constants.MaxSongCacheSizeKey
 import com.dd3boh.outertune.constants.OOBE_VERSION
 import com.dd3boh.outertune.constants.OobeStatusKey
 import com.dd3boh.outertune.constants.ScanPathsKey
 import com.dd3boh.outertune.constants.ThumbnailCornerRadius
+import com.dd3boh.outertune.ui.component.ListPreference
 import com.dd3boh.outertune.ui.component.PreferenceEntry
 import com.dd3boh.outertune.ui.component.PreferenceGroupTitle
 import com.dd3boh.outertune.ui.component.SwitchPreference
@@ -127,6 +130,7 @@ import com.dd3boh.outertune.ui.screens.settings.fragments.LocalizationFrag
 import com.dd3boh.outertune.ui.screens.settings.fragments.ThemeAppFrag
 import com.dd3boh.outertune.ui.utils.backToMain
 import com.dd3boh.outertune.utils.dlCoroutine
+import com.dd3boh.outertune.utils.formatFileSize
 import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.utils.scanners.stringFromUriList
@@ -363,6 +367,13 @@ fun SetupWizard(
                             )
                         }
 
+                        Spacer(Modifier.height(16.dp))
+                        InfoLabel(
+                            text = stringResource(R.string.oobe_welcome_tip),
+                            modifier = Modifier
+                                .padding(horizontal = 16.dp)
+                        )
+                        Spacer(Modifier.height(16.dp))
 
                         Row(
                             modifier = Modifier
@@ -560,6 +571,10 @@ fun SetupWizard(
                     4 -> {
                         val downloadUtil = LocalDownloadUtil.current
                         val (downloadPath, onDownloadPathChange) = rememberPreference(DownloadPathKey, "")
+                        val (maxSongCacheSize, onMaxSongCacheSizeChange) = rememberPreference(
+                            key = MaxSongCacheSizeKey,
+                            defaultValue = 0
+                        )
                         val (scanPaths, onScanPathsChange) = rememberPreference(ScanPathsKey, defaultValue = "")
 
                         var showDlPathDialog: Boolean by remember {
@@ -605,6 +620,49 @@ fun SetupWizard(
                         Spacer(modifier = Modifier.height(16.dp))
                         InfoLabel(stringResource(R.string.dl_oobe_tooltip))
 
+                        Spacer(Modifier.height(16.dp))
+                        Icon(
+                            imageVector = Icons.Rounded.Cached,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(80.dp)
+                                .padding(16.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = stringResource(R.string.song_cache), // TODO: oobe_cache_subtitle when localization is done
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.oobe_cache_subtitle),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(start = 24.dp, end = 24.dp, bottom = 32.dp)
+                        )
+
+                        ElevatedCard(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            ListPreference(
+                                title = { Text(stringResource(R.string.max_cache_size)) },
+                                selectedValue = maxSongCacheSize,
+                                values = listOf(0, 128, 256, 512, 1024, 2048, 4096, 8192, -1),
+                                valueText = {
+                                    when (it) {
+                                        0 -> stringResource(androidx.compose.ui.R.string.state_off)
+                                        -1 -> stringResource(R.string.unlimited)
+                                        else -> formatFileSize(it * 1024 * 1024L)
+                                    }
+                                },
+                                onValueSelected = onMaxSongCacheSizeChange
+                            )
+                            InfoLabel(stringResource(R.string.restart_to_apply_changes))
+                            Spacer(Modifier.height(12.dp))
+                        }
 
                         if (showDlPathDialog) {
                             var tempFilePath by remember {
