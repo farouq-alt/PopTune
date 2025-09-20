@@ -11,6 +11,7 @@ package com.dd3boh.outertune.ui.player
 
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -116,6 +117,7 @@ import com.dd3boh.outertune.constants.InsetsSafeE
 import com.dd3boh.outertune.constants.InsetsSafeS
 import com.dd3boh.outertune.constants.InsetsSafeSE
 import com.dd3boh.outertune.constants.InsetsSafeSTE
+import com.dd3boh.outertune.constants.InsetsSafeT
 import com.dd3boh.outertune.constants.ListItemHeight
 import com.dd3boh.outertune.constants.LockQueueKey
 import com.dd3boh.outertune.constants.MiniPlayerHeight
@@ -983,9 +985,9 @@ fun BoxScope.QueueContent(
                         )
                     }
 
-                    if(seekIncrement != SeekIncrement.OFF) {
+                    if (seekIncrement != SeekIncrement.OFF) {
                         Box(modifier = Modifier.weight(1f)) {
-                            ResizableIconButton (
+                            ResizableIconButton(
                                 icon = Icons.Rounded.FastRewind,
                                 modifier = Modifier
                                     .size(32.dp)
@@ -1022,7 +1024,7 @@ fun BoxScope.QueueContent(
 
                     Spacer(Modifier.width(8.dp))
 
-                    if(seekIncrement != SeekIncrement.OFF) {
+                    if (seekIncrement != SeekIncrement.OFF) {
                         Box(modifier = Modifier.weight(1f)) {
                             ResizableIconButton(
                                 icon = Icons.Rounded.FastForward,
@@ -1103,6 +1105,7 @@ fun BoxScope.QueueContent(
                         .weight(1f, false)
                 ) {
                     if (isSearching) {
+                        Spacer(Modifier.windowInsetsPadding(InsetsSafeT))
                         searchBar()
                         if (inSelectMode) {
                             Row {
@@ -1144,7 +1147,12 @@ fun BoxScope.QueueContent(
                 modifier = Modifier.weight(1f, false)
             ) {
                 // multiqueue list
-                if (isSearching) {
+                AnimatedVisibility(
+                    visible = isSearching,
+                    modifier = Modifier
+                        .windowInsetsPadding(InsetsSafeT)
+                ) {
+                    Spacer(Modifier.windowInsetsPadding(InsetsSafeT))
                     searchBar()
                     if (inSelectMode) {
                         Row {
@@ -1164,16 +1172,21 @@ fun BoxScope.QueueContent(
                             )
                         }
                     }
-                } else if (mqExpand) {
-                    Column(
-                        modifier = Modifier.fillMaxHeight(0.4f)
-                    ) {
-                        queueHeader(Modifier.windowInsetsPadding(InsetsSafeSTE))
-                        queueList(InsetsSafeSE.asPaddingValues())
-                    }
+                }
 
-                    Spacer(Modifier.height(12.dp))
-                    songHeader(Modifier.windowInsetsPadding(InsetsSafeSE)) // song header
+                AnimatedVisibility(mqExpand && !isSearching) {
+                    // why cant i just put everything in one column???
+                    Column {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxHeight(0.4f)
+                        ) {
+                            queueHeader(Modifier.windowInsetsPadding(InsetsSafeSTE))
+                            queueList(InsetsSafeSE.asPaddingValues())
+                        }
+                        Spacer(Modifier.height(12.dp))
+                        songHeader(Modifier.windowInsetsPadding(InsetsSafeSE)) // song header
+                    }
                 }
 
                 val songListInsets = if (mqExpand) {

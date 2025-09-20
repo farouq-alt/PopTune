@@ -73,6 +73,11 @@ val InsetsSafeSTB: WindowInsets
     get() =
         WindowInsets.safeDrawing.only(WindowInsetsSides.Start + WindowInsetsSides.Top + WindowInsetsSides.Bottom)
 
+val InsetsSafeT: WindowInsets
+    @Composable
+    get() =
+        WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
+
 val InsetsSafeTEB: WindowInsets
     @Composable
     get() =
