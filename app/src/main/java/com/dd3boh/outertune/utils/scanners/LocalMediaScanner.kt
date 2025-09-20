@@ -1050,6 +1050,18 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
         }
 
         /**
+         * Check if albums are the same
+         *
+         *  Both null == same albums
+         *  Either null == different albums
+         */
+        fun compareAlbum(a: AlbumEntity?, b: AlbumEntity?): Boolean {
+            if (a != b && (a == null || b == null)) return false
+
+            return a!!.title.lowercase(Locale.getDefault()) == b!!.title.lowercase(Locale.getDefault())
+        }
+
+        /**
          * Check the similarity of a song
          *
          * @param a
@@ -1107,7 +1119,7 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
                         compareArtist(a.artists, b.artists))
 
                 ScannerMatchCriteria.LEVEL_3 -> closeEnough() || (a.song.title == b.song.title &&
-                        compareArtist(a.artists, b.artists) /* && album compare goes here */)
+                        compareArtist(a.artists, b.artists) && compareAlbum(a.album, b.album))
             }
         }
 
