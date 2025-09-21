@@ -164,8 +164,6 @@ fun MiniMediaInfo(
                 .padding(6.dp)
                 .size(48.dp)
         ) {
-
-            // YTM thumbnail arts
             AsyncImage(
                 model = mediaMetadata.getThumbnailModel(px, px),
                 contentDescription = null,

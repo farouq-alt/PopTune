@@ -14,6 +14,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -27,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -91,14 +93,17 @@ fun Thumbnail(
                     modifier = Modifier
                         .weight(1f, false)
                 ) {
-                    // YTM thumbnail arts
                     AsyncImage(
                         model = mediaMetadata?.getThumbnailModel(),
                         contentDescription = null,
                         modifier = Modifier
                             .aspectRatio(1f)
                             .clip(RoundedCornerShape(ThumbnailCornerRadius * 2))
-                            .clickable(enabled = showLyricsOnClick) {
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                enabled = showLyricsOnClick,
+                            ) {
                                 showLyrics = !showLyrics
                                 haptic.performHapticFeedback(HapticFeedbackType.Confirm)
                             }
