@@ -238,4 +238,9 @@
     <string name="speed_very_fast">Sangat cepat</string>
     <string name="attrib_zhuang">Zion Huang untuk OuterTune</string>
     <string name="special_thanks">Ucapan terima kasih</string>
+    <string name="ffmpeg_lgpl">Perangkat lunak ini menggunakan pustaka dari proyek FFmpeg di bawah lisensi LGPLv2.1</string>
+    <string name="seek_increment">Loncat waktu</string>
+    <plurals name="second">
+        <item quantity="other">%d detik</item>
+    </plurals>
 </resources>
