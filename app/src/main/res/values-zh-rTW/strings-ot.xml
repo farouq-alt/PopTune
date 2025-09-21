@@ -37,4 +37,5 @@
     <string name="grp_account_sync">帳號與同步</string>
     <string name="ytm_sync">自動與您的Youtube Music帳號同步</string>
     <string name="oobe_ytm_logon_title">帳號</string>
+    <string name="grp_sync">同步</string>
 </resources>
