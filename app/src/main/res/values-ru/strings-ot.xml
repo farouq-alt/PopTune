@@ -107,14 +107,14 @@
     <string name="action_next">Далее</string>
     <string name="action_skip">Пропустить</string>
     <string name="info">Информация</string>
-    <string name="audio_offload_description">Использовать аппаратный путь воспроизведения аудио. Отключение этой функции может увеличить расход энергии, но может быть полезным, если у вас возникают проблемы с воспроизведением или постобработкой звука</string>
+    <string name="audio_offload_description">Использовать аппаратный путь вывода аудио для воспроизведения. Включение может снизить энергопотребление, но привести к проблемам с воспроизведением или постобработкой звука. Этот параметр не влияет на неподдерживаемые кодеки или устройства</string>
     <string name="token_adv_login_description">Это ПРОДВИНУТЫЙ способ входа. Вместо использования веб-портала вы можете ввести или обновить токен для входа здесь. Это может быть полезно для быстрого входа на нескольких устройствах. Учтите, что приложение не примет токены с неверным форматом</string>
     <string name="scan_paths_excl">Исключённые папки</string>
     <string name="scanner_local_title">Локальный сканер</string>
     <string name="scanner_ytm_link_start">Начало привязки исполнителей к YouTube…</string>
     <string name="scanner_ytm_link_success">Привязка исполнителей к YouTube успешно завершена</string>
     <string name="scanner_type_taglib">Использовать встроенный экстрактор TagLib</string>
-    <string name="scanner_type_ffmpeg_ext">Использовать экстрактор метаданных FFmpeg. Требуется установка отдельного приложения</string>
+    <string name="scanner_type_ffmpeg_ext">Использовать экстрактор метаданных FFmpeg. Пожалуйста, используйте только полную версию приложения. Базовая версия может вызвать проблемы с отслеживанием песен</string>
     <string name="queue_local_history">История (локальная)</string>
     <string name="queue_remote_history">История (удаленная)</string>
     <string name="keep_alive_description">Использовать постоянную службу на переднем плане, чтобы предотвратить закрытие OuterTune в фоновом режиме.</string>
@@ -252,4 +252,10 @@
         <item quantity="other">%d секунд</item>
     </plurals>
     <string name="ffmpeg_lgpl">Это программное обеспечение использует библиотеки проекта FFmpeg под лицензией LGPLv2.1</string>
+    <string name="library_filter">Фильтр библиотеки</string>
+    <string name="audio_decoder_ffmpeg_only">Отдавать приоритет декодерам FFmpeg</string>
+    <string name="audio_decoder_preference">Аудиодекодер</string>
+    <string name="audio_decoder_system_only">Только системные декодеры</string>
+    <string name="audio_decoder_system_with_ffmpeg">Отдавать приоритет системным декодерам</string>
+    <string name="toggle_lyrics">Показать текст песни</string>
 </resources>
