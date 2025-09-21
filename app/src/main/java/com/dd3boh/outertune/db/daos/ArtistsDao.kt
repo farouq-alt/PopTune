@@ -87,7 +87,12 @@ interface ArtistsDao {
 
 
     @Transaction
-    @Query("SELECT song.* FROM song_artist_map JOIN song ON song_artist_map.songId = song.id WHERE song_artist_map.artistId IN (SELECT id FROM artist WHERE name LIKE '%' || :query || '%') LIMIT :previewSize")
+    @Query("""
+        SELECT song.* 
+        FROM song_artist_map JOIN song ON song_artist_map.songId = song.id 
+        WHERE song_artist_map.artistId IN (SELECT id FROM artist WHERE name LIKE '%' || :query || '%') AND song.inLibrary IS NOT NULL 
+        LIMIT :previewSize
+    """)
     fun searchArtistSongs(query: String, previewSize: Int = Int.MAX_VALUE): Flow<List<Song>>
 
     @Query("SELECT * FROM artist WHERE name LIKE '%' || :query || '%' LIMIT :previewSize")
