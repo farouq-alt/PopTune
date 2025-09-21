@@ -91,9 +91,10 @@ class LocalMediaScanner(val context: Context, val scannerImpl: ScannerImpl) {
     suspend fun advancedScan(
         file: File,
     ): SongTempData {
-        if (!file.exists()) throw IOException("File not found")
         val path = file.absolutePath
         try {
+            if (!file.exists()) throw IOException("File not found")
+
             // test if system can play
             val testPlayer = MediaPlayer()
             testPlayer.setDataSource(path)
