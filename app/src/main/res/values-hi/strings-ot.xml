@@ -94,7 +94,7 @@
     <string name="swipe2Queue">कतार में जोड़ने के लिए स्वाइप करें</string>
     <string name="lyrics_font_Size">अक्षर आकार</string>
     <string name="swipe2Queue_description">किसी गाने पर स्वाइप करके उसे वर्तमान में चल रहे गाने के तुरंत बाद प्ले होने के लिए जोड़ें</string>
-    <string name="audio_offload_description">ऑडियो प्लेबैक के लिए ऑफ़लोड ऑडियो पथ का उपयोग करें। इसे अक्षम करने से पावर की खपत बढ़ सकती है, लेकिन यदि आपको ऑडियो प्लेबैक या पोस्ट-प्रोसेसिंग में समस्याएँ हो रही हैं, तो यह उपयोगी हो सकता है</string>
+    <string name="audio_offload_description">ऑडियो प्लेबैक के लिए ऑफ़लोड ऑडियो पथ का उपयोग करें। इसे सक्षम करने से पावर की खपत कम हो सकती है, लेकिन इससे ऑडियो प्लेबैक या पोस्ट-प्रोसेसिंग में समस्याएँ आ सकती हैं। यह विकल्प उन कोडेक्स या डिवाइस पर असर नहीं डालता जो समर्थित नहीं हैं।</string>
     <string name="attrib_zhuang">InnerTune के लिए ज़ायन हुआंग</string>
     <string name="lyrics_karaoke_title">कराओके स्टाइल लिरिक्स।</string>
     <string name="lyrics_karaoke_description">शब्द दर शब्द बोल सिंकिंग सक्षम करता है। इसके लिए बोल के फ़ॉर्मेट का समर्थन आवश्यक है।</string>
@@ -105,7 +105,7 @@
     <string name="local_library_enable_description">अक्षम करने पर स्थानीय लाइब्रेरी ऐप में नहीं दिखाई देगी</string>
     <string name="scan_paths_description">गानों को स्कैन करने के लिए अपनी स्थानीय स्टोरेज में फ़ोल्डर चुनें</string>
     <string name="lyrics_prefer_local_description">सभी क्लाउड प्रदाताओं का उपयोग करने से पहले स्थानीय लिरिक्स फ़ाइलों को प्राथमिकता दें। क्लाउड प्रदाताओं को प्राथमिकता देने के लिए इसे बंद करें</string>
-    <string name="disable_lm_confirm">क्या आप वाकई स्थानीय मीडिया सुविधाओं को अक्षम करना चाहते हैं?</string>
+    <string name="disable_lm_confirm">क्या आप वाकई स्थानीय मीडिया सुविधाओं को अक्षम करना चाहते हैं? आपकी लाइब्रेरी की सामग्री पर इसका कोई असर नहीं पड़ेगा।</string>
     <string name="scanner_local_title">स्थानीय स्कैनर</string>
     <string name="lyrics_multiline_description">सिंक बिंदुओं के बीच की सभी पंक्तियों को एक ही बोल के रूप में मानें</string>
     <string name="lyrics_prefer_local">स्थानीय लिरिक्स फ़ाइलों को प्राथमिकता दें</string>
@@ -164,4 +164,7 @@
     <string name="help_support_forum">मदद और समर्थन (GitHub के माध्यम से)</string>
     <string name="audio_decoder_ffmpeg_only">FFmpeg डिकोडर्स को प्राथमिकता दें</string>
     <string name="audio_decoder_system_with_ffmpeg">सिस्टम डिकोडर्स को प्राथमिकता दें</string>
+    <string name="att_project_support">प्रोजेक्ट सपोर्ट</string>
+    <string name="seek_increment">सीक वृद्धि</string>
+    <string name="lyrics_synced_clickable">क्लिक करने योग्य लिरिक्स</string>
 </resources>
