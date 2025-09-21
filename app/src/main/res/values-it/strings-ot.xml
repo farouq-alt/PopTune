@@ -242,4 +242,10 @@
     <string name="extra_details">Dettagli extra</string>
     <string name="file_path">Percorso del file</string>
     <string name="track_number">Numero brano</string>
+    <string name="ffmpeg_lgpl">Questo software utilizza librerie del progetto FFmpeg sotto licenza LGPLv2.1</string>
+    <plurals name="second">
+        <item quantity="one">1 secondo</item>
+        <item quantity="many">%d secondi</item>
+        <item quantity="other">%d secondi</item>
+    </plurals>
 </resources>
