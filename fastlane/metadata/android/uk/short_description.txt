@@ -1,1 +1,1 @@
-Музичний плеєр Material 3 з підтримкою локальних файлів та YouTube Music
+Локальний музичний плеєр Material 3 та клієнт YouTube Music

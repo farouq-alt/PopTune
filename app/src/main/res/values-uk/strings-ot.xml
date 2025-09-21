@@ -76,7 +76,7 @@
     <string name="oobe_use_backup">У мене є резервна копія</string>
     <string name="sort_by_play_count">Кількість відтворень</string>
     <string name="auto_playlist">Автоматичний плейлист</string>
-    <string name="audio_offload_description">Використовуйте вивантажений аудіошлях для відтворення аудіо. Вимкнення цього параметра може збільшити енергоспоживання, але може бути корисним, якщо у вас виникають проблеми з відтворенням або постобробкою аудіо</string>
+    <string name="audio_offload_description">Використовуйте шлях для розвантаження аудіо для відтворення аудіо. Увімкнення цієї опції може зменшити споживання енергії, але може призвести до проблем із відтворенням аудіо або постобробкою. Ця настройка не впливає на непідтримувані кодеки або пристрої</string>
     <string name="import_innertune_tooltip">Відновлення резервних копій InnerTune підтримується, хоча можливі аномалії через технічні обмеження</string>
     <string name="create_sync_playlist_description">Примітка: це дозволяє синхронізуватися з YouTube Music. Пізніше цей параметр НЕ можна буде змінити. Ви не можете додавати локальні пісні до синхронізованих списків відтворення.</string>
     <string name="slim_navbar_description">Прибрати текстовий напис, щоб зменшити висоту панелі навігації</string>
@@ -92,7 +92,7 @@
     <string name="grp_proxy">Проксі</string>
     <string name="lyrics_prefer_local_description">Надавати пріоритет локальним файлам текстів пісень перед використанням усіх хмарних провайдерів. Вимкніть це, щоби визначити пріоритетність хмарних провайдерів</string>
     <string name="scanner_strict_file_name_description">Якщо увімкнено, назви файлів НЕ ігноруватимуться. Наприклад, «Song.ogg» буде відрізнятися від «Song.flac». Налаштування чутливості сканера все одно буде застосовано</string>
-    <string name="scanner_type_ffmpeg_ext">Використовувати витягувач метаданих FFmpeg. Потребує встановлення зовнішнього пакета</string>
+    <string name="scanner_type_ffmpeg_ext">Використовуйте екстрактор метаданих FFmpeg. Будь ласка, використовуйте лише повну версію програми. Базова версія може спричинити проблеми з відстеженням пісень</string>
     <string name="dev_settings_title">Увімкнути налаштування розробника</string>
     <string name="action_next">Вперед</string>
     <string name="dev_settings_description">Відкриває додаткові розширені налаштування, призначені для використання під час розробки</string>
@@ -252,4 +252,10 @@
         <item quantity="many">%d секунд</item>
         <item quantity="other">%d секунд</item>
     </plurals>
+    <string name="library_filter">Фільтр бібліотеки</string>
+    <string name="toggle_lyrics">Перемикання тексту пісні</string>
+    <string name="audio_decoder_ffmpeg_only">Пріоритет декодерів FFmpeg</string>
+    <string name="audio_decoder_preference">Аудіодекодер</string>
+    <string name="audio_decoder_system_only">Тільки системні декодери</string>
+    <string name="audio_decoder_system_with_ffmpeg">Пріоритет системних декодерів</string>
 </resources>
