@@ -142,4 +142,26 @@
     <string name="err_invalid_ytm_song">गाना बजाने में विफल। केवल वही गाने चलाए जा सकते है जो यूट्यूब म्यूजिक पर उपलब्ध हो।</string>
     <string name="tap_show_more">अधिक जानकारी के लिए टैप करें</string>
     <string name="sort_by_track_number">ट्रैक संख्या</string>
+    <string name="disc_number">डिस्क नंबर</string>
+    <string name="extra_details">अतिरिक्त जानकारी</string>
+    <string name="file_path">फ़ाइल का स्थान</string>
+    <string name="track_number">गीत संख्या</string>
+    <string name="toggle_lyrics">गीत के बोल दिखाएँ/छुपाएँ</string>
+    <string name="app_info_title">सेटिंग्स की जानकारी</string>
+    <string name="device_info_title">उपकरण संबंधी जानकारी</string>
+    <string name="wiki">विकी</string>
+    <string name="all_contributors">सभी योगदानकर्ताओं को दिखाएं</string>
+    <string name="att_contributor">सहयोगकर्ता</string>
+    <string name="att_lead_developer">प्रधान डेवलपर</string>
+    <string name="att_maintainer">रखरखावकर्ता</string>
+    <string name="audio_decoder_preference">ऑडियो डिकोडर</string>
+    <string name="audio_decoder_system_only">केवल सिस्टम डिकोडर</string>
+    <string name="library_filter">लाइब्रेरी फ़िल्टर</string>
+    <string name="bits_per_sample">प्रति सैम्पल बिट्स</string>
+    <string name="ffmpeg_lgpl">यह सॉफ़्टवेयर FFmpeg प्रोजेक्ट की लाइब्रेरी का उपयोग करता है, जो LGPLv2.1 के अंतर्गत आती हैं</string>
+    <string name="help_bug_report_action">समस्या रिपोर्ट भेजें (GitHub के ज़रिए)</string>
+    <string name="help_contact_email_inquiries">अन्य पूछताछ (ईमेल कॉपी करने के लिए टैप करें)</string>
+    <string name="help_support_forum">मदद और समर्थन (GitHub के माध्यम से)</string>
+    <string name="audio_decoder_ffmpeg_only">FFmpeg डिकोडर्स को प्राथमिकता दें</string>
+    <string name="audio_decoder_system_with_ffmpeg">सिस्टम डिकोडर्स को प्राथमिकता दें</string>
 </resources>
