@@ -89,7 +89,7 @@ fun QueueMenu(
     if (showChoosePlaylistDialog) {
         AddToPlaylistDialog(
             navController = navController,
-            onGetSong = { songs.map { it.id } },
+            songIds = songs.map { it.id },
             onDismiss = {
                 showChoosePlaylistDialog = false
             }

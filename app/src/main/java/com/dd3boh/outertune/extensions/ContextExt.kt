@@ -6,8 +6,6 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.PowerManager
 import com.dd3boh.outertune.constants.InnerTubeCookieKey
-import com.dd3boh.outertune.constants.LikedAutoDownloadKey
-import com.dd3boh.outertune.constants.LikedAutodownloadMode
 import com.dd3boh.outertune.constants.TabletUiKey
 import com.dd3boh.outertune.constants.YtmSyncKey
 import com.dd3boh.outertune.utils.dataStore
@@ -27,10 +25,6 @@ fun Context.isInternetConnected(): Boolean {
     val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val networkCapabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
     return networkCapabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) ?: false
-}
-
-fun Context.getLikeAutoDownload(): LikedAutodownloadMode {
-    return dataStore[LikedAutoDownloadKey].toEnum(LikedAutodownloadMode.OFF)
 }
 
 fun Context.supportsWideScreen() : Boolean {

@@ -103,7 +103,6 @@ import com.zionhuang.innertube.YouTube
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
@@ -152,12 +151,6 @@ fun PlayerMenu(
     }
     var showSelectArtistDialog by rememberSaveable {
         mutableStateOf(false)
-    }
-
-    LaunchedEffect(librarySong?.song?.liked) {
-        librarySong?.let {
-            downloadUtil.autoDownloadIfLiked(it.song)
-        }
     }
 
 
@@ -590,14 +583,13 @@ fun PlayerMenu(
     if (showChoosePlaylistDialog) {
         AddToPlaylistDialog(
             navController = navController,
-            onGetSong = { playlist ->
+            songIds = listOf(mediaMetadata.id),
+            onPreAdd = { playlist ->
                 database.transaction {
                     insert(mediaMetadata)
                 }
 
-                coroutineScope.launch(Dispatchers.IO) {
-                    playlist.playlist.browseId?.let { YouTube.addToPlaylist(it, mediaMetadata.id) }
-                }
+                playlist.playlist.browseId?.let { YouTube.addToPlaylist(it, mediaMetadata.id) }
 
                 listOf(mediaMetadata.id)
             },

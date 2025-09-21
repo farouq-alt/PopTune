@@ -27,7 +27,6 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -101,8 +100,7 @@ fun SongMenu(
 
     val syncMode by rememberEnumPreference(key = YtmSyncModeKey, defaultValue = SyncMode.RW)
 
-    val songState = database.song(originalSong.id).collectAsState(initial = originalSong)
-    val song = songState.value ?: originalSong
+    val song = originalSong
     val download by LocalDownloadUtil.current.getDownload(originalSong.id).collectAsState(initial = null)
     val coroutineScope =
         CoroutineScope(syncCoroutine) // rememberCoroutineScope has exception "rememberCoroutineScope left the composition"
@@ -124,10 +122,6 @@ fun SongMenu(
     }
     var showDetailsDialog by rememberSaveable {
         mutableStateOf(false)
-    }
-
-    LaunchedEffect(song.song.liked) {
-        downloadUtil.autoDownloadIfLiked(song.song)
     }
 
     ListItem(
@@ -386,11 +380,10 @@ fun SongMenu(
     if (showChoosePlaylistDialog) {
         AddToPlaylistDialog(
             navController = navController,
-            onGetSong = { playlist ->
-                CoroutineScope(syncCoroutine).launch {
-                    playlist.playlist.browseId?.let { browseId ->
-                        YouTube.addToPlaylist(browseId, song.id)
-                    }
+            songIds = listOf(song.id),
+            onPreAdd = { playlist ->
+                playlist.playlist.browseId?.let { browseId ->
+                    YouTube.addToPlaylist(browseId, song.id)
                 }
                 listOf(song.id)
             },

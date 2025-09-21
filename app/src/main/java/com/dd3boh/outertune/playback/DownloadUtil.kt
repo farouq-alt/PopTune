@@ -2,7 +2,6 @@ package com.dd3boh.outertune.playback
 
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.util.Log
 import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
@@ -23,7 +22,6 @@ import com.dd3boh.outertune.constants.AudioQuality
 import com.dd3boh.outertune.constants.AudioQualityKey
 import com.dd3boh.outertune.constants.DownloadExtraPathKey
 import com.dd3boh.outertune.constants.DownloadPathKey
-import com.dd3boh.outertune.constants.LikedAutodownloadMode
 import com.dd3boh.outertune.db.MusicDatabase
 import com.dd3boh.outertune.db.entities.FormatEntity
 import com.dd3boh.outertune.db.entities.PlaylistSong
@@ -31,7 +29,6 @@ import com.dd3boh.outertune.db.entities.Song
 import com.dd3boh.outertune.db.entities.SongEntity
 import com.dd3boh.outertune.di.AppModule.PlayerCache
 import com.dd3boh.outertune.di.DownloadCache
-import com.dd3boh.outertune.extensions.getLikeAutoDownload
 import com.dd3boh.outertune.models.MediaMetadata
 import com.dd3boh.outertune.playback.downloadManager.DownloadDirectoryManagerOt
 import com.dd3boh.outertune.playback.downloadManager.DownloadManagerOt
@@ -196,26 +193,6 @@ class DownloadUtil @Inject constructor(
             ExoDownloadService::class.java,
             false
         )
-    }
-
-    fun autoDownloadIfLiked(songs: List<SongEntity>) {
-        songs.forEach { song -> autoDownloadIfLiked(song) }
-    }
-
-    fun autoDownloadIfLiked(song: SongEntity) {
-        if (!song.liked || song.dateDownload != null) {
-            return
-        }
-
-        val isWifiConnected = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-            ?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ?: false
-
-        if (
-            context.getLikeAutoDownload() == LikedAutodownloadMode.ON
-            || (context.getLikeAutoDownload() == LikedAutodownloadMode.WIFI_ONLY && isWifiConnected)
-        ) {
-            download(song)
-        }
     }
 
 

@@ -41,7 +41,6 @@ import com.dd3boh.outertune.LocalSnackbarHostState
 import com.dd3boh.outertune.LocalSyncUtils
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.InnerTubeCookieKey
-import com.dd3boh.outertune.constants.LikedAutoDownloadKey
 import com.dd3boh.outertune.constants.LikedAutodownloadMode
 import com.dd3boh.outertune.constants.PauseListenHistoryKey
 import com.dd3boh.outertune.constants.PauseRemoteListenHistoryKey
@@ -232,10 +231,6 @@ fun ColumnScope.SyncExtrasFrag() {
         key = PauseRemoteListenHistoryKey,
         defaultValue = false
     )
-    val (likedAutoDownload, onLikedAutoDownload) = rememberEnumPreference(
-        LikedAutoDownloadKey,
-        LikedAutodownloadMode.OFF
-    )
 
     SwitchPreference(
         title = { Text(stringResource(R.string.pause_remote_listen_history)) },
@@ -243,20 +238,6 @@ fun ColumnScope.SyncExtrasFrag() {
         checked = pauseRemoteListenHistory,
         onCheckedChange = onPauseRemoteListenHistoryChange,
         isEnabled = !pauseListenHistory && isLoggedIn
-    )
-    ListPreference(
-        title = { Text(stringResource(R.string.like_autodownload)) },
-        icon = { Icon(Icons.Rounded.Favorite, null) },
-        values = listOf(LikedAutodownloadMode.OFF, LikedAutodownloadMode.ON, LikedAutodownloadMode.WIFI_ONLY),
-        selectedValue = likedAutoDownload,
-        valueText = {
-            when (it) {
-                LikedAutodownloadMode.OFF -> stringResource(androidx.compose.ui.R.string.state_off)
-                LikedAutodownloadMode.ON -> stringResource(androidx.compose.ui.R.string.state_on)
-                LikedAutodownloadMode.WIFI_ONLY -> stringResource(R.string.wifi_only)
-            }
-        },
-        onValueSelected = onLikedAutoDownload,
     )
 }
 

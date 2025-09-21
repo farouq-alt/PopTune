@@ -237,10 +237,7 @@ fun FolderMenu(
     if (showChoosePlaylistDialog) {
         AddToPlaylistDialog(
             navController = navController,
-            onGetSong = {
-                if (allFolderSongs.isEmpty()) return@AddToPlaylistDialog emptyList()
-                allFolderSongs.map { it.id }
-            },
+            songIds = if (allFolderSongs.isEmpty()) emptyList() else allFolderSongs.map { it.id },
             onDismiss = { showChoosePlaylistDialog = false }
         )
     }

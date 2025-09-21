@@ -61,6 +61,7 @@ import com.dd3boh.outertune.db.MusicDatabase
 import com.dd3boh.outertune.db.entities.ArtistEntity
 import com.dd3boh.outertune.db.entities.Song
 import com.dd3boh.outertune.db.entities.SongEntity
+import com.dd3boh.outertune.models.toMediaMetadata
 import com.dd3boh.outertune.ui.component.EnumListPreference
 import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
 import com.dd3boh.outertune.utils.lmScannerCoroutine
@@ -291,8 +292,13 @@ fun ImportM3uDialog(
             navController = navController,
             allowSyncing = false,
             initialTextFieldValue = importedTitle,
-            songs = importedSongs,
-            onGetSong = { importedSongs.map { it.id } },
+            songIds = importedSongs.map { it.id },
+            onPreAdd = {
+                importedSongs.forEach {
+                    database.insert(it.toMediaMetadata())
+                }
+                emptyList()
+            },
             onDismiss = { showChoosePlaylistDialog = false }
         )
 

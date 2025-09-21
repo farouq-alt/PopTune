@@ -415,7 +415,6 @@ class MusicService : MediaLibraryService(),
                 if (!song.isLocal) {
                     syncUtils.likeSong(song)
                 }
-                downloadUtil.autoDownloadIfLiked(song)
             }
         }
     }

@@ -44,9 +44,6 @@ import com.dd3boh.outertune.playback.queues.ListQueue
 import com.dd3boh.outertune.ui.dialog.AddToPlaylistDialog
 import com.dd3boh.outertune.ui.dialog.AddToQueueDialog
 import com.dd3boh.outertune.ui.dialog.DefaultDialog
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 
 /**
@@ -283,16 +280,12 @@ fun SelectionMediaMetadataMenu(
     if (showChoosePlaylistDialog) {
         AddToPlaylistDialog(
             navController = navController,
-            onGetSong = {
-                selection.map {
-                    // TODO: wth is this code quality???
-                    runBlocking {
-                        withContext(Dispatchers.IO) {
-                            database.insert(it)
-                        }
-                    }
-                    it.id
+            songIds = selection.map { it.id },
+            onPreAdd = {
+                selection.forEach { s ->
+                    database.insert(s)
                 }
+                emptyList()
             },
             onDismiss = { showChoosePlaylistDialog = false }
         )

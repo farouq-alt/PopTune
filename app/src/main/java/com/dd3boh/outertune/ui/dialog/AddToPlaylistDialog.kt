@@ -7,6 +7,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.CheckBox
+import androidx.compose.material.icons.rounded.CheckBoxOutlineBlank
+import androidx.compose.material.icons.rounded.IndeterminateCheckBox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -30,16 +34,21 @@ import androidx.navigation.NavController
 import com.dd3boh.outertune.LocalDatabase
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.ListThumbnailSize
+import com.dd3boh.outertune.constants.PlaylistFilter
+import com.dd3boh.outertune.constants.PlaylistSortDescendingKey
+import com.dd3boh.outertune.constants.PlaylistSortType
+import com.dd3boh.outertune.constants.PlaylistSortTypeKey
 import com.dd3boh.outertune.constants.SyncMode
 import com.dd3boh.outertune.constants.YtmSyncModeKey
 import com.dd3boh.outertune.db.entities.Playlist
-import com.dd3boh.outertune.db.entities.Song
-import com.dd3boh.outertune.models.toMediaMetadata
+import com.dd3boh.outertune.ui.component.SortHeader
 import com.dd3boh.outertune.ui.component.items.ListItem
 import com.dd3boh.outertune.ui.component.items.PlaylistListItem
 import com.dd3boh.outertune.utils.rememberEnumPreference
+import com.dd3boh.outertune.utils.rememberPreference
 import com.zionhuang.innertube.YouTube
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @Composable
@@ -47,13 +56,15 @@ fun AddToPlaylistDialog(
     navController: NavController,
     allowSyncing: Boolean = true,
     initialTextFieldValue: String? = null,
-    onGetSong: suspend (Playlist) -> List<String>, // list of song ids. Songs should be inserted to database in this function.
-    songs: List<Song>? = null,
+    songIds: List<String>?, // song ids to insert.
+    onPreAdd: (suspend (Playlist) -> List<String>)? = null,
     onDismiss: () -> Unit,
 ) {
     val database = LocalDatabase.current
     val coroutineScope = rememberCoroutineScope()
 
+    val (sortType, onSortTypeChange) = rememberEnumPreference(PlaylistSortTypeKey, PlaylistSortType.CREATE_DATE)
+    val (sortDescending, onSortDescendingChange) = rememberPreference(PlaylistSortDescendingKey, true)
     val syncMode by rememberEnumPreference(key = YtmSyncModeKey, defaultValue = SyncMode.RW)
 
     var playlists by remember {
@@ -70,7 +81,10 @@ fun AddToPlaylistDialog(
         mutableStateOf<Playlist?>(null)
     }
     var songIds by remember {
-        mutableStateOf<List<String>?>(null) // list is not saveable
+        mutableStateOf<List<String>?>(songIds) // list is not saveable
+    }
+    var playlistIdsSongParticipation by remember {
+        mutableStateOf<List<String>?>(null)
     }
     var duplicates by remember {
         mutableStateOf(emptyList<String>())
@@ -78,12 +92,20 @@ fun AddToPlaylistDialog(
 
     LaunchedEffect(Unit) {
         if (syncMode == SyncMode.RO) {
-            database.localPlaylistsByCreateDateAsc().collect {
-                playlists = it.asReversed()
+            database.playlists(PlaylistFilter.LIBRARY, sortType, sortDescending, 1).collect {
+                playlists = it
             }
         } else {
-            database.editablePlaylistsByCreateDateAsc().collect {
-                playlists = it.asReversed()
+            database.playlists(PlaylistFilter.LIBRARY, sortType, sortDescending, 2).collect {
+                playlists = it
+            }
+        }
+    }
+
+    LaunchedEffect(playlists) {
+        coroutineScope.launch(Dispatchers.IO) {
+            songIds?.let { s ->
+                playlistIdsSongParticipation = database.playlistIdBySongs(s).first()
             }
         }
     }
@@ -108,24 +130,68 @@ fun AddToPlaylistDialog(
             )
         }
 
+        item {
+            InfoLabel(
+                text = stringResource(R.string.playlist_add_local_to_synced_note),
+                modifier = Modifier.padding(horizontal = 20.dp)
+            )
+        }
+
+        item {
+            SortHeader(
+                sortType = sortType,
+                sortDescending = sortDescending,
+                onSortTypeChange = onSortTypeChange,
+                onSortDescendingChange = onSortDescendingChange,
+                sortTypeText = { sortType ->
+                    when (sortType) {
+                        PlaylistSortType.CREATE_DATE -> R.string.sort_by_create_date
+                        PlaylistSortType.NAME -> R.string.sort_by_name
+                        PlaylistSortType.SONG_COUNT -> R.string.sort_by_song_count
+                    }
+                },
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+            )
+        }
+
         items(playlists) { playlist ->
             PlaylistListItem(
                 playlist = playlist,
+                trailingContent = {
+                    val inPlaylist =
+                        playlistIdsSongParticipation != null && playlist.id in playlistIdsSongParticipation!!
+                    // TODO: checkmark box for all songs in playlist for multiselect
+                    val icon =
+                        if (inPlaylist && songIds?.size == 1) {
+                            Icons.Rounded.CheckBox
+                        } else if (inPlaylist) {
+                            Icons.Rounded.IndeterminateCheckBox
+                        } else {
+                            Icons.Rounded.CheckBoxOutlineBlank
+                        }
+
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                    )
+                },
                 modifier = Modifier.clickable {
                     selectedPlaylist = playlist
                     coroutineScope.launch(Dispatchers.IO) {
-                        if (songIds == null) {
-                            songIds = onGetSong(playlist)
+                        if (onPreAdd != null) {
+                            val result = onPreAdd(playlist)
+                            if (songIds == null) {
+                                songIds = result
+                            }
                         }
                         duplicates = database.playlistDuplicates(playlist.id, songIds!!)
                         if (duplicates.isNotEmpty()) {
                             showDuplicateDialog = true
                         } else {
                             onDismiss()
-                            songs?.forEach {
-                                // import m3u needs this for importing remote songs
-                                database.insert(it.toMediaMetadata())
-                            }
                             database.addSongToPlaylist(playlist, songIds!!)
 
                             if (!playlist.playlist.isLocal) {
@@ -157,13 +223,6 @@ fun AddToPlaylistDialog(
                     )
                 }
             }
-        }
-
-        item {
-            InfoLabel(
-                text = stringResource(R.string.playlist_add_local_to_synced_note),
-                modifier = Modifier.padding(horizontal = 20.dp)
-            )
         }
     }
 

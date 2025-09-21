@@ -210,8 +210,6 @@ class SyncUtils @Inject constructor(
                 }
             }
 
-            val songs = database.likedSongsNotDownloaded().first().map { it.song }
-            downloadUtil.autoDownloadIfLiked(songs)
         } finally {
             context.dataStore.edit { settings ->
                 settings[LastLikeSongSyncKey] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
