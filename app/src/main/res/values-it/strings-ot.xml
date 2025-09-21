@@ -248,4 +248,5 @@
         <item quantity="many">%d secondi</item>
         <item quantity="other">%d secondi</item>
     </plurals>
+    <string name="seek_increment">Salto avanti/indietro</string>
 </resources>
