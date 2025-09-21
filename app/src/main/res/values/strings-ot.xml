@@ -101,7 +101,7 @@ while also allowing users to translate our app as well. New, specific strings to
     <string name="device_info_title">Device information</string>
     <string name="ffmpeg_lgpl">This software uses libraries from the FFmpeg project under the LGPLv2.1</string>
     <string name="help_bug_report_action">Submit a bug report (Via GitHub)</string>
-    <string name="help_contact_email_inquiries">Other inquires (Tap to copy Email)</string>
+    <string name="help_contact_email_inquiries">Other inquires (Tap to copy email)</string>
     <string name="help_support_forum">Help and support (Via GitHub)</string>
     <string name="no_updates_available">No updates available</string>
     <string name="oss_licenses_title">Open source licenses</string>
@@ -158,7 +158,7 @@ while also allowing users to translate our app as well. New, specific strings to
     <string name="audio_offload">Enable offload</string>
     <string name="audio_offload_description">Use the offload audio path for audio playback. Enabling this may reduce power usage but can lead experience issues with audio playback or post processing. This preference has no effect for unsupported codecs or devices</string>
     <string name="keep_alive_title">Prevent system killing app</string>
-    <string name="keep_alive_description">Use a persistent foreground service to prevent OuterTune from being closed in the background.</string>
+    <string name="keep_alive_description">Use a persistent foreground service to prevent OuterTune from being closed in the background</string>
     <string name="persistent_queue_desc_ot">Restore previous open queue(s) when the app starts</string>
     <string name="min_playback_duration">Minimum playback duration</string>
     <string name="min_playback_duration_description">The minimum amount of a song that must be played before it is considered \"played\"</string>
