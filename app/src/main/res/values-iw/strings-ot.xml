@@ -78,7 +78,7 @@
     <string name="delete_lyric_confirm">האם אתה באמת רוצה למחוק את המילים המאוחסנות עבור \"%s\"?</string>
     <string name="slim_navbar_title">Slim navbar</string>
     <string name="audio_offload_description">השתמש בנתיב השמעה של עומס (offload audio) להשמעת שמע. השבתת אפשרות זו עשויה להגביר את צריכת החשמל, אך יכולה להיות שימושית אם אתה נתקל בבעיות בהשמעת שמע או בעיבוד לאחר מכן.</string>
-    <string name="library_empty">תוכן הספרייה שלך יופיע פה</string>
+    <string name="library_empty">תוכן הספרייה שלך יופיע כאן</string>
     <string name="tap_show_more">הקש כדי להציג מידע נוסף</string>
     <string name="err_invalid_ytm_song">נגן</string>
     <string name="dl_migrate_confirm">פעולה זו תעביר את כל ההורדות הפנימיות ל-\"%s\", ופעולה זו לא ניתנת לביטול. האם להמשיך?</string>
@@ -227,4 +227,24 @@
     <string name="dl_rescan_description">עדכן את מסד הנתונים ורענן את רישום ההורדות אם קבצים או תיקיות שונו</string>
     <string name="dl_storage_tooltip">הורדות פנימיות נשמרות באחסון הפרטי של האפליקציה ואינן נגישות ללא root.\n\nהורדות חיצוניות נשמרות באחסון החיצוני של המכשיר שלך (למשל, כרטיסי /sdcard או micro SD) וניתן לגשת אליהן או לערוך אותן ישירות באמצעות סייר קבצים. עבור תיקיית ההורדות החיצוניות, אנו ממליצים לבחור תיקייה ריקה במיוחד עבור הורדות שירים, מכיוון ש-OuterTune עשוי לשנות או למחוק קבצים בתיקייה זו.\n\nתיקיות ייבוא נוספות הן לקריאה בלבד ומשמשות לטעינת שירים נוספים. OuterTune לעולם לא ישנה או ימחק קבצים בתיקיות אלה. ניתן לבחור תיקיות אלה במקטע המתקדם.\n\nכאשר אתה מנקה הורדות, רק שירים פנימיים נמחקים. יש להסיר הורדות חיצוניות ושירים ייבוא נוספים באופן ידני, דרך תפריט השיר או ידנית באמצעות סייר קבצים.\n\nסרוק מחדש את תיקיות ההורדה: הורדות שירים בתיקיות ההורדות החיצוניות והייבוא נוסף אינן מתעדכנות אוטומטית. אם אתה מוסיף, מסיר או משנה קבצים באופן ידני באמצעות סייר קבצים, ייתכן שתצטרך לסרוק מחדש את תיקיות ההורדה כדי לעדכן את מסד הנתונים של האפליקציה. אפשרות זו זמינה במקטע המתקדם.</string>
     <string name="attribution_title">שיוך</string>
+    <string name="toggle_lyrics">הפעל/כבה את מילות השיר</string>
+    <string name="ffmpeg_lgpl">תוכנה זו עושה שימוש בספריות מפרויקט FFmpeg תחת רישיון LGPLv2.1</string>
+    <string name="audio_decoder_preference">מפענח שמע</string>
+    <string name="audio_decoder_system_only">מפענחי מערכת בלבד</string>
+    <string name="audio_decoder_system_with_ffmpeg">העדפת מפענחי מערכת</string>
+    <string name="seek_increment">קפיצת זמן</string>
+    <string name="audio_decoder_ffmpeg_only">העדפת מפענחי FFmpeg</string>
+    <plurals name="scanner_n_song_found">
+        <item quantity="one">שיר נמצא</item>
+        <item quantity="two">%d שירים נמצאו</item>
+        <item quantity="other"></item>
+    </plurals>
+    <string name="scanner_variant_rescan">סרוק מחדש את כל הספרייה וטען שוב את כל פרטי השירים</string>
+    <string name="dl_size_used_extra">ייבוא נוסף: %s בשימוש</string>
+    <plurals name="second">
+        <item quantity="one">שנייה אחת</item>
+        <item quantity="two">%d שניות</item>
+        <item quantity="other"></item>
+    </plurals>
+    <string name="library_filter">מסנן ספרייה</string>
 </resources>
