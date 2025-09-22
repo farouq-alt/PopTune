@@ -5,7 +5,7 @@
     <string name="create_sync_playlist_description">注意：这允许与 YouTube Music 同步。这在以后是不可更改的。您无法将本地歌曲添加到同步的播放列表中。</string>
     <string name="local_library_enable_description">禁用将在应用程序中隐藏本地库</string>
     <string name="slim_navbar_description">删除文本标签以降低导航栏高度</string>
-    <string name="library">图书馆</string>
+    <string name="library">媒体库</string>
     <string name="recent_activity">最近的活动</string>
     <string name="local_history">本地</string>
     <string name="remote_history">远程</string>
@@ -235,4 +235,10 @@
     </plurals>
     <string name="speed_slow">慢速</string>
     <string name="speed_medium">中速</string>
+    <string name="audio_decoder_preference">音频解码器</string>
+    <string name="toggle_lyrics">切换歌词</string>
+    <string name="audio_decoder_ffmpeg_only">优先使用 FFmpeg 解码器</string>
+    <string name="audio_decoder_system_only">仅使用系统解码器</string>
+    <string name="audio_decoder_system_with_ffmpeg">优先使用系统解码器</string>
+    <string name="library_filter">过滤器</string>
 </resources>
