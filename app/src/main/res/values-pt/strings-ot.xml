@@ -249,7 +249,7 @@
     <string name="audio_decoder_preference">Descodificador de áudio</string>
     <string name="audio_decoder_system_only">Apenas decodificadores de sistema</string>
     <string name="audio_decoder_system_with_ffmpeg">Priorizar os descodificadores de sistema</string>
-    <string name="seek_increment">Procurar incremento</string>
+    <string name="seek_increment">Acréscimo de tempo no avançar/retroceder</string>
     <plurals name="second">
         <item quantity="one">1 segundo</item>
         <item quantity="many">%d segundos</item>
