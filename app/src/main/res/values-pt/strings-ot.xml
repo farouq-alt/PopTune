@@ -65,9 +65,9 @@
     <string name="check_for_update">Procurar por atualizações</string>
     <string name="checking_for_update">A procurar por atualizações</string>
     <string name="device_info_title">Informações do dispositivo</string>
-    <string name="help_bug_report_action">Enviar um relatório de erro (pelo GitHub)</string>
+    <string name="help_bug_report_action">Enviar um relatório de bug (via GitHub)</string>
     <string name="help_contact_email_inquiries">Outras consultas (toque para copiar o e-mail)</string>
-    <string name="help_support_forum">Ajuda e apoio (pelo GitHub)</string>
+    <string name="help_support_forum">Ajuda e suporte (via GitHub)</string>
     <string name="no_updates_available">Nenhuma atualização disponível</string>
     <string name="oss_licenses_title">Licenças de código aberto</string>
     <string name="wiki">Wiki</string>
@@ -107,7 +107,7 @@
     <string name="ytm_sync">Sincronizar com a sua conta do YouTube Music automaticamente</string>
     <string name="wifi_only">Somente no Wi-Fi</string>
     <string name="audio_offload">Ativar descarga</string>
-    <string name="audio_offload_description">Usar o caminho de descarga de áudio para a reprodução. Desativar isto pode aumentar o consumo de energia mas pode ser útil caso tenha problemas com a reprodução ou com o pós-processamento</string>
+    <string name="audio_offload_description">Utilize o caminho de áudio de descarregamento para a reprodução de áudio. A ativação desta opção pode reduzir o consumo de energia, mas pode causar problemas com a reprodução ou o pós-processamento de áudio. Esta preferência não tem qualquer efeito para codecs ou dispositivos não suportados.</string>
     <string name="keep_alive_title">Evitar encerramento pelo sistema</string>
     <string name="keep_alive_description">Usar um serviço de primeiro plano persistente para evitar que o OuterTune seja encerrado em segundo plano.</string>
     <string name="persistent_queue_desc_ot">Restaurar fila(s) aberta(s) previamente ao iniciar a app</string>
@@ -175,7 +175,7 @@
     <string name="scanner_sensitivity_L3">Combinar título, artistas e álbuns</string>
     <string name="scanner_type_title">Extrator de metadados</string>
     <string name="scanner_type_taglib">Usar o extrator de metadados TagLib integrado</string>
-    <string name="scanner_type_ffmpeg_ext">Usar o extrator de metadados do FFmpeg. Requer que um pacote externo seja instalado</string>
+    <string name="scanner_type_ffmpeg_ext">Utilize o extrator de metadados FFmpeg. Utilize apenas a versão completa da aplicação. A versão principal pode causar problemas com o rastreio de música.</string>
     <string name="scanner_variant_rescan">Analisar a biblioteca inteira novamente e recarregar os metadados de todas as músicas</string>
     <string name="scanner_online_artist_linking">Tentar sincronizar os artistas dos ficheiros locais com os no YouTube Music</string>
     <string name="clear_downloads_confirm">Tem certeza que quer remover todas as descargas? Somente descargas na pasta principal de descargas serão removidos.</string>
@@ -242,4 +242,17 @@
     <string name="speed_medium">Médio</string>
     <string name="speed_fast">Rápido</string>
     <string name="speed_very_fast">Muito rápido</string>
+    <string name="library_filter">Filtro de biblioteca</string>
+    <string name="toggle_lyrics">Alternar letras</string>
+    <string name="ffmpeg_lgpl">Este software utiliza bibliotecas do projeto FFmpeg sob a licença LGPLv2.1</string>
+    <string name="audio_decoder_ffmpeg_only">Priorizar os descodificadores FFmpeg</string>
+    <string name="audio_decoder_preference">Descodificador de áudio</string>
+    <string name="audio_decoder_system_only">Apenas decodificadores de sistema</string>
+    <string name="audio_decoder_system_with_ffmpeg">Priorizar os descodificadores de sistema</string>
+    <string name="seek_increment">Procurar incremento</string>
+    <plurals name="second">
+        <item quantity="one">1 segundo</item>
+        <item quantity="many">%d segundos</item>
+        <item quantity="other">%d segundos</item>
+    </plurals>
 </resources>

@@ -111,7 +111,7 @@
     <string name="queues_empty">Sin colas</string>
     <string name="err_stop_on_error">Ha ocurrido un error. Reproducción detenida</string>
     <string name="scanner_strict_file_name_title">Nombres de archivo estrictos</string>
-    <string name="scanner_type_ffmpeg_ext">Usar extractor de metadatos FFmpeg. Requiere instalar un paquete externo</string>
+    <string name="scanner_type_ffmpeg_ext">Utilice el extractor de metadatos de FFmpeg. Utilice únicamente la versión completa de la aplicación. La versión principal podría causar problemas con el seguimiento de canciones.</string>
     <string name="auto_scanner_title">Escanear automáticamente</string>
     <string name="scanner_warning">Por defecto, el escáner NO recargará los metadatos de las canciones existentes a menos que especifiques lo contrario más arriba. Dependiendo del tamaño de tu biblioteca, puede llevar un tiempo.</string>
     <string name="scanner_ytm_link_start">Iniciando vinculación de artistas de YouTube…</string>
@@ -133,7 +133,7 @@
     <string name="player_background_blur">Desenfoque</string>
     <string name="slim_navbar_description">Eliminar etiquetas de texto para reducir la altura de la barra de navegación</string>
     <string name="tab_arrangement_disable_tip">--- Arrastrar aquí abajo para deshabilitar ---</string>
-    <string name="audio_offload_description">Utilizar la ruta de audio de offload para la reproducción de audio. Deshabilitar esto puede aumentar el uso de energía, pero puede ser útil si tiene problemas con la reproducción de audio o el posprocesamiento</string>
+    <string name="audio_offload_description">Utilice la ruta de descarga de audio para la reproducción de audio. Activar esta opción puede reducir el consumo de energía, pero puede ocasionar problemas con la reproducción o el posprocesamiento de audio. Esta preferencia no afecta a los códecs o dispositivos no compatibles.</string>
     <string name="lyrics_font_Size">Tamaño de la letra</string>
     <string name="like_autodownload">Descargar automáticamente tus canciones con me gusta</string>
     <string name="token_adv_login_description">Este es un método AVANZADO de inicio de sesión. Como alternativa al portal web, puede introducir o actualizar la ficha de inicio de sesión aquí. Por ejemplo, esto incrementa la velocidad de inicio de sesión en múltiples dispositivos. Tenga en cuenta que no se aceptarán los formatos de ficha no válidos que la aplicación no pueda analizar</string>
@@ -249,4 +249,10 @@
         <item quantity="other">%d segundos</item>
     </plurals>
     <string name="seek_increment">Buscar incremento</string>
+    <string name="library_filter">Filtro de biblioteca</string>
+    <string name="toggle_lyrics">Cambiar letra</string>
+    <string name="audio_decoder_ffmpeg_only">Priorizar los decodificadores FFmpeg</string>
+    <string name="audio_decoder_preference">Decodificador de audio</string>
+    <string name="audio_decoder_system_only">Sólo decodificadores del sistema</string>
+    <string name="audio_decoder_system_with_ffmpeg">Priorizar los decodificadores del sistema</string>
 </resources>
