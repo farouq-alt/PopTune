@@ -128,7 +128,6 @@ import com.dd3boh.outertune.ui.screens.settings.fragments.AccountFrag
 import com.dd3boh.outertune.ui.screens.settings.fragments.LocalScannerFrag
 import com.dd3boh.outertune.ui.screens.settings.fragments.LocalizationFrag
 import com.dd3boh.outertune.ui.screens.settings.fragments.ThemeAppFrag
-import com.dd3boh.outertune.ui.utils.backToMain
 import com.dd3boh.outertune.utils.dlCoroutine
 import com.dd3boh.outertune.utils.formatFileSize
 import com.dd3boh.outertune.utils.rememberEnumPreference
@@ -182,15 +181,6 @@ fun SetupWizard(
         }
     }
 
-
-    LaunchedEffect(oobeStatus) {
-        if (oobeStatus >= OOBE_VERSION) {
-            navController.backToMain()
-        }
-    }
-
-    val MAX_POS = 5
-
     BackHandler {
         if (oobeStatus > 0) {
             oobeStatus -= 1
@@ -228,7 +218,7 @@ fun SetupWizard(
             }
 
             LinearProgressIndicator(
-                progress = { oobeStatus.toFloat() / MAX_POS },
+                progress = { oobeStatus.toFloat() / OOBE_VERSION },
 //                color = ProgressIndicatorDefaults.linearColor,
 //                trackColor = MaterialTheme.colorScheme.primary,
                 strokeCap = StrokeCap.Butt,
@@ -246,7 +236,7 @@ fun SetupWizard(
                         filter = LibraryFilter.ALL // hax
                     }
 
-                    if (oobeStatus < MAX_POS) {
+                    if (oobeStatus < OOBE_VERSION) {
                         oobeStatus += 1
                     }
 
@@ -269,7 +259,7 @@ fun SetupWizard(
 
     Scaffold(
         bottomBar = {
-            if (oobeStatus > 0 && oobeStatus < MAX_POS) {
+            if (oobeStatus > 0 && oobeStatus < OOBE_VERSION) {
                 Box(
                     Modifier
                         .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom))
@@ -841,7 +831,7 @@ fun SetupWizard(
                 }
             }
 
-            if (oobeStatus == 0 || oobeStatus == MAX_POS) {
+            if (oobeStatus == 0 || oobeStatus == OOBE_VERSION) {
                 FloatingActionButton(
                     modifier = Modifier
                         .padding(16.dp)
