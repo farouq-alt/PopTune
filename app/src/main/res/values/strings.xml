@@ -256,7 +256,6 @@ We recycle translations from upstream, they are pulled periodically. -->
 
     <string name="content">Content</string>
     <string name="action_logout">Log out</string>
-    <string name="action_logout_tooltip">To fully log out, please sign out of your YouTube account in the web portal before using this logout button</string>
     <string name="action_login">Log in</string>
     <string name="login">Login</string>
     <string name="not_logged_in">Not logged in</string>

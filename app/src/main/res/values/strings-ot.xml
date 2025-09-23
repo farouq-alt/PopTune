@@ -136,6 +136,7 @@ while also allowing users to translate our app as well. New, specific strings to
 
 <!-- Content settings -->
     <string name="like_autodownload">Automatically download your liked songs</string>
+    <string name="action_logout_tooltip">To fully log out, please sign out of your YouTube account in the web portal before using this logout button</string>
     <string name="token_adv_login_description">This is an ADVANCED login method. As an alternative to the web portal, you may directly enter or update your login token here. For example, this can speed up logging in on multiple devices. Please note that any invalid token formats the app fails to parse will not be accepted</string>
     <string name="token_hidden">Tap to show token</string>
     <string name="token_shown">Tap again to copy or edit</string>
