@@ -7,7 +7,7 @@ kotlin = "2.2.0" # do not bump, database schema changes
 coil = "3.3.0"
 compose = "1.9.1"
 lazycolumnscrollbar = "2.2.0"
-lifecycle = "2.9.3"
+lifecycle = "2.9.4"
 material3 = "1.3.2"
 media3 = "1.8.0"
 room = "2.8.0"
@@ -17,15 +17,15 @@ ksp = "2.2.0-2.0.2" # do not bump, database schema changes
 
 [libraries]
 annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
-error-prone-core = { module = "com.google.errorprone:error_prone_core", version = "2.41.0" }
-guava = { group = "com.google.guava", name = "guava", version = "33.4.8-android" }
+error-prone-core = { module = "com.google.errorprone:error_prone_core", version = "2.42.0" }
+guava = { group = "com.google.guava", name = "guava", version = "33.5.0-android" }
 coroutines-guava = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-guava", version = "1.10.2" }
 concurrent-futures = { group = "androidx.concurrent", name = "concurrent-futures-ktx", version = "1.3.0" }
 
 gradle = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
-activity = { group = "androidx.activity", name = "activity-compose", version = "1.10.1" }
-navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.9.3" }
-hilt-navigation = { group = "androidx.hilt", name = "hilt-navigation-compose", version = "1.2.0" }
+activity = { group = "androidx.activity", name = "activity-compose", version = "1.11.0" }
+navigation = { group = "androidx.navigation", name = "navigation-compose", version = "2.9.4" }
+hilt-navigation = { group = "androidx.hilt", name = "hilt-navigation-compose", version = "1.3.0" }
 datastore = { group = "androidx.datastore", name = "datastore-preferences", version = "1.1.7" }
 
 # compose

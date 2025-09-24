@@ -245,7 +245,7 @@
     <string name="ffmpeg_lgpl">Ce logiciel utilise les bibliothèques du projet FFmpeg sous la licence LGPLv2.1</string>
     <string name="seek_increment">Rechercher une augmentation</string>
     <plurals name="second">
-        <item quantity="one">1 seconde</item>
+        <item quantity="one">%d seconde</item>
         <item quantity="many">%d secondes</item>
         <item quantity="other">%d secondes</item>
     </plurals>

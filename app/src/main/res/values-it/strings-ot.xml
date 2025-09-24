@@ -244,7 +244,7 @@
     <string name="track_number">Numero brano</string>
     <string name="ffmpeg_lgpl">Questo software utilizza librerie del progetto FFmpeg sotto licenza LGPLv2.1</string>
     <plurals name="second">
-        <item quantity="one">1 secondo</item>
+        <item quantity="one">%d secondo</item>
         <item quantity="many">%d secondi</item>
         <item quantity="other">%d secondi</item>
     </plurals>
