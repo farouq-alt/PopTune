@@ -1,11 +1,6 @@
-Version 0.10.0
+Version 0.9.4.1
 
-=== Changes and improvements ===
-• Sync mode default has been changed to read-write. Fixed most account content sync issues (ex. playlist reorder, delete, etc)
-• Improved image loading, scrolling, and general app performance
-• Various UI enhancements
+## Changes and improvements
+• Fix playback issues
 
-=== Bug fixes ===
-• Fixed many crashes and bugs. Please see the full changelog!
-
-Full changelog: https://github.com/OuterTune/OuterTune/releases/tag/v0.10.0
+Full changelog: https://github.com/OuterTune/OuterTune/releases/tag/v0.9.4.1
