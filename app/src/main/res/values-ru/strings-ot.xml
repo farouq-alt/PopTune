@@ -121,7 +121,7 @@
     <string name="scanner_type_title">Экстрактор метаданных</string>
     <string name="scanner_variant_rescan">Пересканировать всю библиотеку и обновить метаданные всех треков</string>
     <string name="scanner_online_artist_linking">Попытаться связать исполнителей локальных файлов с исполнителями на YouTube Music</string>
-    <string name="like_all">Добавить всё в избранное</string>
+    <string name="like_all">Отметить всё понравившимся</string>
     <string name="scan_paths_title">Настроить места для сканирования…</string>
     <string name="action_cancel">Закрыть</string>
     <string name="oobe_complete">OuterTune настроен и готов к использованию. Изучайте свою музыку, открывайте новые треки и наслаждайтесь процессом!</string>
@@ -133,7 +133,7 @@
     <string name="queues_empty">Нет очередей</string>
     <string name="scanner_progress_complete">Сканирование завершено</string>
     <string name="queues_title">Очереди</string>
-    <string name="grp_general">Основные</string>
+    <string name="grp_general">Общее</string>
     <string name="tab_arrangement_home_required">Вкладка «Главная» обязательна.</string>
     <string name="scan_paths_incl">Папки для поиска</string>
     <string name="scanner_missing_ffmpeg">Экстрактор FFmpeg не найден</string>
