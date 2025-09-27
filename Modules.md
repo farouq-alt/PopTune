@@ -1,10 +1,13 @@
 ## material-color-utilities
 
-Commit: 998b611d8319d53d91409385160f64afa4726766
+Commit: 5a7931ec912c45e72caff1d4a776cb2f2c398cd8
 
 Source: https://github.com/material-foundation/material-color-utilities
 
 Path: /material-color-utilities
+
+Notes:
+- https://github.com/material-foundation/material-color-utilities/tree/main/java
 
 
 ## Gramophone Lyrics parser
