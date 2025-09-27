@@ -202,7 +202,6 @@ dependencies {
     implementation(libs.concurrent.futures)
 
     implementation(libs.activity)
-    implementation(libs.navigation)
     implementation(libs.hilt.navigation)
     implementation(libs.datastore)
 
