@@ -70,6 +70,8 @@ android {
             initWith(getByName("release"))
             isMinifyEnabled = false
             isShrinkResources = false
+//            isDebuggable = true
+            isProfileable = true
             matchingFallbacks += listOf("release")
         }
     }
