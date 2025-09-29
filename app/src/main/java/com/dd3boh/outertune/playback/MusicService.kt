@@ -1024,11 +1024,12 @@ class MusicService : MediaLibraryService(),
                 }
 
                 // TODO: support playlist id
-                if (mediaItem.metadata?.isLocal != true && !dataStore.get(PauseRemoteListenHistoryKey, false)) {
-                    val playbackUrl = database.format(mediaItem.mediaId).first()?.playbackTrackingUrl
-                        ?: YTPlayerUtils.playerResponseForMetadata(mediaItem.mediaId, null)
+                val ytHist = mediaItem.metadata?.isLocal != true && !dataStore.get(PauseRemoteListenHistoryKey, false)
+                Log.d(TAG, "Trying to register remote history: $ytHist")
+                if (ytHist) {
+                    val playbackUrl = YTPlayerUtils.playerResponseForMetadata(mediaItem.mediaId, null)
                             .getOrNull()?.playbackTracking?.videostatsPlaybackUrl?.baseUrl
-
+                    Log.d(TAG, "Got playback url: $playbackUrl")
                     playbackUrl?.let {
                         YouTube.registerPlayback(null, playbackUrl)
                             .onFailure {
