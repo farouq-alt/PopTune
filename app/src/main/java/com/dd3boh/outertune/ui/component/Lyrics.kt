@@ -89,7 +89,6 @@ import com.dd3boh.outertune.constants.ShowLyricsKey
 import com.dd3boh.outertune.constants.Speed
 import com.dd3boh.outertune.db.entities.LyricsEntity
 import com.dd3boh.outertune.db.entities.LyricsEntity.Companion.uninitializedLyric
-import com.dd3boh.outertune.extensions.isPowerSaver
 import com.dd3boh.outertune.ui.component.button.IconButton
 import com.dd3boh.outertune.ui.component.shimmer.ShimmerHost
 import com.dd3boh.outertune.ui.component.shimmer.TextPlaceholder
@@ -114,7 +113,6 @@ fun Lyrics(
     sliderPositionProvider: () -> Long?,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
     val playerConnection = LocalPlayerConnection.current ?: return
     val menuState = LocalMenuState.current
@@ -126,7 +124,7 @@ fun Lyrics(
     val lyricsFontSize by rememberPreference(LyricFontSizeKey, 20)
 
     val lyricsClickable by rememberPreference(LyricClickable, true)
-    val lyricsFancy by rememberPreference(LyricKaraokeEnable, false)
+    val lyricsFancy by rememberPreference(LyricKaraokeEnable, true)
     val lyricsUpdateSpeed by rememberEnumPreference(LyricUpdateSpeed, Speed.MEDIUM)
     var lyricRefreshRate = lyricsUpdateSpeed.toLrcRefreshMillis()
 
@@ -341,7 +339,7 @@ fun Lyrics(
                             }
                     ) {
                         if (currentPos.toULong() in item.start..item.end + 100.toULong() && lyricsFancy
-                            && item.words != null && !context.isPowerSaver()
+                            && item.words != null
                         ) { // word by word
                             // now do eye bleach to make lyric line babies
                             val style = LocalTextStyle.current.copy(
