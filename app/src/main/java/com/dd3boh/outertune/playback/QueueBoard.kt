@@ -46,16 +46,17 @@ import kotlin.math.min
  */
 class QueueBoard(
     private val player: MusicService,
+    val masterQueues: SnapshotStateList<MultiQueueObject> = mutableStateListOf(),
     queues: MutableList<MultiQueueObject> = ArrayList(),
     private var maxQueues: Int
 ) {
     private val TAG = QueueBoard::class.simpleName.toString()
 
-    val masterQueues: SnapshotStateList<MultiQueueObject> = mutableStateListOf()
     private var masterIndex = masterQueues.size - 1 // current queue index
     var detachedHead = false
 
     init {
+        masterQueues.clear()
         if (maxQueues < 0) {
             maxQueues = 1
         }

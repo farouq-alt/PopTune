@@ -569,9 +569,9 @@ class MusicService : MediaLibraryService(),
         val persistQueue = dataStore.get(PersistentQueueKey, true)
         val maxQueues = dataStore.get(MaxQueuesKey, 19)
         if (persistQueue) {
-            queueBoard = QueueBoard(this, database.readQueue().toMutableList(), maxQueues)
+            queueBoard = QueueBoard(this, queueBoard.masterQueues, database.readQueue().toMutableList(), maxQueues)
         } else {
-            queueBoard = QueueBoard(this, maxQueues = maxQueues)
+            queueBoard = QueueBoard(this, queueBoard.masterQueues, maxQueues = maxQueues)
         }
         Log.d(TAG, "Queue with $maxQueues queue limit. Persist queue = $persistQueue. Queues loaded = ${queueBoard.masterQueues.size}")
         qbInit.value = true
