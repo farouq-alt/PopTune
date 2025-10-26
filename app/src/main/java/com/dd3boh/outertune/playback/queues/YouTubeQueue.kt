@@ -41,13 +41,13 @@ class YouTubeQueue(
         return nextResult?.items?.map { it.toMediaMetadata() } ?: emptyList()
     }
 
-    fun getContinuationEndpoint(): String? {
-        return if (endpoint.videoId != null && continuation != null) {
-            "${endpoint.videoId}\n$continuation"
-        } else {
-            null
-        }
-    }
+//    fun getContinuationEndpoint(): String? {
+//        return if (endpoint.videoId != null && continuation != null) {
+//            "${endpoint.videoId}\n$continuation"
+//        } else {
+//            null
+//        }
+//    }
 
     companion object {
         fun radio(song: MediaMetadata) = YouTubeQueue(WatchEndpoint(song.id), song)
