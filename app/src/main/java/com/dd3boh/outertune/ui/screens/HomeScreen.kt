@@ -525,13 +525,11 @@ fun HomeScreen(
                             items = quickPicks,
                             key = { it.id }
                         ) { originalSong ->
-                            // fetch song from database to keep updated
-                            val song by database.song(originalSong.id).collectAsState(initial = originalSong)
                             SongListItem(
-                                song = song!!,
+                                song = originalSong,
                                 onPlay = {
                                     playerConnection.playQueue(
-                                        YouTubeQueue.radio(song!!.toMediaMetadata()),
+                                        YouTubeQueue.radio(originalSong.toMediaMetadata()),
                                         isRadio = true
                                     )
                                 },
@@ -575,10 +573,8 @@ fun HomeScreen(
                             items = forgottenFavorites,
                             key = { _, song -> song.id }
                         ) { index, originalSong ->
-                            val song by database.song(originalSong.id).collectAsState(initial = originalSong)
-
                             SongListItem(
-                                song = song!!,
+                                song = originalSong,
                                 onPlay = {
                                     playerConnection.playQueue(
                                         ListQueue(
