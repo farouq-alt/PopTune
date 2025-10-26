@@ -214,7 +214,8 @@ class LocalMediaScanner(val context: Context, scannerImpl: ScannerImpl) {
         }
         Log.i(TAG, "------------ SYNC: Starting Local Library Sync ------------")
         scannerState.value = 3
-//        scannerProgressProbe.value = 0 // using separate variable instead
+        scannerProgressCurrent.value = 0
+        scannerProgressProbe.value = 0
         // deduplicate
         val finalSongs = ArrayList<SongTempData>()
         if (strictFilePaths) {
@@ -228,8 +229,6 @@ class LocalMediaScanner(val context: Context, scannerImpl: ScannerImpl) {
         }
         Log.d(TAG, "Entries to process: ${newSongs.size}. After dedup: ${finalSongs.size}")
         scannerProgressTotal.value = finalSongs.size
-        scannerProgressCurrent.value = 0
-        scannerProgressProbe.value = 0
         val mod = if (newSongs.size < 200) {
             30
         } else if (newSongs.size < 800) {
@@ -248,7 +247,7 @@ class LocalMediaScanner(val context: Context, scannerImpl: ScannerImpl) {
                 Log.d(TAG, "------------ SYNC: Local Library Sync: $runs/${finalSongs.size} processed ------------")
             }
             if (runs % mod == 0) {
-                scannerProgressCurrent.value += mod
+                scannerProgressCurrent.value = runs
             }
 
             if (scannerRequestCancel) {
@@ -431,6 +430,7 @@ class LocalMediaScanner(val context: Context, scannerImpl: ScannerImpl) {
 
         Log.d(TAG, "Scanning for files...")
         // get list of all songs in db, then get songs unknown to the database
+        // TODO: duplicate songs with different paths will cycle through paths, causing it to be synced instead of ignored...
         val allSongs = database.allLocalSongs().fastMapNotNull { it.song.localPath }.toSet()
         val converted = newSongs.fastMapNotNull { fileFromUri(context, it)?.absolutePath }
         val delta = converted.minus(allSongs)
@@ -689,7 +689,7 @@ class LocalMediaScanner(val context: Context, scannerImpl: ScannerImpl) {
             MediaStore.Audio.Media.SIZE,
         ).apply {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                MediaStore.Audio.Media.BITRATE // TODO: METADATA_KEY_BITRATE no such column on SD 24???
+                add(MediaStore.Audio.Media.BITRATE)
                 if (SdkExtensions.getExtensionVersion(Build.VERSION_CODES.TIRAMISU) >= 15) {
                     add(MediaStore.Audio.Media.BITS_PER_SAMPLE)
                 }
@@ -700,7 +700,7 @@ class LocalMediaScanner(val context: Context, scannerImpl: ScannerImpl) {
             }
         }
 
-        val finalSongs = ArrayList<SongTempData>()
+        val mediaStoreSongs = ArrayList<SongTempData>()
 
 
         val contentResolver: ContentResolver = context.contentResolver
@@ -823,7 +823,7 @@ class LocalMediaScanner(val context: Context, scannerImpl: ScannerImpl) {
                     isLocal = true
                 ) else null
 
-                finalSongs.add(
+                mediaStoreSongs.add(
                     SongTempData(
                         Song(
                             song = SongEntity(
@@ -861,7 +861,15 @@ class LocalMediaScanner(val context: Context, scannerImpl: ScannerImpl) {
             }
         }
 
-        scannerProgressCurrent.value = scannerProgressProbe.value
+        // TODO: duplicate songs with different paths will cycle through paths, causing it to be synced instead of ignored...
+        val finalSongs = if (!refreshExisting) {
+            val allSongs = database.allLocalSongs().fastMapNotNull { it.song.localPath }.toSet()
+            ArrayList(mediaStoreSongs.filterNot { it.song.song.localPath in allSongs })
+        } else {
+            mediaStoreSongs
+        }
+
+        scannerProgressCurrent.value = finalSongs.size
         if (finalSongs.isNotEmpty()) {
             /**
              * TODO: Delete all local format entity before scan

@@ -71,4 +71,5 @@ fun cacheDirectoryTree(new: DirectoryTree) {
 
 fun clearDtCache() {
     cachedDirectoryTree.clear()
+    DirectoryTree.directoryUID = 0
 }

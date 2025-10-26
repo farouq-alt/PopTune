@@ -445,7 +445,7 @@ fun FolderScreen(
                 // all subdirectories listed here
                 itemsIndexed(
                     items = if (flatSubfolders) currDir.getFlattenedSubdirs() else currDir.subdirs,
-                    key = { _, item -> item.currentDir },
+                    key = { _, item -> item.uid },
                     contentType = { _, _ -> CONTENT_TYPE_FOLDER }
                 ) { index, folder ->
                     if (!flatSubfolders || folder.getFullSquashedDir() != fixFilePath(currDir.getFullPath())) // rm dupe dir hax
