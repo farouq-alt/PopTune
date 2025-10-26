@@ -11,9 +11,9 @@ class YouTubeQueue(
     private var endpoint: WatchEndpoint,
     override val preloadItem: MediaMetadata? = null,
     override val playlistId: String? = endpoint.playlistId,
-    override val startShuffled: Boolean = false
+    override val startShuffled: Boolean = false,
+    private var continuation: String? = null,
 ) : Queue {
-    private var continuation: String? = null
 
     override suspend fun getInitialStatus(): Queue.Status {
         val nextResult = withContext(IO) {
@@ -32,11 +32,21 @@ class YouTubeQueue(
 
     override suspend fun nextPage(): List<MediaMetadata> {
         val nextResult = withContext(IO) {
-            YouTube.next(endpoint, continuation).getOrThrow()
+            YouTube.next(endpoint, continuation).getOrNull()
         }
-        endpoint = nextResult.endpoint
-        continuation = nextResult.continuation
-        return nextResult.items.map { it.toMediaMetadata() }
+        if (nextResult != null) {
+            endpoint = nextResult.endpoint
+        }
+        continuation = nextResult?.continuation
+        return nextResult?.items?.map { it.toMediaMetadata() } ?: emptyList()
+    }
+
+    fun getContinuationEndpoint(): String? {
+        return if (endpoint.videoId != null && continuation != null) {
+            "${endpoint.videoId}\n$continuation"
+        } else {
+            null
+        }
     }
 
     companion object {

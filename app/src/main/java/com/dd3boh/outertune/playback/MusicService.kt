@@ -469,7 +469,7 @@ class MusicService : MediaLibraryService(),
                         listOf(preloadItem),
                         shuffled = queue.startShuffled,
                         replace = replace,
-                        isRadio = isRadio
+                        continuationEndpoint = null // fulfilled later on after initial status
                     )
                     queueBoard.setCurrQueue(q, true)
                 }
@@ -493,13 +493,14 @@ class MusicService : MediaLibraryService(),
                     } else {
                         items.addAll(initialStatus.items)
                     }
+                    val yq = queue as? YouTubeQueue
                     val q = queueBoard.addQueue(
                         queueTitle ?: getString(R.string.queue),
                         items,
                         shuffled = queue.startShuffled,
                         startIndex = if (initialStatus.mediaItemIndex > 0) initialStatus.mediaItemIndex else 0,
                         replace = replace || preloadItem != null,
-                        isRadio = isRadio
+                        continuationEndpoint = yq?.getContinuationEndpoint()
                     )
                     queueBoard.setCurrQueue(q, shouldResume)
                 }
@@ -953,9 +954,19 @@ class MusicService : MediaLibraryService(),
         ) {
             Log.d(TAG, "onMediaItemTransition: Triggering queue auto load more")
             scope.launch(SilentHandler) {
-                val mediaItems = YouTubeQueue(WatchEndpoint(playlistId)).nextPage()
+                // TODO: remove playlistId migration when old queues get cycled out
+                val endpoint = if (!playlistId.contains("\n")) {
+                    q.getCurrentSong()?.id ?: ""
+                } else {
+                    playlistId.substringBefore("\n")
+                }
+                val continuation = playlistId.substringAfter("\n")
+                val yq = YouTubeQueue(WatchEndpoint(endpoint, continuation))
+                val mediaItems = yq.nextPage()
+                q.playlistId = yq.getContinuationEndpoint()
+                Log.d(TAG, "onMediaItemTransition: Got ${mediaItems.size} songs from radio. Continuation: ${yq.getContinuationEndpoint()}")
                 if (player.playbackState != STATE_IDLE && songCount > 1) { // initial radio loading is handled by playQueue()
-                    queueBoard.enqueueEnd(mediaItems.drop(1), isRadio = true)
+                    queueBoard.enqueueEnd(mediaItems.drop(1))
                 }
             }
         }
@@ -1037,7 +1048,7 @@ class MusicService : MediaLibraryService(),
                 Log.d(TAG, "Trying to register remote history: $ytHist")
                 if (ytHist) {
                     val playbackUrl = YTPlayerUtils.playerResponseForMetadata(mediaItem.mediaId, null)
-                            .getOrNull()?.playbackTracking?.videostatsPlaybackUrl?.baseUrl
+                        .getOrNull()?.playbackTracking?.videostatsPlaybackUrl?.baseUrl
                     Log.d(TAG, "Got playback url: $playbackUrl")
                     playbackUrl?.let {
                         YouTube.registerPlayback(null, playbackUrl)
