@@ -1068,10 +1068,14 @@ class LocalMediaScanner(val context: Context, scannerImpl: ScannerImpl) {
             }
 
             if (tmp.size > 1) {
-                // merge all duplicate artists into the oldest one
-                tmp.removeAt(0)
-                tmp.sortBy { it.artist.bookmarkedAt }
-                tmp.forEach { swapArtists(it.artist, oldestArtist.artist, database) }
+                try {
+                    // merge all duplicate artists into the oldest one
+                    tmp.removeAt(0)
+                    tmp.sortBy { it.artist.bookmarkedAt }
+                    tmp.forEach { swapArtists(it.artist, oldestArtist.artist, database) }
+                } catch (e: Exception) {
+                    reportException(e)
+                }
             }
         }
 
@@ -1087,12 +1091,18 @@ class LocalMediaScanner(val context: Context, scannerImpl: ScannerImpl) {
             }
 
             if (tmp.size > 1) {
-                // merge all duplicate artists into the oldest one
-                tmp.removeAt(0)
-                tmp.sortBy { it.bookmarkedAt }
-                tmp.forEach { swapAlbums(it, oldestAlbum, database) }
+                try {
+                    // merge all duplicate artists into the oldest one
+                    tmp.removeAt(0)
+                    tmp.sortBy { it.bookmarkedAt }
+                    tmp.forEach { swapAlbums(it, oldestAlbum, database) }
+                } catch (e: Exception) {
+                    reportException(e)
+                }
             }
         }
+
+        // TODO: Deduplicate genres when genre screen is a thing
         Log.d(TAG, "Finished finalize (duplicate removal) job")
     }
 
