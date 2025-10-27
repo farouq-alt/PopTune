@@ -20,7 +20,6 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newFixedThreadPoolContext
 import java.time.LocalDateTime
-import java.time.ZoneOffset
 
 
 /**
@@ -83,5 +82,13 @@ fun getDownloadState(localDateTimes: List<LocalDateTime?>): Int {
         return Download.STATE_DOWNLOADING
     } else {
         return Download.STATE_STOPPED
+    }
+}
+
+fun getThumbnailModel(thumbnailUrl: String, sizeX: Int = -1, sizeY: Int = -1): Any? {
+    return if (thumbnailUrl.startsWith("/storage/")) {
+        LocalArtworkPath(thumbnailUrl, sizeX, sizeY)
+    } else {
+        thumbnailUrl
     }
 }

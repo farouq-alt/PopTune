@@ -31,19 +31,26 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.ListThumbnailSize
 import com.dd3boh.outertune.constants.ThumbnailCornerRadius
 import com.dd3boh.outertune.db.entities.Playlist
 import com.dd3boh.outertune.db.entities.PlaylistEntity
 import com.dd3boh.outertune.ui.utils.getNSongsString
+import com.dd3boh.outertune.utils.getThumbnailModel
+import kotlin.math.roundToInt
 
 @Composable
 fun AutoPlaylistListItem(
@@ -155,6 +162,7 @@ fun PlaylistListItem(
     thumbnailContent = {
         PlaylistThumbnail(
             playlist = playlist.playlist,
+            thumbnails = playlist.thumbnails,
         )
     },
     trailingContent = trailingContent,
@@ -188,6 +196,7 @@ fun PlaylistGridItem(
         val width = maxWidth
         PlaylistThumbnail(
             playlist = playlist.playlist,
+            thumbnails = playlist.thumbnails,
             size = width,
             iconPadding = width / 6,
             iconTint = LocalContentColor.current.copy(alpha = 0.8f),
@@ -200,6 +209,7 @@ fun PlaylistGridItem(
 @Composable
 fun PlaylistThumbnail(
     playlist: PlaylistEntity,
+    thumbnails: List<String>,
     size: Dp = ListThumbnailSize,
     shape: Shape = RoundedCornerShape(ThumbnailCornerRadius),
     iconPadding: Dp = 4.dp,
@@ -228,9 +238,41 @@ fun PlaylistThumbnail(
             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp))
     ) {
         if (customIcon == null) {
+            val thumbnail = playlist.thumbnailUrl ?: thumbnails.firstOrNull()
+            if (thumbnail != null) {
+                val density = LocalDensity.current
+                val px = (size.value * density.density).roundToInt()
+                AsyncImage(
+                    model = getThumbnailModel(thumbnail, px, px),
+                    contentDescription = null,
+                    contentScale = ContentScale.Companion.Crop,
+                    modifier = Modifier.Companion
+                        .size(size)
+                        .clip(shape)
+                )
+                Icon(
+                    imageVector = when {
+                        // TODO: Icons that actually goddamn match with each other wth is this google???
+                        features >= 8 -> Icons.AutoMirrored.Rounded.QueueMusic
+                        features >= 4 -> Icons.AutoMirrored.Rounded.PlaylistAdd
+                        features >= 2 -> Icons.AutoMirrored.Rounded.PlaylistPlay
+                        else -> Icons.Rounded.Error
+                    },
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(iconPadding)
+                        .alpha(0.6f)
+                        .graphicsLayer {
+                            translationX = 0.04f * px
+                            translationY = 0.04f * px
+                        }
+                )
+            }
             Icon(
                 imageVector = when {
-                    // TODO: Icons that actually godammn match with each other wth is this google???
+                    // TODO: Icons that actually goddamn match with each other wth is this google???
                     features >= 8 -> Icons.AutoMirrored.Rounded.QueueMusic
                     features >= 4 -> Icons.AutoMirrored.Rounded.PlaylistAdd
                     features >= 2 -> Icons.AutoMirrored.Rounded.PlaylistPlay
@@ -241,6 +283,7 @@ fun PlaylistThumbnail(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(iconPadding)
+                    .alpha(if (thumbnail == null) 1.0f else 0.8f)
             )
         } else {
             customIcon()

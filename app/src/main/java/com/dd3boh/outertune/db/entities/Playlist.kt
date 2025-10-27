@@ -31,7 +31,6 @@ data class Playlist(
     override val thumbnailUrl: String?
         get() = null
 
-    @Deprecated("Thumbnails are to be replaced with icons.")
     val thumbnails: List<String>
         get() {
             return if (playlist.thumbnailUrl != null)

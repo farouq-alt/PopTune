@@ -687,6 +687,7 @@ fun LocalPlaylistHeader(
         ) {
             PlaylistThumbnail(
                 playlist = playlist.playlist,
+                thumbnails = playlist.thumbnails,
                 size = AlbumThumbnailSize,
                 shape = RoundedCornerShape(AlbumCornerRadius),
                 iconPadding = AlbumThumbnailSize / 16,
