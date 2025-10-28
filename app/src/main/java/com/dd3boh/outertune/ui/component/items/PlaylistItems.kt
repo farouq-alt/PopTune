@@ -9,7 +9,6 @@ package com.dd3boh.outertune.ui.component.items
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -31,11 +30,9 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
@@ -48,6 +45,7 @@ import com.dd3boh.outertune.constants.ListThumbnailSize
 import com.dd3boh.outertune.constants.ThumbnailCornerRadius
 import com.dd3boh.outertune.db.entities.Playlist
 import com.dd3boh.outertune.db.entities.PlaylistEntity
+import com.dd3boh.outertune.ui.component.items.Icon.PlaylistIcon
 import com.dd3boh.outertune.ui.utils.getNSongsString
 import com.dd3boh.outertune.utils.getThumbnailModel
 import kotlin.math.roundToInt
@@ -130,6 +128,7 @@ fun PlaylistListItem(
         else
             getNSongsString(playlist.songCount, playlist.downloadCount),
     badges = {
+        PlaylistIcon(playlist.playlist) // always show
         if (!showBadges) return@ListItem
         Icon(
             imageVector = if (playlist.playlist.isEditable) Icons.Rounded.Edit else Icons.Rounded.EditOff,
@@ -182,6 +181,7 @@ fun PlaylistGridItem(
         else
             getNSongsString(playlist.songCount, playlist.downloadCount),
     badges = {
+        PlaylistIcon(playlist.playlist)
         if (playlist.downloadCount > 0) {
             Icon(
                 imageVector = Icons.Rounded.OfflinePin,
@@ -214,62 +214,40 @@ fun PlaylistThumbnail(
     shape: Shape = RoundedCornerShape(ThumbnailCornerRadius),
     iconPadding: Dp = 4.dp,
     iconTint: Color = LocalContentColor.current,
-    customIcon: (@Composable BoxScope.() -> Unit)? = null,
 ) {
-    /**
-     * 8: Local playlist
-     * 4: Synced/editable playlist
-     * 2: Saved remote playlist
-     * 1: Supports endpoints
-     *
-     */
-    var features = 0
-    if (playlist.isLocal) features += 8
-    if (playlist.isEditable) features += 4
-    if (playlist.bookmarkedAt != null) features += 2
-    if ((playlist.playEndpointParams ?: playlist.radioEndpointParams
-        ?: playlist.shuffleEndpointParams) != null
-    ) features += 1
-
     Box(
         modifier = Modifier
             .size(size)
             .clip(shape)
             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp))
     ) {
-        if (customIcon == null) {
-            val thumbnail = playlist.thumbnailUrl ?: thumbnails.firstOrNull()
-            if (thumbnail != null) {
-                val density = LocalDensity.current
-                val px = (size.value * density.density).roundToInt()
-                AsyncImage(
-                    model = getThumbnailModel(thumbnail, px, px),
-                    contentDescription = null,
-                    contentScale = ContentScale.Companion.Crop,
-                    modifier = Modifier.Companion
-                        .size(size)
-                        .clip(shape)
-                )
-                Icon(
-                    imageVector = when {
-                        // TODO: Icons that actually goddamn match with each other wth is this google???
-                        features >= 8 -> Icons.AutoMirrored.Rounded.QueueMusic
-                        features >= 4 -> Icons.AutoMirrored.Rounded.PlaylistAdd
-                        features >= 2 -> Icons.AutoMirrored.Rounded.PlaylistPlay
-                        else -> Icons.Rounded.Error
-                    },
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(iconPadding)
-                        .alpha(0.6f)
-                        .graphicsLayer {
-                            translationX = 0.04f * px
-                            translationY = 0.04f * px
-                        }
-                )
-            }
+        val thumbnail = playlist.thumbnailUrl ?: thumbnails.firstOrNull()
+        if (thumbnail != null) {
+            val density = LocalDensity.current
+            val px = (size.value * density.density).roundToInt()
+            AsyncImage(
+                model = getThumbnailModel(thumbnail, px, px),
+                contentDescription = null,
+                contentScale = ContentScale.Companion.Crop,
+                modifier = Modifier.Companion
+                    .size(size)
+                    .clip(shape)
+            )
+        } else {
+            /**
+             * 8: Local playlist
+             * 4: Synced/editable playlist
+             * 2: Saved remote playlist
+             * 1: Supports endpoints
+             *
+             */
+            var features = 0
+            if (playlist.isLocal) features += 8
+            if (playlist.isEditable) features += 4
+            if (playlist.bookmarkedAt != null) features += 2
+            if ((playlist.playEndpointParams ?: playlist.radioEndpointParams
+                ?: playlist.shuffleEndpointParams) != null
+            ) features += 1
             Icon(
                 imageVector = when {
                     // TODO: Icons that actually goddamn match with each other wth is this google???
@@ -283,10 +261,7 @@ fun PlaylistThumbnail(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(iconPadding)
-                    .alpha(if (thumbnail == null) 1.0f else 0.8f)
             )
-        } else {
-            customIcon()
         }
     }
 }

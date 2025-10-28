@@ -36,8 +36,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
+import androidx.compose.material.icons.automirrored.rounded.PlaylistPlay
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.CloudOff
+import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material.icons.rounded.Explicit
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FolderCopy
@@ -83,6 +86,7 @@ import com.dd3boh.outertune.constants.GridThumbnailHeight
 import com.dd3boh.outertune.constants.ListItemHeight
 import com.dd3boh.outertune.constants.ListThumbnailSize
 import com.dd3boh.outertune.constants.ThumbnailCornerRadius
+import com.dd3boh.outertune.db.entities.PlaylistEntity
 import com.dd3boh.outertune.db.entities.RecentActivityEntity
 import com.dd3boh.outertune.extensions.isPowerSaver
 import com.dd3boh.outertune.models.MediaMetadata
@@ -797,6 +801,38 @@ object Icon {
                 .size(18.dp)
                 .padding(end = 2.dp)
         )
+    }
+
+    @Composable
+    fun PlaylistIcon(playlist: PlaylistEntity) {
+        /**
+         * 8: Local playlist
+         * 4: Synced/editable playlist
+         * 2: Saved remote playlist
+         * 1: Supports endpoints
+         *
+         */
+        var features = 0
+        if (playlist.isLocal) features += 8
+        if (playlist.isEditable) features += 4
+        if (playlist.bookmarkedAt != null) features += 2
+        if ((playlist.playEndpointParams ?: playlist.radioEndpointParams
+            ?: playlist.shuffleEndpointParams) != null
+        ) features += 1
+        Icon(
+            imageVector = when {
+                // TODO: Icons that actually goddamn match with each other wth is this google???
+                features >= 8 -> Icons.AutoMirrored.Rounded.QueueMusic
+                features >= 4 -> Icons.AutoMirrored.Rounded.PlaylistAdd
+                features >= 2 -> Icons.AutoMirrored.Rounded.PlaylistPlay
+                else -> Icons.Rounded.Error
+            },
+            contentDescription = null,
+            modifier = Modifier
+                .size(18.dp)
+                .padding(end = 2.dp)
+        )
+
     }
 
     @Composable

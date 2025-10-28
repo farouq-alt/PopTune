@@ -241,7 +241,6 @@ import com.dd3boh.outertune.ui.theme.extractThemeColor
 import com.dd3boh.outertune.ui.utils.MEDIA_PERMISSION_LEVEL
 import com.dd3boh.outertune.ui.utils.Updater
 import com.dd3boh.outertune.ui.utils.appBarScrollBehavior
-import com.dd3boh.outertune.ui.utils.backToMain
 import com.dd3boh.outertune.ui.utils.clearDtCache
 import com.dd3boh.outertune.ui.utils.resetHeightOffset
 import com.dd3boh.outertune.utils.ActivityLauncherHelper
@@ -1238,7 +1237,14 @@ class MainActivity : ComponentActivity() {
                                                         .size(48.dp)
                                                         .clip(CircleShape)
                                                         .clickable {
-                                                            navController.navigate("settings")
+                                                            navController.navigate("settings") {
+                                                                popUpTo(navController.graph.startDestinationId) {
+                                                                    saveState = true
+                                                                }
+
+                                                                launchSingleTop = true
+                                                                restoreState = true
+                                                            }
                                                         }
                                                 ) {
                                                     BadgedBox(
@@ -1374,7 +1380,6 @@ class MainActivity : ComponentActivity() {
                                                                 searchBarScrollBehavior.state.resetHeightOffset()
                                                             }
                                                         } else {
-                                                            navController.backToMain()
                                                             navController.navigate(screen.route) {
                                                                 popUpTo(navController.graph.startDestinationId) {
                                                                     saveState = true
@@ -1382,10 +1387,6 @@ class MainActivity : ComponentActivity() {
 
                                                                 launchSingleTop = true
                                                                 restoreState = true
-                                                            }
-
-                                                            while (navController.currentDestination?.route.let { it != null && it != screen.route }) {
-                                                                navController.popBackStack()
                                                             }
                                                         }
 
@@ -1453,6 +1454,10 @@ class MainActivity : ComponentActivity() {
                                                 }
                                             },
                                             onClick = {
+                                                if (playerBottomSheetState.isExpanded) {
+                                                    playerBottomSheetState.collapseSoft()
+                                                }
+
                                                 if (navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true) {
                                                     navBackStackEntry?.savedStateHandle?.set(
                                                         "scrollToTop",
@@ -1462,7 +1467,6 @@ class MainActivity : ComponentActivity() {
                                                         searchBarScrollBehavior.state.resetHeightOffset()
                                                     }
                                                 } else {
-                                                    navController.backToMain()
                                                     navController.navigate(screen.route) {
                                                         popUpTo(navController.graph.startDestinationId) {
                                                             saveState = true

@@ -190,7 +190,7 @@ class HomeViewModel @Inject constructor(
 
     fun refresh() {
         if (isRefreshing.value) return
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(syncCoroutine) {
             isRefreshing.value = true
             load()
             isRefreshing.value = false
@@ -198,8 +198,8 @@ class HomeViewModel @Inject constructor(
     }
 
     init {
+        refresh()
         viewModelScope.launch(syncCoroutine) {
-            load()
             syncUtils.tryAutoSync()
         }
     }

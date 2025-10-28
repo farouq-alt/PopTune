@@ -268,7 +268,7 @@ fun LibraryPlaylistsScreen(
                 state = pullRefreshState,
                 isRefreshing = isSyncingRemotePlaylists,
                 onRefresh = {
-                    viewModel.syncPlaylists()
+                    viewModel.syncPlaylists(true)
                 }
             ),
     ) {

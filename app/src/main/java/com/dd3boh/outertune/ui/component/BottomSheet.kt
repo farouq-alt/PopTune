@@ -52,7 +52,9 @@ import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import com.dd3boh.outertune.constants.BottomSheetAnimationSpec
 import com.dd3boh.outertune.constants.BottomSheetSoftAnimationSpec
+import com.dd3boh.outertune.constants.MiniPlayerHeight
 import com.dd3boh.outertune.constants.NavigationBarAnimationSpec
+import com.dd3boh.outertune.ui.utils.fadingEdge
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.pow
@@ -119,32 +121,35 @@ fun BottomSheet(
             BackHandler(onBack = state::collapseSoft)
         }
 
+        // main
         if (!state.isCollapsed) {
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer {
-                        alpha = ((state.progress * 4 - 0.25f) * 4).coerceIn(0f, 1f)
+                        alpha = ((state.progress - 0.15f) * 4).coerceIn(0f, 1f)
                     },
                 content = content
             )
         }
 
-        if (!state.isExpanded && (onDismiss == null || !state.isDismissed)) {
-            Box(
-                modifier = Modifier
-                    .graphicsLayer {
-                        alpha = 1f - (state.progress * 4).coerceAtMost(1f)
-                    }
-                    .clickable(
-                        onClick = state::expandSoft
-                    )
-                    .fillMaxWidth()
-                    .height(state.collapsedBound)
-                    .background(collapsedBackgroundColor),
-                content = collapsedContent
-            )
-        }
+        // collapsed content
+        Box(
+            modifier = Modifier
+                .graphicsLayer {
+                    alpha = 1f - (state.progress * 4).coerceAtMost(1f)
+                }
+                // yeet to infinity and beyond offscreen so not obscuring top content
+                .offset(y = if (state.isExpanded) state.expandedBound else 0.dp)
+                .clickable(
+                    onClick = state::expandSoft
+                )
+                .fillMaxWidth()
+                .height(state.collapsedBound)
+                .background(collapsedBackgroundColor)
+                .fadingEdge(bottom = MiniPlayerHeight),
+            content = collapsedContent
+        )
     }
 }
 
