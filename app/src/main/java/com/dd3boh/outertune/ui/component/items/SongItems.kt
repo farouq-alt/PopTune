@@ -77,32 +77,32 @@ import kotlin.math.roundToInt
 @Composable
 fun SongListItem(
     song: Song,
-    onPlay: () -> Unit,
-    onSelectedChange: (Boolean) -> Unit,
+    albumIndex: Int? = null,
+    playlistSong: PlaylistSong? = null,
+    playlist: Playlist? = null,
+    navController: NavController,
+    snackbarHostState: SnackbarHostState? = null,
+
+    isActive: Boolean,
+    isPlaying: Boolean,
     inSelectMode: Boolean?,
     isSelected: Boolean,
+    onSelectedChange: (Boolean) -> Unit,
     swipeEnabled: Boolean,
-    navController: NavController,
-    albumIndex: Int? = null,
+
+    showMenu: Boolean = false,
     showLikedIcon: Boolean = true,
     showInLibraryIcon: Boolean = true,
     showDownloadIcon: Boolean = true,
-    playlistSong: PlaylistSong? = null,
-    playlist: Playlist? = null,
-    showDragHandle: Boolean = false,
+
+    thumbnailSize: Int,
+    onPlay: () -> Unit,
     dragHandleModifier: Modifier? = null,
-    disableShowMenu: Boolean = false,
-    snackbarHostState: SnackbarHostState? = null,
     modifier: Modifier = Modifier,
 ) {
     val menuState = LocalMenuState.current
     val haptic = LocalHapticFeedback.current
-
     val playerConnection = LocalPlayerConnection.current ?: return
-    val isPlaying by playerConnection.isPlaying.collectAsState()
-    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
-
-    val isActive = song.id == mediaMetadata?.id
 
     val listItem: @Composable () -> Unit = {
         ListItem(
@@ -129,6 +129,7 @@ fun SongListItem(
             thumbnailContent = {
                 ItemThumbnail(
                     thumbnailUrl = if (song.song.isLocal) song.song.localPath else song.song.thumbnailUrl,
+                    preferredSize = thumbnailSize,
                     albumIndex = albumIndex,
                     isActive = isActive,
                     isPlaying = isPlaying,
@@ -145,7 +146,7 @@ fun SongListItem(
                 } else {
                     IconButton(
                         onClick = {
-                            if (!disableShowMenu) {
+                            if (showMenu) {
                                 menuState.show {
                                     SongMenu(
                                         originalSong = song,
@@ -167,7 +168,7 @@ fun SongListItem(
                     }
                 }
 
-                if (showDragHandle && dragHandleModifier != null) {
+                if (dragHandleModifier != null) {
                     IconButton(
                         onClick = { },
                         modifier = dragHandleModifier
@@ -185,7 +186,7 @@ fun SongListItem(
                 onClick = {
                     if (inSelectMode == true) {
                         onSelectedChange(!isSelected)
-                    } else if (song.id == mediaMetadata?.id) {
+                    } else if (isActive) {
                         playerConnection.player.togglePlayPause()
                     } else {
                         onPlay()

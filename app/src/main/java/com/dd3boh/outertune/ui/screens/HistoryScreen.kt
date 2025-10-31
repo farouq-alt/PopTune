@@ -54,6 +54,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
@@ -70,6 +71,7 @@ import com.dd3boh.outertune.LocalSnackbarHostState
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.HistorySource
 import com.dd3boh.outertune.constants.InnerTubeCookieKey
+import com.dd3boh.outertune.constants.ListThumbnailSize
 import com.dd3boh.outertune.constants.SwipeToQueueKey
 import com.dd3boh.outertune.constants.TopBarInsets
 import com.dd3boh.outertune.db.entities.EventWithSong
@@ -96,6 +98,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import java.time.format.DateTimeFormatter
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, FlowPreview::class)
 @Composable
@@ -104,6 +107,7 @@ fun HistoryScreen(
     viewModel: HistoryViewModel = hiltViewModel(),
 ) {
     val database = LocalDatabase.current
+    val density = LocalDensity.current
     val context = LocalContext.current
     val menuState = LocalMenuState.current
     val playerConnection = LocalPlayerConnection.current ?: return
@@ -368,11 +372,30 @@ fun HistoryScreen(
                         )
                     }
 
+                    val thumbnailSize = (ListThumbnailSize.value * density.density).roundToInt()
                     itemsIndexed(
                         items = eventsGroup,
                     ) { index, event ->
                         SongListItem(
                             song = event.song,
+                            navController = navController,
+                            snackbarHostState = snackbarHostState,
+
+                            isActive = event.song.id == mediaMetadata?.id,
+                            isPlaying = isPlaying,
+                            inSelectMode = inSelectMode,
+                            isSelected = selection.contains(event.event.id),
+                            onSelectedChange = {
+                                inSelectMode = true
+                                if (it) {
+                                    selection.add(event.event.id)
+                                } else {
+                                    selection.remove(event.event.id)
+                                }
+                            },
+                            swipeEnabled = swipeEnabled,
+
+                            thumbnailSize = thumbnailSize,
                             onPlay = {
                                 if (event.song.id == mediaMetadata?.id) {
                                     playerConnection.player.togglePlayPause()
@@ -390,19 +413,6 @@ fun HistoryScreen(
                                     )
                                 }
                             },
-                            onSelectedChange = {
-                                inSelectMode = true
-                                if (it) {
-                                    selection.add(event.event.id)
-                                } else {
-                                    selection.remove(event.event.id)
-                                }
-                            },
-                            inSelectMode = inSelectMode,
-                            isSelected = selection.contains(event.event.id),
-                            swipeEnabled = swipeEnabled,
-                            navController = navController,
-                            snackbarHostState = snackbarHostState,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .animateItem()

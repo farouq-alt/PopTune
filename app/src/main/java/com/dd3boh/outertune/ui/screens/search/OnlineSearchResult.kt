@@ -324,7 +324,7 @@ fun OnlineSearchResult(
             }
         },
         modifier = Modifier
-            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top))
+            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Top).add(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal)))
             .padding(top = AppBarHeight)
     )
 }

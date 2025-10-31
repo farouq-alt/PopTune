@@ -1,6 +1,7 @@
 package com.dd3boh.outertune.ui.screens.library
 
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -59,6 +60,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -69,7 +71,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastSumBy
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.dd3boh.outertune.LocalMenuState
 import com.dd3boh.outertune.LocalPlayerAwareWindowInsets
 import com.dd3boh.outertune.LocalPlayerConnection
@@ -86,6 +87,7 @@ import com.dd3boh.outertune.constants.FolderSongSortTypeKey
 import com.dd3boh.outertune.constants.FolderSortType
 import com.dd3boh.outertune.constants.FolderSortTypeKey
 import com.dd3boh.outertune.constants.LastLocalScanKey
+import com.dd3boh.outertune.constants.ListThumbnailSize
 import com.dd3boh.outertune.constants.LocalLibraryEnableKey
 import com.dd3boh.outertune.constants.SwipeToQueueKey
 import com.dd3boh.outertune.constants.TopBarInsets
@@ -120,6 +122,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import java.time.ZoneOffset
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
@@ -127,10 +130,13 @@ fun FolderScreen(
     navController: NavController,
     scrollBehavior: TopAppBarScrollBehavior,
     viewModel: LibraryFoldersViewModel = hiltViewModel(),
+    isRoot: Boolean = false,
     libraryFilterContent: @Composable (() -> Unit)? = null
 ) {
+    Log.v("FolderScreen", "F_RC-1")
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val density = LocalDensity.current
     val haptic = LocalHapticFeedback.current
     val menuState = LocalMenuState.current
     val playerConnection = LocalPlayerConnection.current ?: return
@@ -146,9 +152,10 @@ fun FolderScreen(
     val swipeEnabled by rememberPreference(SwipeToQueueKey, true)
 
     val lazyListState = rememberLazyListState()
-    val backStackEntry by navController.currentBackStackEntryAsState()
-    val scrollToTop = backStackEntry?.savedStateHandle?.getStateFlow("scrollToTop", false)?.collectAsState()
 
+
+    val isPlaying by playerConnection.isPlaying.collectAsState()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val currDir: DirectoryTree by viewModel.localSongDirectoryTree.collectAsState()
     val subDirSongCount by viewModel.localSongDtSongCount.collectAsState()
 
@@ -156,9 +163,6 @@ fun FolderScreen(
         if (viewModel.uiInit && !currDir.isSkeleton && viewModel.lastLocalScan != lastLocalScan) {
             viewModel.lastLocalScan = lastLocalScan
             navController.backToMain()
-            coroutineScope.launch(Dispatchers.IO) {
-                viewModel.getLocalSongs()
-            }
         }
     }
 
@@ -221,17 +225,6 @@ fun FolderScreen(
         BackHandler(onBack = { isSearching = false })
     }
 
-    LaunchedEffect(inSelectMode) {
-        backStackEntry?.savedStateHandle?.set("inSelectMode", inSelectMode)
-    }
-
-    LaunchedEffect(scrollToTop?.value) {
-        if (scrollToTop?.value == true) {
-            lazyListState.animateScrollToItem(0)
-            backStackEntry?.savedStateHandle?.set("scrollToTop", false)
-        }
-    }
-
     LaunchedEffect(sortType, sortDescending, currDir) {
         val tempList = currDir.files.map { it }.toMutableList()
         // sort songs
@@ -269,7 +262,8 @@ fun FolderScreen(
             item(
                 key = "header",
                 contentType = CONTENT_TYPE_HEADER
-            ) {
+            )
+            {
                 Column(
                     modifier = Modifier.background(MaterialTheme.colorScheme.background)
                 ) {
@@ -490,6 +484,7 @@ fun FolderScreen(
             if (currDir.isSkeleton) return@LazyColumn
 
             // all songs get listed here
+            val thumbnailSize = (ListThumbnailSize.value * density.density).roundToInt()
             itemsIndexed(
                 items = if (isSearching) filteredSongs else mutableSongs,
                 key = { _, item -> item.id },
@@ -497,6 +492,24 @@ fun FolderScreen(
             ) { index, song ->
                 SongListItem(
                     song = song,
+                    navController = navController,
+                    snackbarHostState = snackbarHostState,
+
+                    isActive = song.song.id == mediaMetadata?.id,
+                    isPlaying = isPlaying,
+                    inSelectMode = inSelectMode,
+                    isSelected = selection.contains(song.id),
+                    onSelectedChange = {
+                        inSelectMode = true
+                        if (it) {
+                            selection.add(song.id)
+                        } else {
+                            selection.remove(song.id)
+                        }
+                    },
+                    swipeEnabled = swipeEnabled,
+
+                    thumbnailSize = thumbnailSize,
                     onPlay = {
                         playerConnection.playQueue(
                             ListQueue(
@@ -506,19 +519,6 @@ fun FolderScreen(
                             )
                         )
                     },
-                    onSelectedChange = {
-                        inSelectMode = true
-                        if (it) {
-                            selection.add(song.id)
-                        } else {
-                            selection.remove(song.id)
-                        }
-                    },
-                    inSelectMode = inSelectMode,
-                    isSelected = selection.contains(song.id),
-                    swipeEnabled = swipeEnabled,
-                    navController = navController,
-                    snackbarHostState = snackbarHostState,
                     modifier = Modifier
                         .fillMaxWidth()
                         .animateItem()
@@ -529,52 +529,54 @@ fun FolderScreen(
             state = lazyListState,
         )
 
-        TopAppBar(title = {
-            Column {
-                val title = currDir.currentDir.substringAfterLast('/')
-                val subtitle = currDir.getFullPath().substringBeforeLast('/')
-                Text(
-                    text = if (currDir.currentDir == "storage") {
-                        stringResource(R.string.local_player_settings_title)
-                    } else {
-                        title
-                    },
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1
-                )
-
-                if (!subtitle.isBlank()) {
+        if (!isRoot) {
+            TopAppBar(title = {
+                Column {
+                    val title = currDir.currentDir.substringAfterLast('/')
+                    val subtitle = currDir.getFullPath().substringBeforeLast('/')
                     Text(
-                        text = subtitle,
-                        color = MaterialTheme.colorScheme.secondary,
-                        style = MaterialTheme.typography.bodyMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        text = if (currDir.currentDir == "storage") {
+                            stringResource(R.string.local_player_settings_title)
+                        } else {
+                            title
+                        },
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1
+                    )
+
+                    if (!subtitle.isBlank()) {
+                        Text(
+                            text = subtitle,
+                            color = MaterialTheme.colorScheme.secondary,
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }, navigationIcon = {
+                IconButton(
+                    onClick = {
+                        if (isSearching) {
+                            isSearching = false
+                            query = TextFieldValue()
+                        } else {
+                            navController.navigateUp()
+                        }
+                    },
+                    onLongClick = {
+                        if (!isSearching) {
+                            navController.backToMain()
+                        }
+                    },
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Rounded.ArrowBack,
+                        contentDescription = null
                     )
                 }
-            }
-        }, navigationIcon = {
-            IconButton(
-                onClick = {
-                    if (isSearching) {
-                        isSearching = false
-                        query = TextFieldValue()
-                    } else {
-                        navController.navigateUp()
-                    }
-                },
-                onLongClick = {
-                    if (!isSearching) {
-                        navController.backToMain()
-                    }
-                },
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Rounded.ArrowBack,
-                    contentDescription = null
-                )
-            }
-        }, windowInsets = TopBarInsets, scrollBehavior = scrollBehavior)
+            }, windowInsets = TopBarInsets)
+        }
 
         FloatingFooter(inSelectMode) {
             SelectHeader(

@@ -49,7 +49,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
+import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import com.dd3boh.outertune.constants.BottomSheetAnimationSpec
 import com.dd3boh.outertune.constants.BottomSheetSoftAnimationSpec
 import com.dd3boh.outertune.constants.MiniPlayerHeight
@@ -134,22 +136,26 @@ fun BottomSheet(
         }
 
         // collapsed content
-        Box(
-            modifier = Modifier
-                .graphicsLayer {
-                    alpha = 1f - (state.progress * 4).coerceAtMost(1f)
-                }
-                // yeet to infinity and beyond offscreen so not obscuring top content
-                .offset(y = if (state.isExpanded) state.expandedBound else 0.dp)
-                .clickable(
-                    onClick = state::expandSoft
-                )
-                .fillMaxWidth()
-                .height(state.collapsedBound)
-                .background(collapsedBackgroundColor)
-                .fadingEdge(bottom = MiniPlayerHeight),
-            content = collapsedContent
-        )
+        if (!state.isExpanded) {
+            Box(
+                modifier = Modifier
+                    .graphicsLayer {
+                        alpha = 1f - (state.progress * 4).coerceAtMost(1f)
+                    }
+                    // yeet to infinity and beyond offscreen so not obscuring top content
+                    .offset(y = if (state.isExpanded) state.expandedBound else 0.dp)
+                    .clickable(
+                        onClick = state::expandSoft
+                    )
+                    .fillMaxWidth()
+                    .height(state.collapsedBound)
+                    .background(collapsedBackgroundColor)
+                    .fadingEdge(
+                        bottom = min(MiniPlayerHeight, (state.collapsedBound - MiniPlayerHeight).coerceAtLeast(0.dp))
+                    ),
+                content = collapsedContent
+            )
+        }
     }
 }
 

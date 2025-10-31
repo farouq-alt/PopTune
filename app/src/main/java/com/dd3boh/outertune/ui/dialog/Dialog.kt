@@ -110,7 +110,7 @@ fun DefaultDialog(
             Column(
                 horizontalAlignment = horizontalAlignment,
                 modifier = modifier
-                    .padding(24.dp)
+                    .padding(8.dp)
             ) {
                 if (icon != null) {
                     CompositionLocalProvider(LocalContentColor provides AlertDialogDefaults.iconContentColor) {

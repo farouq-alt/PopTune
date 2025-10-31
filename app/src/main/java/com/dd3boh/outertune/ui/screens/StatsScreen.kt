@@ -22,6 +22,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -30,6 +31,7 @@ import com.dd3boh.outertune.LocalMenuState
 import com.dd3boh.outertune.LocalPlayerAwareWindowInsets
 import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.R
+import com.dd3boh.outertune.constants.ListThumbnailSize
 import com.dd3boh.outertune.constants.StatPeriod
 import com.dd3boh.outertune.constants.SwipeToQueueKey
 import com.dd3boh.outertune.constants.TopBarInsets
@@ -47,6 +49,7 @@ import com.dd3boh.outertune.ui.menu.ArtistMenu
 import com.dd3boh.outertune.ui.utils.backToMain
 import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.viewmodels.StatsViewModel
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -54,6 +57,7 @@ fun StatsScreen(
     navController: NavController,
     viewModel: StatsViewModel = hiltViewModel(),
 ) {
+    val density = LocalDensity.current
     val menuState = LocalMenuState.current
     val playerConnection = LocalPlayerConnection.current ?: return
 
@@ -100,12 +104,23 @@ fun StatsScreen(
             )
         }
 
+        val thumbnailSize = (ListThumbnailSize.value * density.density).roundToInt()
         items(
             items = mostPlayedSongs,
             key = { it.id }
         ) { song ->
             SongListItem(
                 song = song,
+                navController = navController,
+
+                isActive = song.song.id == mediaMetadata?.id,
+                isPlaying = isPlaying,
+                inSelectMode = false,
+                isSelected = false,
+                onSelectedChange = {},
+                swipeEnabled = swipeEnabled,
+
+                thumbnailSize = thumbnailSize,
                 onPlay = {
                     playerConnection.playQueue(
                         ListQueue(
@@ -114,11 +129,6 @@ fun StatsScreen(
                         )
                     )
                 },
-                onSelectedChange = {},
-                inSelectMode = false,
-                isSelected = false,
-                swipeEnabled = swipeEnabled,
-                navController = navController,
                 modifier = Modifier
                     .fillMaxWidth()
                     .animateItem()

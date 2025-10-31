@@ -69,6 +69,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -93,6 +94,7 @@ import com.dd3boh.outertune.LocalSyncUtils
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.AlbumThumbnailSize
 import com.dd3boh.outertune.constants.CONTENT_TYPE_HEADER
+import com.dd3boh.outertune.constants.ListThumbnailSize
 import com.dd3boh.outertune.constants.SongSortDescendingKey
 import com.dd3boh.outertune.constants.SongSortType
 import com.dd3boh.outertune.constants.SongSortTypeKey
@@ -127,6 +129,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 
 enum class PlaylistType {
     LIKE, DOWNLOAD, OTHER
@@ -141,6 +144,7 @@ fun AutoPlaylistScreen(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val density = LocalDensity.current
     val menuState = LocalMenuState.current
     val database = LocalDatabase.current
     val syncUtils = LocalSyncUtils.current
@@ -150,6 +154,8 @@ fun AutoPlaylistScreen(
     val (sortDescending, onSortDescendingChange) = rememberPreference(SongSortDescendingKey, true)
     val swipeEnabled by rememberPreference(SwipeToQueueKey, true)
 
+    val isPlaying by playerConnection.isPlaying.collectAsState()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val songs by viewModel.songs.collectAsState()
 
     // multiselect
@@ -547,25 +553,18 @@ fun AutoPlaylistScreen(
             }
 
 
-
+            val thumbnailSize = (ListThumbnailSize.value * density.density).roundToInt()
             itemsIndexed(
                 items = if (isSearching) filteredSongs else mutableSongs,
                 key = { _, song -> song.id }
             ) { index, song ->
                 SongListItem(
                     song = song,
-                    onPlay = {
-                        playerConnection.playQueue(
-                            ListQueue(
-                                title = playlist.name,
-                                items = (if (isSearching) filteredSongs else mutableSongs).map { it.toMediaMetadata() },
-                                startIndex = index,
-                                playlistId = playlist.browseId
-                            )
-                        )
-                    },
-                    showLikedIcon = playlistType != PlaylistType.LIKE,
-                    showDownloadIcon = playlistType != PlaylistType.DOWNLOAD,
+                    navController = navController,
+                    snackbarHostState = snackbarHostState,
+
+                    isActive = song.song.id == mediaMetadata?.id,
+                    isPlaying = isPlaying,
                     onSelectedChange = {
                         inSelectMode = true
                         if (it) {
@@ -577,8 +576,21 @@ fun AutoPlaylistScreen(
                     inSelectMode = inSelectMode,
                     isSelected = selection.contains(song.id),
                     swipeEnabled = swipeEnabled,
-                    navController = navController,
-                    snackbarHostState = snackbarHostState,
+
+                    showLikedIcon = playlistType != PlaylistType.LIKE,
+                    showDownloadIcon = playlistType != PlaylistType.DOWNLOAD,
+
+                    thumbnailSize = thumbnailSize,
+                    onPlay = {
+                        playerConnection.playQueue(
+                            ListQueue(
+                                title = playlist.name,
+                                items = (if (isSearching) filteredSongs else mutableSongs).map { it.toMediaMetadata() },
+                                startIndex = index,
+                                playlistId = playlist.browseId
+                            )
+                        )
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(MaterialTheme.colorScheme.background),

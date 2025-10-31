@@ -34,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -49,6 +50,7 @@ import com.dd3boh.outertune.constants.ArtistSongSortDescendingKey
 import com.dd3boh.outertune.constants.ArtistSongSortType
 import com.dd3boh.outertune.constants.ArtistSongSortTypeKey
 import com.dd3boh.outertune.constants.CONTENT_TYPE_HEADER
+import com.dd3boh.outertune.constants.ListThumbnailSize
 import com.dd3boh.outertune.constants.SwipeToQueueKey
 import com.dd3boh.outertune.constants.TopBarInsets
 import com.dd3boh.outertune.models.toMediaMetadata
@@ -69,6 +71,7 @@ import com.zionhuang.innertube.YouTube
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,6 +80,7 @@ fun ArtistSongsScreen(
     scrollBehavior: TopAppBarScrollBehavior,
     viewModel: ArtistSongsViewModel = hiltViewModel(),
 ) {
+    val density = LocalDensity.current
     val menuState = LocalMenuState.current
     val playerConnection = LocalPlayerConnection.current ?: return
 
@@ -85,6 +89,8 @@ fun ArtistSongsScreen(
     val swipeEnabled by rememberPreference(SwipeToQueueKey, true)
 
     val artist by viewModel.artist.collectAsState()
+    val isPlaying by playerConnection.isPlaying.collectAsState()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val songs by viewModel.songs.collectAsState()
 
     val lazyListState = rememberLazyListState()
@@ -170,12 +176,31 @@ fun ArtistSongsScreen(
                 }
             }
 
+            val thumbnailSize = (ListThumbnailSize.value * density.density).roundToInt()
             itemsIndexed(
                 items = songs,
                 key = { _, item -> item.id }
             ) { index, song ->
                 SongListItem(
                     song = song,
+                    navController = navController,
+                    snackbarHostState = snackbarHostState,
+
+                    isActive = song.song.id == mediaMetadata?.id,
+                    isPlaying = isPlaying,
+                    inSelectMode = inSelectMode,
+                    isSelected = selection.contains(song.id),
+                    onSelectedChange = {
+                        inSelectMode = true
+                        if (it) {
+                            selection.add(song.id)
+                        } else {
+                            selection.remove(song.id)
+                        }
+                    },
+                    swipeEnabled = swipeEnabled,
+
+                    thumbnailSize = thumbnailSize,
                     onPlay = {
                         viewModel.viewModelScope.launch(Dispatchers.IO) {
                             val playlistId = YouTube.artist(artist?.id!!).getOrNull()
@@ -193,19 +218,6 @@ fun ArtistSongsScreen(
                             }
                         }
                     },
-                    onSelectedChange = {
-                        inSelectMode = true
-                        if (it) {
-                            selection.add(song.id)
-                        } else {
-                            selection.remove(song.id)
-                        }
-                    },
-                    inSelectMode = inSelectMode,
-                    isSelected = selection.contains(song.id),
-                    swipeEnabled = swipeEnabled,
-                    navController = navController,
-                    snackbarHostState = snackbarHostState,
                     modifier = Modifier
                         .fillMaxWidth()
                         .animateItem()

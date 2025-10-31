@@ -85,6 +85,7 @@ import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.LocalSnackbarHostState
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.AlbumThumbnailSize
+import com.dd3boh.outertune.constants.ListThumbnailSize
 import com.dd3boh.outertune.constants.SwipeToQueueKey
 import com.dd3boh.outertune.constants.ThumbnailCornerRadius
 import com.dd3boh.outertune.constants.TopBarInsets
@@ -192,7 +193,11 @@ fun AlbumScreen(
                         if (thumbnailUrl != null) {
                             val px = (AlbumThumbnailSize.value * density.density).roundToInt()
                             AsyncImage(
-                                model = if (thumbnailUrl.startsWith("/storage")) LocalArtworkPath(thumbnailUrl, px, px) else thumbnailUrl,
+                                model = if (thumbnailUrl.startsWith("/storage")) LocalArtworkPath(
+                                    thumbnailUrl,
+                                    px,
+                                    px
+                                ) else thumbnailUrl,
                                 contentDescription = null,
                                 modifier = Modifier
                                     .size(AlbumThumbnailSize)
@@ -416,6 +421,7 @@ fun AlbumScreen(
                 }
             }
 
+            val thumbnailSize = (ListThumbnailSize.value * density.density).roundToInt()
             itemsIndexed(
                 items = albumWithSongs!!.songs,
                 key = { _, song -> song.id }
@@ -423,6 +429,25 @@ fun AlbumScreen(
                 SongListItem(
                     song = song,
                     albumIndex = index + 1,
+
+                    navController = navController,
+                    snackbarHostState = snackbarHostState,
+
+                    isActive = song.id == mediaMetadata?.id,
+                    isPlaying = isPlaying,
+                    inSelectMode = inSelectMode,
+                    isSelected = selection.contains(song.id),
+                    onSelectedChange = {
+                        inSelectMode = true
+                        if (it) {
+                            selection.add(song.id)
+                        } else {
+                            selection.remove(song.id)
+                        }
+                    },
+                    swipeEnabled = swipeEnabled,
+
+                    thumbnailSize = thumbnailSize,
                     onPlay = {
                         playerConnection.playQueue(
                             ListQueue(
@@ -433,19 +458,6 @@ fun AlbumScreen(
                             )
                         )
                     },
-                    onSelectedChange = {
-                        inSelectMode = true
-                        if (it) {
-                            selection.add(song.id)
-                        } else {
-                            selection.remove(song.id)
-                        }
-                    },
-                    inSelectMode = inSelectMode,
-                    isSelected = selection.contains(song.id),
-                    swipeEnabled = swipeEnabled,
-                    navController = navController,
-                    snackbarHostState = snackbarHostState,
                     modifier = Modifier
                         .fillMaxWidth()
                         .animateItem()

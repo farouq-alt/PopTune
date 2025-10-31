@@ -59,6 +59,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -76,6 +77,7 @@ import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.LocalSnackbarHostState
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.AppBarHeight
+import com.dd3boh.outertune.constants.ListThumbnailSize
 import com.dd3boh.outertune.constants.SwipeToQueueKey
 import com.dd3boh.outertune.constants.TopBarInsets
 import com.dd3boh.outertune.db.entities.ArtistEntity
@@ -110,6 +112,7 @@ import com.zionhuang.innertube.models.AlbumItem
 import com.zionhuang.innertube.models.ArtistItem
 import com.zionhuang.innertube.models.PlaylistItem
 import com.zionhuang.innertube.models.SongItem
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -120,6 +123,7 @@ fun ArtistScreen(
 ) {
     val context = LocalContext.current
     val database = LocalDatabase.current
+    val density = LocalDensity.current
     val menuState = LocalMenuState.current
     val coroutineScope = rememberCoroutineScope()
     val playerConnection = LocalPlayerConnection.current ?: return
@@ -297,12 +301,24 @@ fun ArtistScreen(
                             )
                         }
 
+                        val thumbnailSize = (ListThumbnailSize.value * density.density).roundToInt()
                         itemsIndexed(
                             items = librarySongs,
                             key = { _, item -> item.hashCode() }
                         ) { index, song ->
                             SongListItem(
                                 song = song,
+                                navController = navController,
+                                snackbarHostState = snackbarHostState,
+
+                                isActive = song.song.id == mediaMetadata?.id,
+                                isPlaying = isPlaying,
+                                inSelectMode = false,
+                                isSelected = false,
+                                onSelectedChange = { },
+                                swipeEnabled = swipeEnabled,
+
+                                thumbnailSize = thumbnailSize,
                                 onPlay = {
                                     playerConnection.playQueue(
                                         ListQueue(
@@ -312,12 +328,6 @@ fun ArtistScreen(
                                         )
                                     )
                                 },
-                                onSelectedChange = { },
-                                inSelectMode = false,
-                                isSelected = false,
-                                swipeEnabled = swipeEnabled,
-                                navController = navController,
-                                snackbarHostState = snackbarHostState,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .animateItem()
@@ -469,7 +479,8 @@ fun ArtistScreen(
                                                 onClick = {
                                                     when (item) {
                                                         is SongItem -> playerConnection.playQueue(
-                                                            YouTubeQueue.radio(item.toMediaMetadata()
+                                                            YouTubeQueue.radio(
+                                                                item.toMediaMetadata()
                                                             ),
                                                             isRadio = true,
                                                             title = artistPage.artist.title

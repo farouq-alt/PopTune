@@ -96,6 +96,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -114,12 +115,14 @@ import com.dd3boh.outertune.LocalMenuState
 import com.dd3boh.outertune.LocalPlayerAwareWindowInsets
 import com.dd3boh.outertune.LocalPlayerConnection
 import com.dd3boh.outertune.R
+import com.dd3boh.outertune.constants.CONTENT_TYPE_SONG
 import com.dd3boh.outertune.constants.InsetsSafeE
 import com.dd3boh.outertune.constants.InsetsSafeS
 import com.dd3boh.outertune.constants.InsetsSafeSE
 import com.dd3boh.outertune.constants.InsetsSafeSTE
 import com.dd3boh.outertune.constants.InsetsSafeT
 import com.dd3boh.outertune.constants.ListItemHeight
+import com.dd3boh.outertune.constants.ListThumbnailSize
 import com.dd3boh.outertune.constants.LockQueueKey
 import com.dd3boh.outertune.constants.MiniPlayerHeight
 import com.dd3boh.outertune.constants.PlayerHorizontalPadding
@@ -128,7 +131,6 @@ import com.dd3boh.outertune.constants.SeekIncrementKey
 import com.dd3boh.outertune.extensions.metadata
 import com.dd3boh.outertune.extensions.move
 import com.dd3boh.outertune.extensions.supportsWideScreen
-import com.dd3boh.outertune.extensions.tabMode
 import com.dd3boh.outertune.extensions.togglePlayPause
 import com.dd3boh.outertune.extensions.toggleRepeatMode
 import com.dd3boh.outertune.models.MediaMetadata
@@ -154,6 +156,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
+import kotlin.math.roundToInt
 
 @Composable
 fun QueueSheet(
@@ -164,6 +167,7 @@ fun QueueSheet(
     navController: NavController,
     modifier: Modifier = Modifier,
 ) {
+    Log.v("QueueSheet", "Q-1")
     val haptic = LocalHapticFeedback.current
     BottomSheet(
         state = state,
@@ -176,6 +180,7 @@ fun QueueSheet(
         },
         modifier = modifier,
         collapsedContent = {
+            Log.v("QueueSheet", "Q-2")
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
@@ -239,8 +244,10 @@ fun BoxScope.QueueContent(
     onTerminate: () -> Unit,
     navController: NavController,
 ) {
+    Log.v("QueueContent", "QC-1")
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val density = LocalDensity.current
     val haptic = LocalHapticFeedback.current
     val menuState = LocalMenuState.current
     val playerConnection = LocalPlayerConnection.current ?: return
@@ -265,20 +272,20 @@ fun BoxScope.QueueContent(
     )
 
     // ui
-    val tabMode = context.tabMode()
     val wideScreen = context.supportsWideScreen()
     val landscape =
-        LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE && !tabMode && wideScreen
+        LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE && wideScreen
+
+    val queueWindows by playerConnection.queueWindows.collectAsState()
 
     // multi queue vars
-    var mqExpand by remember { mutableStateOf(false) }
-    var detachedHead by remember { mutableStateOf(false) }
-    var detachedQueue by remember { mutableStateOf<MultiQueueObject?>(null) }
+    val fallBackQueue = if (queueWindows.isEmpty()) qb.getCurrentQueue() else null
+    var mqExpand by remember { mutableStateOf(fallBackQueue != null) }
+    var detachedHead by remember { mutableStateOf(fallBackQueue != null) }
+    var detachedQueue by remember { mutableStateOf<MultiQueueObject?>(fallBackQueue) }
     val mutableQueues = remember { mutableStateListOf<MultiQueueObject>() }
     var playingQueue by remember { mutableIntStateOf(-1) }
 
-    // current queue vars
-    val queueWindows by playerConnection.queueWindows.collectAsState()
 
     /**
      * SONG LIST
@@ -320,7 +327,9 @@ fun BoxScope.QueueContent(
 
     LaunchedEffect(query) {
         snapshotFlow { searchQuery }.debounce { 300L }.collectLatest {
-            searchQuery = query
+            if (searchQuery.text != query.text) {
+                searchQuery = query
+            }
         }
     }
 
@@ -391,21 +400,11 @@ fun BoxScope.QueueContent(
     }
 
     // Helpers
-    LaunchedEffect(detachedHead) {
-        if (!detachedHead) {
-            detachedQueue = null // detachedQueue should only exist in detached mode
-        } else {
-            isSearching = false // no searching in detach mode
-        }
-        onExitSelectionMode() // select supported in both modes, but we disallow cross contamination of items
+    fun exitDetachHead() {
+        detachedHead = false
+        detachedQueue = null // detachedQueue should only exist in detached mode
+        onExitSelectionMode()
     }
-
-    LaunchedEffect(mqExpand) {
-        if (detachedHead) {
-            detachedHead = false
-        }
-    }
-
 
     LaunchedEffect(queueWindows, detachedQueue) { // add to songs list & scroll
         if (isSearching) return@LaunchedEffect
@@ -419,11 +418,8 @@ fun BoxScope.QueueContent(
             }
             return@LaunchedEffect
         }
-        val fallBackQueue = qb.getCurrentQueue()
-        if (queueWindows.isEmpty() && fallBackQueue != null) {
-            detachedQueue = fallBackQueue
-            detachedHead = true
-            mqExpand = true
+        // fallback queue, for before user plays any song
+        if (fallBackQueue != null) {
             return@LaunchedEffect
         }
 
@@ -439,35 +435,23 @@ fun BoxScope.QueueContent(
         selectedItems.clear()
     }
 
-    LaunchedEffect(mqExpand) { // scroll to queue
-        if (mqExpand && playingQueue >= 0) {
-            lazyQueuesListState.animateScrollToItem(playingQueue)
-            if (currentWindowIndex != -1) {
-                lazySongsListState.scrollToItem(currentWindowIndex)
-            }
-        }
-    }
 
     LaunchedEffect(Unit) {
         combine(snapshotFlow { qb.masterQueues.toList() }, playerConnection.service.qbInit) { updatedList, init ->
             updatedList to init
         }.collect { (updatedList, init) ->
             Log.d("Queue.kt", "Trigger loading queue. init = $init")
-            mutableQueues.clear()
-            mutableQueues.addAll(qb.getAllQueues())
-            playingQueue = updatedList.indexOf(qb.getCurrentQueue())
-        }
-
-        snapshotFlow { qb.masterQueues.toList() }
-            .collect { updatedList ->
-                // Handle the updated list
+            if (init) {
                 mutableQueues.clear()
                 mutableQueues.addAll(qb.getAllQueues())
                 playingQueue = updatedList.indexOf(qb.getCurrentQueue())
             }
+        }
     }
 
     val queueHeader: @Composable ColumnScope.(Modifier) -> Unit = { modifier ->
+        Log.v("QueueContent", "QC-mq_a")
+
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
@@ -499,6 +483,7 @@ fun BoxScope.QueueContent(
                         icon = Icons.Rounded.Close,
                         onClick = {
                             mqExpand = false
+                            exitDetachHead()
                         },
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
@@ -508,6 +493,16 @@ fun BoxScope.QueueContent(
     }
 
     val queueList: @Composable ColumnScope.(PaddingValues) -> Unit = { contentPadding ->
+        Log.v("QueueContent", "QC-mq_b")
+        LaunchedEffect(mqExpand) { // scroll to queue
+            if (mqExpand && playingQueue >= 0) {
+                lazyQueuesListState.animateScrollToItem(playingQueue)
+                if (currentWindowIndex != -1) {
+                    lazySongsListState.scrollToItem(currentWindowIndex)
+                }
+            }
+        }
+
         if (mutableQueues.isEmpty()) {
             Text(text = stringResource(R.string.queues_empty))
         }
@@ -541,9 +536,10 @@ fun BoxScope.QueueContent(
                                 onClick = {
                                     // clicking on queue shows it in the ui
                                     if (playingQueue == index) {
-                                        detachedHead = false
+                                        exitDetachHead()
                                     } else {
                                         detachedHead = true
+                                        isSearching = false // no searching in detach mode
                                         detachedQueue = mq
                                         onExitSelectionMode()
                                     }
@@ -578,7 +574,7 @@ fun BoxScope.QueueContent(
                                             if (playingQueue == index) {
                                                 qb.setCurrQueue()
                                             }
-                                            detachedHead = false
+                                            exitDetachHead()
                                             if (remainingQueues < 1) {
                                                 onTerminate.invoke()
                                             }
@@ -611,6 +607,7 @@ fun BoxScope.QueueContent(
     }
 
     val songHeader: @Composable ColumnScope.(Modifier) -> Unit = { modifier ->
+        Log.v("QueueContent", "QC-s_a")
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
@@ -638,7 +635,7 @@ fun BoxScope.QueueContent(
                             qb.setCurrQueue(detachedQueue)
                             playerConnection.player.prepare() // else cannot click to play after auto-skip onError stop
                             playerConnection.player.playWhenReady = true
-                            detachedHead = false
+                            exitDetachHead()
                         }
                     }
                 )
@@ -654,6 +651,7 @@ fun BoxScope.QueueContent(
     }
 
     val songList: @Composable ColumnScope.(PaddingValues) -> Unit = { contentPadding ->
+        Log.v("QueueContent", "QC-s_b")
         LazyColumn(
             state = lazySongsListState,
             contentPadding = contentPadding,
@@ -669,9 +667,11 @@ fun BoxScope.QueueContent(
                 }
             }
 
+            val thumbnailSize = (ListThumbnailSize.value * density.density).roundToInt()
             itemsIndexed(
                 items = if (isSearching) filteredSongs else mutableSongs,
-                key = { _, item -> item.hashCode() }
+                key = { _, item -> item.hashCode() },
+                contentType = { _, _ -> CONTENT_TYPE_SONG }
             ) { index, window ->
                 ReorderableItem(
                     state = reorderableState,
@@ -761,6 +761,7 @@ fun BoxScope.QueueContent(
                                 }
                             },
                             isSelected = inSelectMode && window.hashCode() in selectedItems,
+                            preferredSize = thumbnailSize,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .combinedClickable(
@@ -781,7 +782,7 @@ fun BoxScope.QueueContent(
                                                     }
                                                     playerConnection.player.prepare() // else cannot click to play after auto-skip onError stop
                                                     playerConnection.player.playWhenReady = true
-                                                    detachedHead = false
+                                                    exitDetachHead()
                                                 }
                                             }
                                         }
@@ -814,6 +815,7 @@ fun BoxScope.QueueContent(
     }
 
     val searchBar: @Composable ColumnScope.() -> Unit = {
+        Log.v("QueueContent", "QC-searchbar")
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -861,7 +863,7 @@ fun BoxScope.QueueContent(
 
 // queue info + player controls
     val bottomNav: @Composable ColumnScope.() -> Unit = {
-
+        Log.v("QueueContent", "QC-nav")
 
         Column(
             modifier = Modifier
@@ -905,6 +907,9 @@ fun BoxScope.QueueContent(
                             .weight(1f)
                             .clickable(enabled = !landscape && !queueWindows.isEmpty()) {
                                 mqExpand = !mqExpand
+                                if (mqExpand) {
+                                    exitDetachHead()
+                                }
                                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                             }
                     ) {
@@ -921,6 +926,9 @@ fun BoxScope.QueueContent(
                             enabled = !landscape && !queueWindows.isEmpty(),
                             onClick = {
                                 mqExpand = !mqExpand
+                                if (mqExpand) {
+                                    exitDetachHead()
+                                }
                                 haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                             },
                             modifier = Modifier.padding(vertical = 6.dp)
@@ -1154,20 +1162,24 @@ fun BoxScope.QueueContent(
             }
         }
     } else {
+        Log.v("QueueContent", "QC-2.1")
         // queue contents
         Column(
             verticalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxSize()
         ) {
+            Log.v("QueueContent", "QC-2.2")
             Column(
                 modifier = Modifier.weight(1f, false)
             ) {
+                Log.v("QueueContent", "QC-2.3")
                 // multiqueue list
                 AnimatedVisibility(
                     visible = isSearching,
                     modifier = Modifier
                         .windowInsetsPadding(InsetsSafeT)
                 ) {
+                    Log.v("QueueContent", "QC-2.4a")
                     Spacer(Modifier.windowInsetsPadding(InsetsSafeT))
                     searchBar()
                     if (inSelectMode) {
@@ -1191,6 +1203,7 @@ fun BoxScope.QueueContent(
                 }
 
                 AnimatedVisibility(mqExpand && !isSearching) {
+                    Log.v("QueueContent", "QC-2.4b")
                     // why cant i just put everything in one column???
                     Column {
                         Column(

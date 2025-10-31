@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,6 +30,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -39,6 +42,7 @@ import com.dd3boh.outertune.LocalSnackbarHostState
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.CONTENT_TYPE_LIST
 import com.dd3boh.outertune.constants.ListItemHeight
+import com.dd3boh.outertune.constants.ListThumbnailSize
 import com.dd3boh.outertune.constants.SwipeToQueueKey
 import com.dd3boh.outertune.db.entities.Album
 import com.dd3boh.outertune.db.entities.Artist
@@ -60,6 +64,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
+import kotlin.math.roundToInt
 
 @OptIn(FlowPreview::class)
 @Composable
@@ -70,6 +75,7 @@ fun LocalSearchScreen(
     viewModel: LocalSearchViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
+    val density = LocalDensity.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val playerConnection = LocalPlayerConnection.current ?: return
 
@@ -98,7 +104,10 @@ fun LocalSearchScreen(
         }
     }
 
-    Column {
+    Column(
+        modifier = Modifier
+            .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom))
+    ) {
         ChipsRow(
             chips = listOf(
                 LocalFilter.ALL to stringResource(R.string.filter_all),
@@ -113,6 +122,7 @@ fun LocalSearchScreen(
 
         LazyColumn(
             state = lazyListState,
+//            contentPadding = LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Bottom + WindowInsetsSides.Start).asPaddingValues(),
             modifier = Modifier.weight(1f)
         ) {
             result.map.forEach { (filter, items) ->
@@ -151,6 +161,7 @@ fun LocalSearchScreen(
                     }
                 }
 
+                val thumbnailSize = (ListThumbnailSize.value * density.density).roundToInt()
                 items(
                     items = items,
                     key = { it.id },
@@ -160,6 +171,17 @@ fun LocalSearchScreen(
                         is Song -> {
                             SongListItem(
                                 song = item,
+                                navController = navController,
+                                snackbarHostState = snackbarHostState,
+
+                                isActive = item.id == mediaMetadata?.id,
+                                isPlaying = isPlaying,
+                                inSelectMode = false,
+                                isSelected = false,
+                                onSelectedChange = { },
+                                swipeEnabled = swipeEnabled,
+
+                                thumbnailSize = thumbnailSize,
                                 onPlay = {
                                     val songs = result.map
                                         .getOrDefault(LocalFilter.SONG, emptyList())
@@ -172,12 +194,6 @@ fun LocalSearchScreen(
                                             startIndex = songs.indexOfFirst { it.id == item.id }
                                         ))
                                 },
-                                onSelectedChange = { },
-                                inSelectMode = false,
-                                isSelected = false,
-                                swipeEnabled = swipeEnabled,
-                                navController = navController,
-                                snackbarHostState = snackbarHostState,
                                 modifier = Modifier.animateItem()
                             )
                         }

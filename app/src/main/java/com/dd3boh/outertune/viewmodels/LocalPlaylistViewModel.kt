@@ -13,6 +13,7 @@ import com.dd3boh.outertune.extensions.toEnum
 import com.dd3boh.outertune.utils.dataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -29,17 +30,17 @@ class LocalPlaylistViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     val playlistId = savedStateHandle.get<String>("playlistId")!!
-    val playlist = database.playlist(playlistId)
-        .stateIn(viewModelScope, SharingStarted.Lazily, null)
-    val playlistSongs = combine(
+    val playlistWithSongs = combine(
+        database.playlist(playlistId),
         database.playlistSongs(playlistId),
         context.dataStore.data
             .map {
-                it[PlaylistSongSortTypeKey].toEnum(PlaylistSongSortType.CUSTOM) to (it[PlaylistSongSortDescendingKey] ?: true)
+                it[PlaylistSongSortTypeKey].toEnum(PlaylistSongSortType.CUSTOM) to
+                        (it[PlaylistSongSortDescendingKey] ?: true)
             }
             .distinctUntilChanged()
-    ) { songs, (sortType, sortDescending) ->
-        when (sortType) {
+    ) { playlist, songs, (sortType, sortDescending) ->
+        val sortedSongs = when (sortType) {
             PlaylistSongSortType.CUSTOM -> songs
             PlaylistSongSortType.NAME -> songs.sortedBy { it.song.song.title.lowercase() }
             PlaylistSongSortType.ARTIST -> songs.sortedBy { song ->
@@ -49,12 +50,14 @@ class LocalPlaylistViewModel @Inject constructor(
             PlaylistSongSortType.MODIFIED_DATE -> songs.sortedBy { it.song.song.dateModified }
             PlaylistSongSortType.RELEASE_DATE -> songs.sortedBy { it.song.song.getDateLong() }
         }.reversed(sortDescending && sortType != PlaylistSongSortType.CUSTOM)
-    }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+        Pair(playlist, sortedSongs)
+    }.stateIn(viewModelScope, SharingStarted.Lazily, Pair(null, emptyList()))
 
     init {
         // Fix playlist song order
-        viewModelScope.launch {
-            val sortedSongs = playlistSongs.first().sortedWith(compareBy({ it.map.position }, { it.map.id }))
+        viewModelScope.launch(Dispatchers.IO) {
+            val sortedSongs = playlistWithSongs.first().second.sortedWith(compareBy({ it.map.position }, { it.map.id }))
             database.transaction {
                 sortedSongs.forEachIndexed { index, song ->
                     if (song.map.position != index) {

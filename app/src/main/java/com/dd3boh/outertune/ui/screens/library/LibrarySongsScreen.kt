@@ -1,6 +1,7 @@
 package com.dd3boh.outertune.ui.screens.library
 
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -48,13 +49,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEachReversed
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.dd3boh.outertune.LocalMenuState
 import com.dd3boh.outertune.LocalPlayerAwareWindowInsets
 import com.dd3boh.outertune.LocalPlayerConnection
@@ -63,6 +64,7 @@ import com.dd3boh.outertune.MainActivity
 import com.dd3boh.outertune.R
 import com.dd3boh.outertune.constants.CONTENT_TYPE_HEADER
 import com.dd3boh.outertune.constants.CONTENT_TYPE_SONG
+import com.dd3boh.outertune.constants.ListThumbnailSize
 import com.dd3boh.outertune.constants.LocalLibraryEnableKey
 import com.dd3boh.outertune.constants.SongFilter
 import com.dd3boh.outertune.constants.SongFilterKey
@@ -86,6 +88,7 @@ import com.dd3boh.outertune.ui.utils.MEDIA_PERMISSION_LEVEL
 import com.dd3boh.outertune.utils.rememberEnumPreference
 import com.dd3boh.outertune.utils.rememberPreference
 import com.dd3boh.outertune.viewmodels.LibrarySongsViewModel
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -94,34 +97,28 @@ fun LibrarySongsScreen(
     viewModel: LibrarySongsViewModel = hiltViewModel(),
     libraryFilterContent: @Composable (() -> Unit)? = null
 ) {
+    Log.v("LibrarySongsScreen", "S_RC-1")
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val density = LocalDensity.current
     val menuState = LocalMenuState.current
     val playerConnection = LocalPlayerConnection.current ?: return
     val snackbarHostState = LocalSnackbarHostState.current
 
     var filter by rememberEnumPreference(SongFilterKey, SongFilter.LIKED)
     val localLibEnable by rememberPreference(LocalLibraryEnableKey, defaultValue = true)
-
     val (sortType, onSortTypeChange) = rememberEnumPreference(SongSortTypeKey, SongSortType.CREATE_DATE)
     val (sortDescending, onSortDescendingChange) = rememberPreference(SongSortDescendingKey, true)
     val swipeEnabled by rememberPreference(SwipeToQueueKey, true)
 
     val songs by viewModel.allSongs.collectAsState()
+    val isPlaying by playerConnection.isPlaying.collectAsState()
     val isSyncingRemoteLikedSongs by viewModel.isSyncingRemoteLikedSongs.collectAsState()
     val isSyncingRemoteSongs by viewModel.isSyncingRemoteSongs.collectAsState()
+    val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val pullRefreshState = rememberPullToRefreshState()
 
     val lazyListState = rememberLazyListState(cacheWindow = LazyLayoutCacheWindow(ahead = 200.dp, behind = 200.dp))
-    val backStackEntry by navController.currentBackStackEntryAsState()
-    val scrollToTop = backStackEntry?.savedStateHandle?.getStateFlow("scrollToTop", false)?.collectAsState()
-
-    LaunchedEffect(scrollToTop?.value) {
-        if (scrollToTop?.value == true) {
-            lazyListState.animateScrollToItem(0)
-            backStackEntry?.savedStateHandle?.set("scrollToTop", false)
-        }
-    }
 
     // multiselect
     var inSelectMode by rememberSaveable { mutableStateOf(false) }
@@ -137,10 +134,6 @@ fun LibrarySongsScreen(
     }
     if (inSelectMode) {
         BackHandler(onBack = onExitSelectionMode)
-    }
-
-    LaunchedEffect(inSelectMode) {
-        backStackEntry?.savedStateHandle?.set("inSelectMode", inSelectMode)
     }
 
     LaunchedEffect(songs) {
@@ -339,6 +332,7 @@ fun LibrarySongsScreen(
                         )
                     }
                 }
+                val thumbnailSize = (ListThumbnailSize.value * density.density).roundToInt()
                 itemsIndexed(
                     items = songs,
                     key = { _, item -> item.id },
@@ -346,6 +340,24 @@ fun LibrarySongsScreen(
                 ) { index, song ->
                     SongListItem(
                         song = song,
+                        navController = navController,
+                        snackbarHostState = snackbarHostState,
+
+                        isActive = song.song.id == mediaMetadata?.id,
+                        isPlaying = isPlaying,
+                        inSelectMode = inSelectMode,
+                        isSelected = selection.contains(song.id),
+                        onSelectedChange = {
+                            inSelectMode = true
+                            if (it) {
+                                selection.add(song.id)
+                            } else {
+                                selection.remove(song.id)
+                            }
+                        },
+                        swipeEnabled = swipeEnabled,
+
+                        thumbnailSize = thumbnailSize,
                         onPlay = {
                             playerConnection.playQueue(
                                 ListQueue(
@@ -355,19 +367,6 @@ fun LibrarySongsScreen(
                                 )
                             )
                         },
-                        onSelectedChange = {
-                            inSelectMode = true
-                            if (it) {
-                                selection.add(song.id)
-                            } else {
-                                selection.remove(song.id)
-                            }
-                        },
-                        inSelectMode = inSelectMode,
-                        isSelected = selection.contains(song.id),
-                        swipeEnabled = swipeEnabled,
-                        navController = navController,
-                        snackbarHostState = snackbarHostState,
                         modifier = Modifier
                             .fillMaxWidth()
                             .animateItem()

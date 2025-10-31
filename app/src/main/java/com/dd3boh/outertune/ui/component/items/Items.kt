@@ -66,7 +66,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -88,7 +87,6 @@ import com.dd3boh.outertune.constants.ListThumbnailSize
 import com.dd3boh.outertune.constants.ThumbnailCornerRadius
 import com.dd3boh.outertune.db.entities.PlaylistEntity
 import com.dd3boh.outertune.db.entities.RecentActivityEntity
-import com.dd3boh.outertune.extensions.isPowerSaver
 import com.dd3boh.outertune.models.MediaMetadata
 import com.dd3boh.outertune.models.MultiQueueObject
 import com.dd3boh.outertune.models.toMediaMetadata
@@ -112,7 +110,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
-import kotlin.math.roundToInt
 
 const val ActiveBoxAlpha = 0.6f
 
@@ -330,6 +327,7 @@ fun MediaMetadataListItem(
     showLikedIcon: Boolean = true,
     showInLibraryIcon: Boolean = true,
     showDownloadIcon: Boolean = true,
+    preferredSize: Int,
     trailingContent: @Composable RowScope.() -> Unit = {},
 ) = ListItem(
     title = mediaMetadata.title,
@@ -354,6 +352,7 @@ fun MediaMetadataListItem(
     thumbnailContent = {
         ItemThumbnail(
             thumbnailUrl = if (mediaMetadata.isLocal) mediaMetadata.localPath else mediaMetadata.thumbnailUrl,
+            preferredSize = preferredSize,
             isActive = isActive,
             isPlaying = isPlaying,
             shape = RoundedCornerShape(ThumbnailCornerRadius),
@@ -658,6 +657,7 @@ fun YouTubeCardItem(
 @Composable
 fun ItemThumbnail(
     thumbnailUrl: String?,
+    preferredSize: Int = -1,
     placeholderIcon: ImageVector = Icons.Rounded.MusicNote,
     isActive: Boolean,
     isPlaying: Boolean,
@@ -666,8 +666,6 @@ fun ItemThumbnail(
     albumIndex: Int? = null,
 ) {
     val context = LocalContext.current
-    val density = LocalDensity.current
-    val px = (ListThumbnailSize.value * density.density).roundToInt()
 
     BoxWithConstraints(
         contentAlignment = Alignment.Center,
@@ -676,7 +674,7 @@ fun ItemThumbnail(
         AsyncImage(
             imageLoader = context.imageLoader,
             model = if (thumbnailUrl?.startsWith("/storage") == true) {
-                LocalArtworkPath(thumbnailUrl, px, px)
+                LocalArtworkPath(thumbnailUrl, preferredSize, preferredSize)
             } else {
                 thumbnailUrl
             },
@@ -725,7 +723,7 @@ fun ItemThumbnail(
         }
 
         PlayingIndicatorBox(
-            isActive = isActive && !context.isPowerSaver(),
+            isActive = isActive,
             playWhenReady = isPlaying,
             color = Color.White,
             modifier = Modifier
