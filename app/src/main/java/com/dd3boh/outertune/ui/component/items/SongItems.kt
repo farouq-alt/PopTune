@@ -90,7 +90,7 @@ fun SongListItem(
     onSelectedChange: (Boolean) -> Unit,
     swipeEnabled: Boolean,
 
-    showMenu: Boolean = false,
+    showMenu: Boolean = true,
     showLikedIcon: Boolean = true,
     showInLibraryIcon: Boolean = true,
     showDownloadIcon: Boolean = true,
@@ -128,7 +128,7 @@ fun SongListItem(
             },
             thumbnailContent = {
                 ItemThumbnail(
-                    thumbnailUrl = if (song.song.isLocal) song.song.localPath else song.song.thumbnailUrl,
+                    thumbnailUrl = song.song.thumbnailUrl,
                     preferredSize = thumbnailSize,
                     albumIndex = albumIndex,
                     isActive = isActive,

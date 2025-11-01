@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.annotation.DrawableRes
+import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -465,7 +466,7 @@ class MediaLibrarySessionCallback @Inject constructor(
                     .setTitle(song.title)
                     .setSubtitle(artists.joinToString { it.name })
                     .setArtist(artists.joinToString { it.name })
-                    .setArtworkUri(if (song.isLocal) song.localPath?.toUri() else song.thumbnailUrl?.toUri())
+                    .setArtworkUri(song.thumbnailUrl?.toUri())
                     .setIsPlayable(isPlayable)
                     .setIsBrowsable(isBrowsable)
                     .setMediaType(MEDIA_TYPE_MUSIC)
@@ -483,7 +484,7 @@ class MediaLibrarySessionCallback @Inject constructor(
                 .setTitle(title)
                 .setSubtitle(artists.joinToString { it.name })
                 .setArtist(artists.joinToString { it.name })
-                .setArtworkUri(if (isLocal) localPath?.toUri() else thumbnailUrl?.toUri())
+                .setArtworkUri(thumbnailUrl?.toUri())
                 .setAlbumTitle(album?.title)
                 .setIsPlayable(isPlayable)
                 .setIsBrowsable(isBrowsable)

@@ -171,7 +171,7 @@ class App : Application(), SingletonImageLoader.Factory {
             return ImageLoader.Builder(this)
                 .components {
                     add(CoilBitmapLoader.Factory(this@App))
-                add(LocalArtworkPathKeyer())
+                    add(LocalArtworkPathKeyer())
                 }
                 .crossfade(true)
                 .allowHardware(false)

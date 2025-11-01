@@ -55,7 +55,7 @@ data class MediaMetadata(
         id = id,
         title = title,
         duration = duration,
-        thumbnailUrl = if (isLocal) null else thumbnailUrl,
+        thumbnailUrl = thumbnailUrl,
         trackNumber = trackNumber,
         discNumber = discNumber,
         albumId = album?.id,
@@ -119,7 +119,7 @@ fun Song.toMediaMetadata() = MediaMetadata(
         )
     },
     duration = song.duration,
-    thumbnailUrl = if (song.isLocal) null else song.thumbnailUrl,
+    thumbnailUrl = song.thumbnailUrl,
     trackNumber = song.trackNumber,
     discNumber = song.discNumber,
     album = album?.let {
