@@ -529,7 +529,7 @@ class LocalMediaScanner(val context: Context, scannerImpl: ScannerImpl) {
         // we handle disabling songs here instead
         scannerState.value = 3
         finalize(database)
-        disableSongsByPath(converted, database)
+        disableSongsByPath(finalSongs.mapNotNull { it.song.song.localPath }, database)
 
         scannerState.value = 0
         Log.i(TAG, "------------ SYNC: Finished Quick (additive delta) Library Sync ------------")
@@ -982,7 +982,7 @@ class LocalMediaScanner(val context: Context, scannerImpl: ScannerImpl) {
     }
 
     private suspend fun disableSongsByPath(newSongs: List<String>, database: MusicDatabase) {
-        Log.i(TAG, "Start finalize (disable songs) job. Number of valid songs: ${newSongs.size}")
+        Log.i(TAG, "Start finalize (disableSongsByPath) job. Number of valid songs: ${newSongs.size}")
         // get list of all local songs in db
         database.disableInvalidLocalSongs() // make sure path is existing
         val allSongs = database.allLocalSongs()
@@ -1006,7 +1006,7 @@ class LocalMediaScanner(val context: Context, scannerImpl: ScannerImpl) {
     }
 
     private suspend fun disableSongs(newSongs: List<Song>, database: MusicDatabase) {
-        Log.i(TAG, "Start finalize (disable songs) job. Number of valid songs: ${newSongs.size}")
+        Log.i(TAG, "Start finalize (disableSongs) job. Number of valid songs: ${newSongs.size}")
 
         // get list of all local songs in db
         database.disableInvalidLocalSongs() // make sure path is existing
