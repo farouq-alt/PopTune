@@ -120,6 +120,8 @@ import com.dd3boh.outertune.ui.component.AutoResizeText
 import com.dd3boh.outertune.ui.component.EmptyPlaceholder
 import com.dd3boh.outertune.ui.component.FloatingFooter
 import com.dd3boh.outertune.ui.component.FontSizeRange
+import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
+import com.dd3boh.outertune.ui.component.ScrollToTopManager
 import com.dd3boh.outertune.ui.component.SelectHeader
 import com.dd3boh.outertune.ui.component.SortHeader
 import com.dd3boh.outertune.ui.component.button.IconButton
@@ -432,6 +434,7 @@ fun LocalPlaylistScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         Log.v("LocalPlaylistScreen", "P_RC-2.1")
+        ScrollToTopManager(navController, lazyListState)
         LazyColumn(
             state = lazyListState,
             contentPadding = LocalPlayerAwareWindowInsets.current.union(WindowInsets.ime).asPaddingValues(),
@@ -559,6 +562,10 @@ fun LocalPlaylistScreen(
                 }
             }
         }
+
+        LazyColumnScrollbar(
+            state = lazyListState,
+        )
 
         TopAppBar(
             title = {

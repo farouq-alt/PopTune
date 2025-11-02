@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.layout.LazyLayoutCacheWindow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.FilterAlt
@@ -79,6 +78,7 @@ import com.dd3boh.outertune.ui.component.ChipsRow
 import com.dd3boh.outertune.ui.component.EmptyPlaceholder
 import com.dd3boh.outertune.ui.component.FloatingFooter
 import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
+import com.dd3boh.outertune.ui.component.ScrollToTopManager
 import com.dd3boh.outertune.ui.component.SelectHeader
 import com.dd3boh.outertune.ui.component.SortHeader
 import com.dd3boh.outertune.ui.component.items.SongListItem
@@ -118,7 +118,7 @@ fun LibrarySongsScreen(
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
     val pullRefreshState = rememberPullToRefreshState()
 
-    val lazyListState = rememberLazyListState(cacheWindow = LazyLayoutCacheWindow(ahead = 200.dp, behind = 200.dp))
+    val lazyListState = rememberLazyListState()
 
     // multiselect
     var inSelectMode by rememberSaveable { mutableStateOf(false) }
@@ -278,6 +278,7 @@ fun LibrarySongsScreen(
                 }
             ),
     ) {
+        ScrollToTopManager(navController, lazyListState)
         LazyColumn(
             state = lazyListState,
             contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),

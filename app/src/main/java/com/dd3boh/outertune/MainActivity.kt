@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -46,6 +47,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -86,6 +88,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -825,6 +828,10 @@ class MainActivity : ComponentActivity() {
                                                         "scrollToTop",
                                                         true
                                                     )
+                                                } else if (navigationItems.none { scr -> navBackStackEntry?.destination?.hierarchy?.any { it.route == scr.route } == true }) {
+                                                    // this eye bleach allows you to navigate back when you tap on the navbar on a non-root page
+                                                    // TODO: nav3 allows us to access back stack... maybe do indicators properly and remove this hack
+                                                    navController.navigateUp()
                                                 } else {
                                                     navController.navigate(screen.route) {
                                                         popUpTo(navController.graph.startDestinationId) {
@@ -843,7 +850,8 @@ class MainActivity : ComponentActivity() {
                             }
 
                             @Composable
-                            fun navRail(alignment: Alignment = Alignment.BottomStart) {
+                            fun navRail(alignment: Alignment) {
+                                val layoutDirection = LocalLayoutDirection.current
                                 val navigationBarHeight by animateDpAsState(
                                     targetValue = NavigationBarHeight,
                                     animationSpec = NavigationBarAnimationSpec,
@@ -851,26 +859,24 @@ class MainActivity : ComponentActivity() {
                                 )
                                 val leftInset = remember {
                                     derivedStateOf {
-                                        playerAwareWindowInsets
-                                            .add(windowsInsets.only(WindowInsetsSides.Start))
-                                            .add(cutoutInsets.only(WindowInsetsSides.Start)).getLeft(
-                                                density,
-                                                LayoutDirection.Ltr
-                                            ).dp
+                                        playerAwareWindowInsets.getLeft(density, layoutDirection).dp
                                     }
                                 }
-                                Column(
-                                    verticalArrangement = Arrangement.Bottom,
+                                NavigationRail(
+                                    containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp),
+                                    header = {
+                                        Spacer(Modifier.height(8.dp))
+                                        Image(
+                                            modifier = Modifier
+                                                .size(36.dp)
+                                                .padding(start = 8.dp),
+                                            painter = painterResource(R.drawable.small_icon),
+                                            contentDescription = null
+                                        )
+                                    },
                                     modifier = Modifier
                                         .align(alignment)
-                                        .fillMaxHeight()
                                         .verticalScroll(rememberScrollState())
-                                        .windowInsetsPadding(
-                                            playerAwareWindowInsets
-                                                .only(WindowInsetsSides.Bottom)
-                                                .add(windowsInsets.only(WindowInsetsSides.Start + WindowInsetsSides.Top))
-                                                .add(cutoutInsets.only(WindowInsetsSides.Start))
-                                        )
                                         .offset {
                                             if (navigationBarHeight == 0.dp) {
                                                 IntOffset(
@@ -890,65 +896,51 @@ class MainActivity : ComponentActivity() {
                                             }
                                         },
                                 ) {
-                                    NavigationRail(
-                                        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp),
-                                        header = {
-                                            Spacer(Modifier.height(8.dp))
-                                            Image(
-                                                modifier = Modifier
-                                                    .size(36.dp)
-                                                    .padding(start = 8.dp),
-                                                painter = painterResource(R.drawable.small_icon),
-                                                contentDescription = null
-                                            )
-                                        }
-                                    ) {
-                                        navigationItems.fastForEach { screen ->
-                                            // TODO: display selection when based on root page user entered
+                                    navigationItems.fastForEach { screen ->
+                                        // TODO: display selection when based on root page user entered
 //                                                val isSelected = navBackStackEntry?.destination?.hierarchy?.any {
 //                                                    it.route?.substringBefore("?")?.substringBefore("/") == screen.route
 //                                                } == true
-                                            NavigationRailItem(
-                                                selected = navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true,
-                                                icon = {
-                                                    Icon(
-                                                        screen.icon,
-                                                        contentDescription = null
+                                        NavigationRailItem(
+                                            selected = navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true,
+                                            icon = {
+                                                Icon(
+                                                    screen.icon,
+                                                    contentDescription = null
+                                                )
+                                            },
+                                            label = {
+                                                if (!slimNav) {
+                                                    Text(
+                                                        text = stringResource(screen.titleId),
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis
                                                     )
-                                                },
-                                                label = {
-                                                    if (!slimNav) {
-                                                        Text(
-                                                            text = stringResource(screen.titleId),
-                                                            maxLines = 1,
-                                                            overflow = TextOverflow.Ellipsis
-                                                        )
-                                                    }
-                                                },
-                                                onClick = {
-                                                    if (playerBottomSheetState.isExpanded) {
-                                                        playerBottomSheetState.collapseSoft()
-                                                    }
-                                                    if (navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true) {
-                                                        navBackStackEntry?.savedStateHandle?.set(
-                                                            "scrollToTop",
-                                                            true
-                                                        )
-                                                    } else {
-                                                        navController.navigate(screen.route) {
-                                                            popUpTo(navController.graph.startDestinationId) {
-                                                                saveState = true
-                                                            }
-
-                                                            launchSingleTop = true
-                                                            restoreState = true
-                                                        }
-                                                    }
-
-                                                    haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
                                                 }
-                                            )
-                                        }
+                                            },
+                                            onClick = {
+                                                if (playerBottomSheetState.isExpanded) {
+                                                    playerBottomSheetState.collapseSoft()
+                                                }
+                                                if (navBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true) {
+                                                    navBackStackEntry?.savedStateHandle?.set(
+                                                        "scrollToTop",
+                                                        true
+                                                    )
+                                                } else {
+                                                    navController.navigate(screen.route) {
+                                                        popUpTo(navController.graph.startDestinationId) {
+                                                            saveState = true
+                                                        }
+
+                                                        launchSingleTop = true
+                                                        restoreState = true
+                                                    }
+                                                }
+
+                                                haptic.performHapticFeedback(HapticFeedbackType.ContextClick)
+                                            }
+                                        )
                                     }
                                 }
                             }
@@ -974,7 +966,7 @@ class MainActivity : ComponentActivity() {
                             if (!useNavRail) {
                                 navbar()
                             } else {
-                                navRail()
+                                navRail(if (LocalLayoutDirection.current == LayoutDirection.Rtl) Alignment.BottomEnd else Alignment.BottomStart)
                             }
                             bottomSheetMenu()
 

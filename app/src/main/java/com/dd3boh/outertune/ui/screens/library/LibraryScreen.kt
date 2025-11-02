@@ -84,6 +84,7 @@ import com.dd3boh.outertune.ui.component.LibraryArtistGridItem
 import com.dd3boh.outertune.ui.component.LibraryArtistListItem
 import com.dd3boh.outertune.ui.component.LibraryPlaylistGridItem
 import com.dd3boh.outertune.ui.component.LibraryPlaylistListItem
+import com.dd3boh.outertune.ui.component.ScrollToTopManager
 import com.dd3boh.outertune.ui.component.SortHeader
 import com.dd3boh.outertune.ui.component.button.IconButton
 import com.dd3boh.outertune.ui.component.items.AutoPlaylistGridItem
@@ -328,7 +329,8 @@ fun LibraryScreen(
                     filterContent = filterContent
                 )
 
-            LibraryFilter.ALL ->
+            LibraryFilter.ALL -> {
+                ScrollToTopManager(navController, lazyListState)
                 when (viewType) {
                     LibraryViewType.LIST -> {
                         LazyColumn(
@@ -558,7 +560,7 @@ fun LibraryScreen(
                         )
                     }
                 }
-
+            }
         }
 
         Indicator(

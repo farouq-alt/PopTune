@@ -72,6 +72,7 @@ import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
 import com.dd3boh.outertune.ui.component.LazyVerticalGridScrollbar
 import com.dd3boh.outertune.ui.component.LibraryArtistGridItem
 import com.dd3boh.outertune.ui.component.LibraryArtistListItem
+import com.dd3boh.outertune.ui.component.ScrollToTopManager
 import com.dd3boh.outertune.ui.component.SortHeader
 import com.dd3boh.outertune.ui.component.button.IconButton
 import com.dd3boh.outertune.ui.menu.ActionDropdown
@@ -245,6 +246,7 @@ fun LibraryArtistsScreen(
                 }
             ),
     ) {
+        ScrollToTopManager(navController, lazyListState)
         when (viewType) {
             LibraryViewType.LIST -> {
                 LazyColumn(

@@ -97,6 +97,7 @@ import com.dd3boh.outertune.models.toMediaMetadata
 import com.dd3boh.outertune.playback.queues.ListQueue
 import com.dd3boh.outertune.ui.component.FloatingFooter
 import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
+import com.dd3boh.outertune.ui.component.ScrollToTopManager
 import com.dd3boh.outertune.ui.component.SelectHeader
 import com.dd3boh.outertune.ui.component.SortHeader
 import com.dd3boh.outertune.ui.component.button.IconButton
@@ -254,6 +255,7 @@ fun FolderScreen(
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
+        ScrollToTopManager(navController, lazyListState)
         LazyColumn(
             state = lazyListState,
             contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues(),
@@ -262,8 +264,7 @@ fun FolderScreen(
             item(
                 key = "header",
                 contentType = CONTENT_TYPE_HEADER
-            )
-            {
+            ) {
                 Column(
                     modifier = Modifier.background(MaterialTheme.colorScheme.background)
                 ) {

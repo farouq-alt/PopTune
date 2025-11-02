@@ -85,6 +85,7 @@ import com.dd3boh.outertune.ui.component.HideOnScrollFAB
 import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
 import com.dd3boh.outertune.ui.component.NavigationTile
 import com.dd3boh.outertune.ui.component.NavigationTitle
+import com.dd3boh.outertune.ui.component.ScrollToTopManager
 import com.dd3boh.outertune.ui.component.items.AlbumGridItem
 import com.dd3boh.outertune.ui.component.items.ArtistGridItem
 import com.dd3boh.outertune.ui.component.items.SongGridItem
@@ -365,6 +366,7 @@ fun HomeScreen(
             )
         }
 
+        ScrollToTopManager(navController, lazylistState)
         LazyColumn(
             state = lazylistState,
             contentPadding = LocalPlayerAwareWindowInsets.current.asPaddingValues()

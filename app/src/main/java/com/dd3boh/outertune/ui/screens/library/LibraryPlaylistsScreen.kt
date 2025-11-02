@@ -80,6 +80,7 @@ import com.dd3boh.outertune.ui.component.LazyColumnScrollbar
 import com.dd3boh.outertune.ui.component.LazyVerticalGridScrollbar
 import com.dd3boh.outertune.ui.component.LibraryPlaylistGridItem
 import com.dd3boh.outertune.ui.component.LibraryPlaylistListItem
+import com.dd3boh.outertune.ui.component.ScrollToTopManager
 import com.dd3boh.outertune.ui.component.SortHeader
 import com.dd3boh.outertune.ui.component.items.AutoPlaylistGridItem
 import com.dd3boh.outertune.ui.component.items.AutoPlaylistListItem
@@ -261,6 +262,7 @@ fun LibraryPlaylistsScreen(
                 }
             ),
     ) {
+        ScrollToTopManager(navController, lazyListState)
         when (viewType) {
             LibraryViewType.LIST -> {
                 LazyColumn(
