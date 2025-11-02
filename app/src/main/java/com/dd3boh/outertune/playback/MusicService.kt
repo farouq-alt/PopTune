@@ -459,8 +459,8 @@ class MusicService : MediaLibraryService(),
         queuePlaylistId = queue.playlistId
         var q: MultiQueueObject? = null
         val preloadItem = queue.preloadItem
-
-        scope.launch {
+        // do not use scope.launch ... it breaks randomly... why is this bug back???
+        CoroutineScope(Dispatchers.Main).launch {
             Log.d(TAG, "playQueue: Resolving additional queue data...")
             try {
                 if (preloadItem != null) {
