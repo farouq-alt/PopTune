@@ -954,19 +954,20 @@ class MainActivity : ComponentActivity() {
 
                             // phone
                             navHost()
-                            Box {
-                                SearchBarContainer(navController, scrollBehavior)
-                            }
+
+                            SearchBarContainer(navController, scrollBehavior)
+
                             if (oobeStatus >= OOBE_VERSION) {
                                 BottomSheetPlayer(
                                     state = playerBottomSheetState,
                                     navController = navController
                                 )
-                            }
-                            if (!useNavRail) {
-                                navbar()
-                            } else {
-                                navRail(if (LocalLayoutDirection.current == LayoutDirection.Rtl) Alignment.BottomEnd else Alignment.BottomStart)
+
+                                if (!useNavRail) {
+                                    navbar()
+                                } else {
+                                    navRail(if (LocalLayoutDirection.current == LayoutDirection.Rtl) Alignment.BottomEnd else Alignment.BottomStart)
+                                }
                             }
                             bottomSheetMenu()
 
