@@ -48,7 +48,7 @@
     <string name="local_library_enable_description">Disattivando si nasconderà la libreria locale dall\'app</string>
     <string name="flat_subfolders_title">Appiattire le sottocartelle</string>
     <string name="import_innertune_tooltip">Il ripristino dei backup di InnerTune è supportato, anche se è possibile che si verifichino anomalie a causa di limitazioni tecniche</string>
-    <string name="auto_scanner_description">Esegui automaticamente la scansione dei brani all\'apertura dell\'app. Questo non ricarica i metadati dei brani esistenti.</string>
+    <string name="auto_scanner_description">Esegui automaticamente la scansione dei brani e delle cartelle di download all\'apertura dell\'app.</string>
     <string name="scan_paths_title">Configura percorsi di scansione…</string>
     <string name="scan_paths_add_folder">Aggiungi nuova cartella</string>
     <string name="scanner_manual_btn">Attiva sincronizzazione manuale</string>
@@ -260,4 +260,5 @@
     <string name="oobe_cache_title">Cache del brano</string>
     <string name="oobe_welcome_tip">Per la migliore esperienza, ti consigliamo di completare una configurazione rapida per personalizzare le impostazioni chiave come il tema, account YouTube, media locali e downloads.</string>
     <string name="max_queues_title">Numero massimo di code</string>
+    <string name="grp_more_settings">Altre impostazioni</string>
 </resources>
