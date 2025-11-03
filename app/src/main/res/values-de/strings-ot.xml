@@ -33,7 +33,7 @@
     <string name="prefs_advanced">Fortgeschritten</string>
     <string name="grp_account_sync">Konto und Synchronisation</string>
     <string name="grp_library_and_content">Bibliothek und Inhalt</string>
-    <string name="tab_arrangement_home_required">Die Startseite ist notwendig</string>
+    <string name="tab_arrangement_home_required">Die Startseite ist notwendig.</string>
     <string name="like_autodownload">Favorisierte Titel automatisch herunterladen</string>
     <string name="sync_conflict_add_only">Lokale Inhalte beibehalten und mit nicht-lokalen Inhalten ergänzen</string>
     <string name="sync_conflict_overwrite">Lokale Inhalte mit nicht-lokalen Inhalten überschreiben</string>
@@ -253,4 +253,7 @@
     <string name="audio_decoder_system_with_ffmpeg">Priorisiere System Decoder</string>
     <string name="max_queues_title">Maximale Anzahl an Warteschlangen</string>
     <string name="oobe_cache_title">Song-Cache</string>
+    <string name="toggle_lyrics">Liedtext -ein/ausschalten</string>
+    <string name="oobe_welcome_tip">Für ein optimales Erlebnis empfehlen wir Ihnen, eine schnelle Einrichtung durchzuführen, um wichtige Einstellungen wie Design, YouTube-Konto, lokale Medien und Downloads anzupassen.</string>
+    <string name="oobe_cache_subtitle">Wählen Sie eine Song-Cache-Größe. Dies kann dazu beitragen, Probleme bei der Wiedergabe über das Internet oder die YouTube-API zu reduzieren.</string>
 </resources>
