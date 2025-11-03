@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="android_auto">أندرويد تلقائي</string>
+    <string name="android_auto">اعدادات النضام التلقائية</string>
     <string name="folders">المجلدات</string>
     <string name="library">المكتبة</string>
     <string name="recent_activity">النشاط الأخير</string>
