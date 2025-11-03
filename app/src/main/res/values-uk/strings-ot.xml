@@ -3,7 +3,7 @@
     <string name="recent_activity">Нещодавна активність</string>
     <string name="sort_by_like_date">Коли сподобалося</string>
     <string name="attrib_zhuang">Zion Huang за InnerTune</string>
-    <string name="auto_scanner_description">Автоматичний пошук пісень під час відкриття застосунку. Це не перезавантажує метадані наявних пісень.</string>
+    <string name="auto_scanner_description">Періодично оновлювати папки локальних медіафайлів та користувацьких завантажень під час відкриття програми</string>
     <string name="experimental_settings_title">Експериментальні</string>
     <string name="info">Інформація</string>
     <string name="scanner_sensitivity_L3">Збіг назви, виконавця та альбому</string>
@@ -263,4 +263,8 @@
     <string name="oobe_cache_title">Кеш пісень</string>
     <string name="oobe_cache_subtitle">Виберіть розмір кешу пісні. Це може допомогти зменшити проблеми з відтворенням через Інтернет або YouTube API</string>
     <string name="action_logout_tooltip">Щоб повністю вийти, вийдіть зі свого облікового запису YouTube на веб-порталі, перш ніж використовувати цю кнопку виходу</string>
+    <string name="grp_more_settings">Більше налаштувань</string>
+    <string name="auto_scanner_tooltip">Для локальних медіафайлів це не перезавантажує метадані існуючих пісень. Використовуйте ручне сканування з увімкненим прапорцем «Повторне сканування», якщо ви також хочете оновити метадані.</string>
+    <string name="scanner_auto_end">Оновлення завантажень локальних медіафайлів та пісень завершено!</string>
+    <string name="scanner_auto_start">Оновлення папок локальних медіафайлів та завантаження пісень…</string>
 </resources>
