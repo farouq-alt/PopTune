@@ -246,4 +246,11 @@
         <item quantity="other">%d Sekunden</item>
     </plurals>
     <string name="seek_increment">Sprungintervall</string>
+    <string name="grp_more_settings">Mehr Einstellungen</string>
+    <string name="audio_decoder_ffmpeg_only">Priorisiere FFmpeg-Decoder</string>
+    <string name="audio_decoder_preference">Audio Decoder</string>
+    <string name="audio_decoder_system_only">Nur System Decoder</string>
+    <string name="audio_decoder_system_with_ffmpeg">Priorisiere System Decoder</string>
+    <string name="max_queues_title">Maximale Anzahl an Warteschlangen</string>
+    <string name="oobe_cache_title">Song-Cache</string>
 </resources>
