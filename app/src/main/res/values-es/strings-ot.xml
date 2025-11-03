@@ -69,7 +69,7 @@
     <string name="import_innertune_tooltip">Se admite la restauración de copias de seguridad de InnerTune, aunque existe la posibilidad de anomalías debido a limitaciones técnicas</string>
     <string name="m3u_import_playlist">Importar una playlist (m3u)</string>
     <string name="m3u_import_playlist_failed">No se pudo importar la playlist</string>
-    <string name="auto_scanner_description">Busca automáticamente canciones al abrir la aplicación. Esto no vuelve a cargar los metadatos de las canciones existentes.</string>
+    <string name="auto_scanner_description">Actualiza periódicamente las canciones de los medios locales y las carpetas de descargas personalizadas al abrir la aplicación</string>
     <string name="scan_paths_title">Configurar rutas de escaneo…</string>
     <string name="scan_paths_tooltip">Todos los subdirectorios también se verán afectados</string>
     <string name="scan_paths_add_folder">Añadir carpeta nueva</string>
@@ -260,4 +260,11 @@
     <string name="oobe_welcome_tip">Para disfrutar de la mejor experiencia, te recomendamos completar una configuración rápida para personalizar ajustes clave como el tema, la cuenta de YouTube, los medios locales y las descargas.</string>
     <string name="oobe_cache_title">Caché de canciones</string>
     <string name="oobe_cache_subtitle">Elige un tamaño para el caché de canciones. Esto puede ayudar a reducir los problemas de reproducción de Internet o de la API de YouTube</string>
+    <string name="grp_more_settings">Más ajustes</string>
+    <string name="auto_scanner_tooltip">En el caso de los medios locales, el escaneo automático no vuelve a cargar los metadatos de las canciones existentes. Utilice el escáner manual con la casilla de verificación «Volver a escanear» seleccionada si también desea actualizar los metadatos.</string>
+    <string name="scanner_auto_end">¡Actualización completa de medios locales y descargas de canciones!</string>
+    <string name="scanner_auto_start">Actualizando los medios locales y las carpetas de descarga de canciones…</string>
+    <string name="scanner_strict_file_paths_title">Coincidir rutas de archivo en lugar de metadatos</string>
+    <string name="scanner_strict_file_paths_description">Desactiva toda la coincidencia inteligente de metadatos. Esto puede causar problemas si se mueven archivos en tu almacenamiento local, pero permite que la misma canción se encuentre en diferentes carpetas</string>
+    <string name="scanner_type_tooltip">El escáner del sistema es más rápido, pero puede extraer algunos metadatos de forma incorrecta en comparación con otros extractores. Ten en cuenta que al cambiar de escáner no se volverán a cargar automáticamente los metadatos de las canciones existentes.</string>
 </resources>
