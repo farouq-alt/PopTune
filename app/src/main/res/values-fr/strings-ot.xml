@@ -36,7 +36,7 @@
     <string name="wifi_only">Wi-Fi uniquement</string>
     <string name="grp_audio">Audio</string>
     <string name="grp_proxy">Proxy</string>
-    <string name="auto_scanner_description">Rechercher automatiquement les titres lors de l\'ouverture de l\'application. Cela ne recharge pas les métadonnées des titres existants.</string>
+    <string name="auto_scanner_description">Actualiser périodiquement les titres locaux et les dossiers de téléchargement personnalisés lors de l\'ouverture de l\'application.</string>
     <string name="scan_paths_title">Configurer les emplacements d’analyse…</string>
     <string name="scan_paths_tooltip">Tous les sous-répertoires seront également affectés</string>
     <string name="scan_paths_add_folder">Ajouter un nouveau dossier</string>
@@ -260,4 +260,11 @@
     <string name="oobe_cache_title">Cache de chansons</string>
     <string name="oobe_cache_subtitle">Choisissez la taille du cache des chansons. Cela peut contribuer à réduire les problèmes de lecture sur Internet ou via l\'API YouTube.</string>
     <string name="action_logout_tooltip">Pour vous déconnecter complètement, veuillez vous déconnecter de votre compte YouTube dans le portail Web avant d\'utiliser ce bouton de déconnexion.</string>
+    <string name="grp_more_settings">Plus de paramètres</string>
+    <string name="auto_scanner_tooltip">Pour les médias locaux, cette opération ne recharge pas les métadonnées des titres existants. Utilisez l\'analyse manuelle en cochant la case « Réanalyser » si vous souhaitez également actualiser les métadonnées.</string>
+    <string name="scanner_auto_end">L\'actualisation des médias locaux et des téléchargements de titres est terminée !</string>
+    <string name="scanner_auto_start">Actualisation des dossiers de téléchargement de médias locaux et de titres…</string>
+    <string name="scanner_strict_file_paths_title">Faire correspondre les chemins de fichiers au lieu des métadonnées</string>
+    <string name="scanner_strict_file_paths_description">Désactive toute correspondance intelligente des métadonnées. Cela peut poser problème si des fichiers sont déplacés de votre stockage local, mais autorise le même titre dans différents dossiers</string>
+    <string name="scanner_type_tooltip">L\'analyseur système est plus rapide, mais il peut extraire certaines métadonnées de manière incorrecte par rapport à d\'autres extracteurs. Veuillez noter que le changement d\'analyseur ne recharge pas automatiquement les métadonnées des titres existants.</string>
 </resources>
