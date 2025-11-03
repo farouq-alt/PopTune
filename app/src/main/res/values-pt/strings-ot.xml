@@ -107,7 +107,7 @@
     <string name="ytm_sync">Sincronizar com a sua conta do YouTube Music automaticamente</string>
     <string name="wifi_only">Somente no Wi-Fi</string>
     <string name="audio_offload">Ativar descarga</string>
-    <string name="audio_offload_description">Utilize o caminho de áudio de descarregamento para a reprodução de áudio. A ativação desta opção pode reduzir o consumo de energia, mas pode causar problemas com a reprodução ou o pós-processamento de áudio. Esta preferência não tem qualquer efeito para codecs ou dispositivos não suportados.</string>
+    <string name="audio_offload_description">Utilize o caminho de áudio de descarregamento para a reprodução de áudio. A ativação desta opção pode reduzir o consumo de energia, mas pode causar problemas com a reprodução ou o pós-processamento de áudio. Esta preferência não tem qualquer efeito para codecs ou dispositivos não suportados</string>
     <string name="keep_alive_title">Evitar encerramento pelo sistema</string>
     <string name="keep_alive_description">Usar um serviço de primeiro plano persistente para evitar que o OuterTune seja encerrado em segundo plano</string>
     <string name="persistent_queue_desc_ot">Restaurar fila(s) aberta(s) previamente ao iniciar a app</string>
@@ -133,7 +133,7 @@
     <string name="flat_subfolders_description">Desative isto para preservar como a estrutura de ficheiros é no armazenamento</string>
     <string name="disable_lm_confirm">Tem a certeza que quer desativar todos os recursos de média local? A sua biblioteca não será alterada.</string>
     <string name="auto_scanner_title">Analisar automaticamente</string>
-    <string name="auto_scanner_description">Analisar músicas automaticamente ao abrir a app. Isto não recarrega os metadados de músicas existentes.</string>
+    <string name="auto_scanner_description">Atualize periodicamente as músicas da mídia local e as pastas de downloads personalizadas ao abrir a aplicação</string>
     <string name="scan_paths_title">Configurar locais de análise…</string>
     <string name="scan_paths_description">Selecione pastas no seu armazenamento local para analisar músicas</string>
     <string name="scan_paths_tooltip">Todas as subpastas também serão afetadas</string>
@@ -175,7 +175,7 @@
     <string name="scanner_sensitivity_L3">Combinar título, artistas e álbuns</string>
     <string name="scanner_type_title">Extrator de metadados</string>
     <string name="scanner_type_taglib">Usar o extrator de metadados TagLib integrado</string>
-    <string name="scanner_type_ffmpeg_ext">Utilize o extrator de metadados FFmpeg. Utilize apenas a versão completa da aplicação. A versão principal pode causar problemas com o rastreio de música.</string>
+    <string name="scanner_type_ffmpeg_ext">Utilize o extrator de metadados FFmpeg. Utilize apenas a versão completa da aplicação. A versão principal pode causar problemas com o rastreio de música</string>
     <string name="scanner_variant_rescan">Analisar a biblioteca inteira novamente e recarregar os metadados de todas as músicas</string>
     <string name="scanner_online_artist_linking">Tentar sincronizar os artistas dos ficheiros locais com os no YouTube Music</string>
     <string name="clear_downloads_confirm">Tem certeza que quer remover todas as descargas? Somente descargas na pasta principal de descargas serão removidos.</string>
@@ -260,4 +260,11 @@
     <string name="oobe_welcome_tip">Para uma melhor experiência, recomendamos concluir uma configuração rápida para personalizar as principais definições, como tema, conta do YouTube, mídia local e transferências.</string>
     <string name="oobe_cache_title">Cache de músicas</string>
     <string name="oobe_cache_subtitle">Escolha um tamanho para o cache de músicas. Isso pode ajudar a reduzir problemas de reprodução da Internet ou da API do YouTube</string>
+    <string name="grp_more_settings">Mais definições</string>
+    <string name="auto_scanner_tooltip">Para mídias locais, a análise automática não recarrega os metadados das músicas existentes. Use o scanner manual com a opção re-verificar marcada se também desejar atualizar os metadados.</string>
+    <string name="scanner_auto_end">Atualização completa dos downloads de mídia local e músicas!</string>
+    <string name="scanner_auto_start">Atualizando mídia local e pastas de transferências…</string>
+    <string name="scanner_strict_file_paths_title">Corresponder aos caminhos dos arquivos em vez dos metadados</string>
+    <string name="scanner_strict_file_paths_description">Desativa toda a correspondência inteligente de metadados. Isso pode causar problemas se os arquivos forem movidos no seu armazenamento local, mas permite que a mesma música esteja em pastas diferentes</string>
+    <string name="scanner_type_tooltip">O scanner do sistema é mais rápido, mas pode extrair metadados incorretamente em comparação com outros extratores. Observe que a troca de scanners não recarrega automaticamente os metadados das músicas existentes.</string>
 </resources>
