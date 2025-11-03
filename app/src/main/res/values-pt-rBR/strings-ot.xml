@@ -13,10 +13,10 @@
     <string name="lyrics_prefer_local_description">Priorizar arquivos de letra locais antes de usar os fornecidos pela nuvem. Desative isso para priorizar os fornecidos pela nuvem</string>
     <string name="local_library_enable_description">Desativar isto ocultará a biblioteca local do app</string>
     <string name="flat_subfolders_description">Desative isto para preservar como a estrutura de arquivos é no armazenamento</string>
-    <string name="auto_scanner_description">Buscar músicas automaticamente ao abrir o app. Isso não recarrega os metadados de músicas existentes.</string>
+    <string name="auto_scanner_description">Recarregar periodicamente as músicas na mídia local e pastas de download personalizadas ao abrir o app</string>
     <string name="scanner_variant_rescan">Buscar a biblioteca inteira novamente e recarregar os metadados de todas as músicas</string>
     <string name="import_failed_songs">Não foi possível importar</string>
-    <string name="scanner_sensitivity_L3">Combinar título, artistas, e álbuns</string>
+    <string name="scanner_sensitivity_L3">Corresponder título, artistas, e álbuns</string>
     <string name="scanner_type_taglib">Usar o extrator de metadados TagLib integrado</string>
     <string name="oobe_welcome_message">Boas vindas ao OuterTune</string>
     <string name="folders">Pastas</string>
@@ -76,8 +76,8 @@
     <string name="grp_extra_scanner_settings">Configurações de busca adicionais</string>
     <string name="scanner_strict_file_name_title">Nomes de arquivo estritos</string>
     <string name="scanner_sensitivity_title">Configurar sensibilidade da busca</string>
-    <string name="scanner_sensitivity_L1">Combinar título</string>
-    <string name="scanner_sensitivity_L2">Combinar título e artistas</string>
+    <string name="scanner_sensitivity_L1">Corresponder ao título</string>
+    <string name="scanner_sensitivity_L2">Corresponder título e artistas</string>
     <string name="scanner_type_title">Extrator de metadados</string>
     <string name="scanner_type_ffmpeg_ext">Usar o extrator de metadados do FFmpeg. Por favor use a versão full do app. A versão core pode levar a problemas com o rastreamento de músicas</string>
     <string name="scanner_online_artist_linking">Tentar sincronizar os artistas dos arquivos locais com os no YouTube Music</string>
@@ -218,7 +218,7 @@
     <string name="dl_storage_tooltip">Os downloads internos são salvos no armazenamento privado do app, e não são acessíveis sem root.\n\nOs downloads externos são salvos no armazenamento externo do seu dispositivo (ex: /sdcard ou em cartões micro SD) e podem serem acessados e editados diretamente com um explorador de arquivos. Para a pasta de downloads externos, recomendamos selecionar uma pasta vazia especificamente para baixar músicas, já que o OuterTune pode modificar ou apagar arquivos nesta pasta.\n\nPastas de importações extra são somente de leitura, e são usadas para carregar músicas adicionais. O OuterTune nunca alterará ou apagará arquivos nestas pastas. Pode selecionar uma dessas pastas na seção avançada.\n\nAo apagar downloads, somente as músicas internas serão apagadas. Os downloads externos e as importações extra devem serem apagados manualmente, ou pelo menu da música ou manualmente usando um explorador de arquivos.\n\nPastas de busca de downloads: Downloads de músicas externos e importações extra NÃO são atualizados automaticamente. Se você adicionar, remover, ou alterar arquivos manualmente usando um explorador de arquivos, você precisará buscar as pastas de downloads novamente para atualizar o banco de dados do app. Esta opção está disponível na seção avançada.</string>
     <string name="dl_calculate_size">Toque para calcular o tamanho dos downloads</string>
     <string name="dl_size_used_main">Externo: %s usados</string>
-    <string name="scanner_sensitivity_L0">Usar o primeiro resultado fornecido pelo YouTube quando a pesquisa no YouTube está ativada, caso contrário combinar título</string>
+    <string name="scanner_sensitivity_L0">Usar o primeiro resultado fornecido pelo YouTube quando a pesquisa no YouTube está ativada, caso contrário corresponder o título</string>
     <string name="app_info_title">Informações do aplicativo</string>
     <string name="device_info_title">Informações do dispositivo</string>
     <string name="help_bug_report_action">Enviar um relatório de erro (pelo GitHub)</string>
@@ -260,4 +260,11 @@
     <string name="oobe_cache_title">Cache de músicas</string>
     <string name="oobe_cache_subtitle">Selecione um tamanho para a cache de músicas. Isso pode ajudar a reduzir problemas com a internet ou reprodução com a API do YouTube</string>
     <string name="action_logout_tooltip">Para desconectar-se totalmente, desconecte-se da sua conta do YouTube pelo portal web antes de usar este botão</string>
+    <string name="grp_more_settings">Mais configurações</string>
+    <string name="auto_scanner_tooltip">Para a mídia local, a busca automática não recarrega os metadados das músicas existentes. Use a busca manual com a opção de buscar novamente selecionada se quer recarregar os metadados.</string>
+    <string name="scanner_auto_end">Recarregamento da mídia local e downloads de músicas concluído!</string>
+    <string name="scanner_auto_start">Recarregando mídia local e pastas de download de música…</string>
+    <string name="scanner_strict_file_paths_title">Corresponder caminhos de arquivo em vez de metadados</string>
+    <string name="scanner_strict_file_paths_description">Desativa toda a correspondência inteligente de metadados. Isso pode causar problemas se os arquivos forem movidos no seu armazenamento local, mas permite a mesma música em pastas diferentes</string>
+    <string name="scanner_type_tooltip">O busca do sistema é mais rápida, mas pode extrair alguns metadados incorretamente comparado a outros extratores. Observe que ao alterar buscadores, os metadados de músicas existentes não serão recarregados.</string>
 </resources>
