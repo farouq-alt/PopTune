@@ -218,7 +218,7 @@ fun SetupWizard(
             }
 
             LinearProgressIndicator(
-                progress = { oobeStatus.toFloat() / OOBE_VERSION },
+                progress = { oobeStatus.toFloat() / (OOBE_VERSION - 1) },
 //                color = ProgressIndicatorDefaults.linearColor,
 //                trackColor = MaterialTheme.colorScheme.primary,
                 strokeCap = StrokeCap.Butt,
@@ -259,7 +259,7 @@ fun SetupWizard(
 
     Scaffold(
         bottomBar = {
-            if (oobeStatus > 0 && oobeStatus < OOBE_VERSION) {
+            if (oobeStatus > 0 && oobeStatus < OOBE_VERSION - 1) {
                 Box(
                     Modifier
                         .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Bottom))
@@ -427,7 +427,7 @@ fun SetupWizard(
                         ElevatedCard(
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                          ThemeAppFrag()
+                            ThemeAppFrag()
                         }
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -831,7 +831,7 @@ fun SetupWizard(
                 }
             }
 
-            if (oobeStatus == 0 || oobeStatus == OOBE_VERSION) {
+            if (oobeStatus == 0 || oobeStatus == OOBE_VERSION - 1) {
                 FloatingActionButton(
                     modifier = Modifier
                         .padding(16.dp)

@@ -876,6 +876,7 @@ class MainActivity : ComponentActivity() {
                                     },
                                     modifier = Modifier
                                         .align(alignment)
+                                        .fillMaxHeight()
                                         .verticalScroll(rememberScrollState())
                                         .offset {
                                             if (navigationBarHeight == 0.dp) {
