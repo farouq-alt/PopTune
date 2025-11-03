@@ -55,7 +55,7 @@
     <string name="queues_title">Ουρές</string>
     <string name="queues_empty">Καμία ουρά</string>
     <string name="tab_arrangement">Αναδιάταξη καρτελών</string>
-    <string name="tab_arrangement_disable_tip">– Σύρε παρακάτω για απενεργοποίηση -</string>
+    <string name="tab_arrangement_disable_tip">--– Σύρε προς τα κάτω για απενεργοποίηση ---</string>
     <string name="tab_arrangement_home_required">Η καρτέλα Αρχική απαιτείται.</string>
     <string name="android_auto">Android Auto</string>
     <string name="library_empty">Τα περιεχόμενα της βιβλιοθήκης σας θα εμφανιστούν εδώ</string>
@@ -88,4 +88,9 @@
     <string name="all_contributors">Προβολή όλων των συντελεστών</string>
     <string name="att_contributor">Συντελεστής</string>
     <string name="att_lead_developer">Κύριος προγραμματιστής</string>
+    <string name="library_filter">Φίλτρο Βιβλιοθήκης</string>
+    <string name="grp_more_settings">Περισσότερες Ρυθμίσεις</string>
+    <string name="att_maintainer">Συντηρητής</string>
+    <string name="att_translator">Μεταφραστής (%s)</string>
+    <string name="action_logout_tooltip">Για πλήρη έξοδο, παρακαλώ εξέλθετε απο τον λογαριασμό σας στο YouTube στη διαδικτυακή πύλη του YouTube πρωτού εξέλθετε απο εδώ</string>
 </resources>
