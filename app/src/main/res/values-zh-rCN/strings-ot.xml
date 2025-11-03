@@ -45,7 +45,7 @@
     <string name="special_thanks">特别鸣谢</string>
     <string name="new_interface">新的界面布局</string>
     <string name="player_background_blur">模糊</string>
-    <string name="player_background_default">关注主题</string>
+    <string name="player_background_default">跟随主题</string>
     <string name="player_background_gradient">渐变</string>
     <string name="show_liked_and_downloaded_playlist">在媒体库中显示喜欢和已下载歌曲的播放列表</string>
     <string name="slim_navbar_title">细长导航栏</string>
@@ -60,7 +60,7 @@
     <string name="audio_offload">启用卸载</string>
     <string name="audio_offload_description">使用卸载的音频路径进行音频播放。禁用此选项可能会增加功耗，但在遇到音频播放或后处理问题时可能很有用</string>
     <string name="keep_alive_title">防止系统终止应用程序</string>
-    <string name="keep_alive_description">使用持久性前台服务来防止 OuterTune 在后台关闭。</string>
+    <string name="keep_alive_description">使用常驻前台服务来防止 OuterTune 在后台关闭。</string>
     <string name="persistent_queue_desc_ot">应用程序启动时恢复以前打开的队列</string>
     <string name="min_playback_duration">最短播放时间</string>
     <string name="min_playback_duration_description">一首歌曲在被标记为“播放过”之前，必须播放完</string>
@@ -124,7 +124,7 @@
     <string name="scanner_missing_storage_perm">扫描需要存储权限</string>
     <string name="local_library_enable_title">启用本地媒体</string>
     <string name="experimental_settings_title">实验功能</string>
-    <string name="auto_scanner_description">打开应用程序时自动扫描歌曲。这不会重新加载现有歌曲的元数据。</string>
+    <string name="auto_scanner_description">在打开应用时，定期更新本地歌曲和自定义下载的文件夹</string>
     <string name="scanner_warning">默认情况下，扫描不会重新加载现有歌曲的任何元数据，除非你在上面另行指定。根据你的音乐库大小，可能需要一些时间。</string>
     <string name="scanner_strict_file_name_title">严格的文件名</string>
     <string name="scanner_strict_file_name_description">启用时，文件名将不会被忽略。例如，Song.ogg 将与 Song.flac 被视为不同的歌曲。扫描的灵敏度偏好仍然适用</string>
@@ -147,7 +147,7 @@
     <string name="library_empty">你的音乐库将在此显示</string>
     <string name="lyrics_karaoke_hz_title">调整卡拉ok歌词更新速度</string>
     <string name="lyrics_karaoke_description">开启歌词同步。需要支持的歌词格式。</string>
-    <string name="lyrics_karaoke_title">卡拉ok风格歌词</string>
+    <string name="lyrics_karaoke_title">卡拉ok风格歌词。</string>
     <string name="m3u_export">导出为M3U文件</string>
     <string name="m3u_import_failed">没有找到歌曲。无效的M3U文件，或没有找到匹配的歌曲</string>
     <string name="m3u_ytm_lookup">在YouTube音乐中搜索不在APP数据库中的歌曲</string>
@@ -241,4 +241,24 @@
     <string name="audio_decoder_system_only">仅使用系统解码器</string>
     <string name="audio_decoder_system_with_ffmpeg">优先使用系统解码器</string>
     <string name="library_filter">过滤器</string>
+    <string name="sort_by_track_number">歌曲顺序</string>
+    <string name="bits_per_sample">采样深度</string>
+    <string name="disc_number">碟号</string>
+    <string name="track_number">曲目编号</string>
+    <string name="grp_more_settings">更多设置</string>
+    <string name="action_logout_tooltip">要完全退出登录，请先在网页上退出您的 YouTube 帐户，然后再点击此退出按钮。</string>
+    <string name="seek_increment">快进/快退间隔</string>
+    <string name="auto_scanner_tooltip">对于本地媒体，自动扫描不会重新载入已有歌曲的元数据。如需刷新元数据，请勾选“重新扫描”选项后使用手动扫描功能。</string>
+    <string name="scanner_auto_end">本地媒体和歌曲下载刷新完成！</string>
+    <string name="scanner_auto_start">正在刷新本地媒体和歌曲下载文件夹…</string>
+    <string name="scanner_strict_file_paths_title">依据文件路径进行匹配，而非元数据</string>
+    <string name="scanner_strict_file_paths_description">禁用所有元数据的智能匹配功能。这可能导致本地文件被移动时出现问题，但允许您在不同文件夹中保存同一首歌曲的副本。</string>
+    <string name="scanner_type_tooltip">系统扫描器的速度更快，但与其它提取器相比，在提取某些元数据时可能不够准确。请注意，切换扫描器并不会自动重新加载现有歌曲的元数据。</string>
+    <string name="dl_rescan_description">若文件或文件夹发生变动，更新数据库并刷新下载记录</string>
+    <string name="dl_rescan_confirm">是否立即重新扫描所有下载文件夹？这可能需要几分钟，具体取决于您的媒体库大小。</string>
+    <string name="dl_storage_tooltip">内部下载保存在应用的私有存储空间，没有 root 权限将无法访问。外部下载保存在您设备的外部存储空间（例如，/sdcard 或 micro SD 卡），可以使用文件管理器直接访问或编辑。对于“外部下载”文件夹，我们建议您选择一个专门用于歌曲下载的空文件夹，因为 OuterTune 可能会修改或删除该文件夹中的文件。\n\n额外导入文件夹是只读的，用于加载额外的歌曲。OuterTune 绝不会更改或删除这些文件夹中的文件。您可以在高级设置部分选择这些文件夹。\n\n当您清除下载时，只有内部歌曲会被删除。外部下载和额外导入的歌曲必须手动移除，可以通过歌曲菜单操作，也可以通过文件管理器手动删除。\n\n重新扫描下载文件夹： “外部下载”和“额外导入”文件夹中的歌曲不会自动更新。如果您使用文件管理器手动添加、移除或更改了文件，您可能需要重新扫描下载文件夹来更新应用的数据库。此选项可在高级设置部分找到。</string>
+    <string name="max_queues_title">最大播放队列数</string>
+    <string name="oobe_welcome_tip">为了获得最佳体验，我们建议您立即完成快速设置，以便对主题、YouTube 帐户、本地媒体和下载等关键功能进行个性化配置。</string>
+    <string name="oobe_cache_title">歌曲缓存</string>
+    <string name="oobe_cache_subtitle">设置歌曲缓存容量。此操作有助于解决网络或 YouTube API 播放时出现的问题</string>
 </resources>
