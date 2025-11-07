@@ -529,7 +529,7 @@ class LocalMediaScanner(val context: Context, scannerImpl: ScannerImpl) {
         // we handle disabling songs here instead
         scannerState.value = 3
         finalize(database)
-        disableSongsByPath(finalSongs.mapNotNull { it.song.song.localPath }, database)
+        disableSongsByPath(converted, database)
 
         scannerState.value = 0
         Log.i(TAG, "------------ SYNC: Finished Quick (additive delta) Library Sync ------------")
@@ -886,7 +886,7 @@ class LocalMediaScanner(val context: Context, scannerImpl: ScannerImpl) {
         // we handle disabling songs here instead
         scannerState.value = 3
         finalize(database)
-        disableSongsByPath(finalSongs.mapNotNull { it.song.song.localPath }, database)
+        disableSongsByPath(mediaStoreSongs.mapNotNull { it.song.song.localPath }, database)
         scannerState.value = 0
 
 
