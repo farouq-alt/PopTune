@@ -36,13 +36,35 @@ val DefaultThemeColor = Color(0xFFED5564)
 fun OuterTuneTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     pureBlack: Boolean = false,
+    highContrastCompat: Boolean,
     themeColor: Color = DefaultThemeColor,
     content: @Composable () -> Unit,
 ) {
     val colorScheme = remember(darkTheme, pureBlack, themeColor) {
-        SchemeTonalSpot(Hct.fromInt(themeColor.toArgb()), darkTheme, 0.0)
-            .toColorScheme()
-            .pureBlack(darkTheme && pureBlack)
+       if (themeColor == DefaultThemeColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val systemTheme = if (darkTheme) {
+                dynamicDarkColorScheme(context).pureBlack(pureBlack)
+            } else {
+                dynamicLightColorScheme(context)
+            }
+
+
+            // when high contrast mode Android collapses all accent colours into (more or less) one shade. We use
+            // secondaryContainer and onSecondaryContainer weirdly in several places in terms of theming so just replace
+            // those with shades that make sense
+            if (highContrastCompat) {
+                systemTheme.copy(
+                    secondaryContainer = systemTheme.surfaceContainerHigh,
+                    onSecondaryContainer = systemTheme.secondary,
+                )
+            } else {
+                systemTheme
+            }
+        } else {
+            SchemeTonalSpot(Hct.fromInt(themeColor.toArgb()), darkTheme, 0.0)
+                .toColorScheme()
+                .pureBlack(darkTheme && pureBlack)
+        }
     }
 
     MaterialTheme(
