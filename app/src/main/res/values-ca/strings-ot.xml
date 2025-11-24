@@ -43,4 +43,12 @@
     <string name="oobe_complete_title">Tot a punt!</string>
     <string name="oobe_downloads_subtitle">Escull la carpeta en la que es guardaran les cançons descareegades.</string>
     <string name="oobe_downloads_title">Cançons descarregades</string>
+    <string name="library_filter">Filtre de biblioteca</string>
+    <string name="bits_per_sample">Bits per mostra</string>
+    <string name="create_sync_playlist">Sincronitza la llista de reproducció</string>
+    <string name="create_sync_playlist_description">Nota: Això permet la sincronització amb YouTube Music. Això NO es pot canviar més tard. No pots afegir cançons locals a les llistes de reproducció sincronitzades.</string>
+    <string name="disc_number">Número de disc</string>
+    <string name="extra_details">Detalls addicionals</string>
+    <string name="file_path">Ruta del fitxer</string>
+    <string name="track_number">Número de pista</string>
 </resources>
