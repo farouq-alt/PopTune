@@ -52,7 +52,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.dd3boh.outertune.LocalSnackbarHostState
 import com.dd3boh.outertune.R
-import com.dd3boh.outertune.constants.ENABLE_UPDATE_CHECKER
 import com.dd3boh.outertune.constants.LastVersionKey
 import com.dd3boh.outertune.constants.TopBarInsets
 import com.dd3boh.outertune.constants.UpdateAvailableKey
@@ -172,55 +171,6 @@ fun SettingsScreen(
                 icon = { Icon(Icons.Rounded.Info, null) },
                 onClick = { navController.navigate("settings/about") }
             )
-
-            if (ENABLE_UPDATE_CHECKER)
-                PreferenceEntry(
-                    title = {
-                        Text(
-                            text = stringResource(if (updateAvailable) R.string.new_version_available else R.string.check_for_update),
-                        )
-                    },
-                    description = if (updateAvailable) lastVer else stringResource(R.string.no_updates_available),
-                    icon = {
-                        BadgedBox(
-                            badge = { if (updateAvailable) Badge() }
-                        ) {
-                            Icon(Icons.Rounded.Update, null)
-                        }
-                    },
-                    onClick = {
-                        if (updateAvailable) {
-                            uriHandler.openUri("https://github.com/OuterTune/OuterTune/releases/latest")
-                        } else {
-                            CoroutineScope(Dispatchers.IO).launch {
-                                Updater.tryCheckUpdate(context, true)?.let {
-                                    snackbarHostState.showSnackbar(
-                                        message = context.getString(R.string.check_for_update),
-                                        withDismissAction = true,
-                                        duration = SnackbarDuration.Short
-                                    )
-                                    if (compareVersion(lastVer, it) < 0) {
-                                        onUpdateAvailableChange(true)
-                                        Log.d(SETTINGS_TAG, "Update available. UpdateAvailable set to true")
-                                        newVersion = it
-                                        snackbarHostState.showSnackbar(
-                                            message = context.getString(R.string.new_version_available),
-                                            withDismissAction = true,
-                                            duration = SnackbarDuration.Short
-                                        )
-                                    } else {
-                                        Log.d(SETTINGS_TAG, "No new updates available")
-                                        snackbarHostState.showSnackbar(
-                                            message = context.getString(R.string.no_updates_available),
-                                            withDismissAction = true,
-                                            duration = SnackbarDuration.Short
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                )
         }
     }
 
