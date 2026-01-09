@@ -106,4 +106,7 @@ lint/tmp/
 .DS_Store
 
 /ffMetadataEx
+<<<<<<< HEAD
 node_modules
+=======
+>>>>>>> 2a2bc9d6f6b7faec433762253f651b6779a3224e
