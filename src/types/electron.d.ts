@@ -93,7 +93,6 @@ export interface ElectronAPI {
     getYTMusicPlaylistSongs: (playlistId: string) => Promise<Song[]>
     getLikedSongs: () => Promise<Song[]>
   }
-  }
   local: {
     scanFolder: () => Promise<Song[]>
     getMetadata: (filePath: string) => Promise<Song>

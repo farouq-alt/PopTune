@@ -63,6 +63,10 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     }
 
     try {
+      // Stop current playback and reset state before loading new song
+      audio.pause()
+      audio.currentTime = 0
+      
       let url: string
 
       if (song.isLocal && song.localPath) {
@@ -83,6 +87,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         console.error('Audio error:', audio.error?.message, audio.error?.code)
       }
       
+      // Force play the new song regardless of previous pause state
       await audio.play()
 
       // Save song to database first (so liked/recent can work)
