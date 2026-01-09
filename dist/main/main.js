@@ -20,7 +20,7 @@ let proxyServer = null;
 const streamUrls = new Map();
 // Store active ffmpeg processes for cleanup
 const activeStreams = new Map();
-const isDev = process.env.NODE_ENV !== 'production' || !electron_1.app.isPackaged;
+const isDev = !electron_1.app.isPackaged;
 const PROXY_PORT = 45678;
 function startProxyServer() {
     proxyServer = http_1.default.createServer((req, res) => {
@@ -239,15 +239,31 @@ function registerIpcHandlers() {
     });
     electron_1.ipcMain.handle('db:addSong', async (_, song) => {
         const db = (0, database_1.getDatabase)();
+        // Use INSERT OR IGNORE to not overwrite existing song data (liked status, play count, etc.)
         const stmt = db.prepare(`
-      INSERT OR REPLACE INTO songs (id, title, artist, album, duration, thumbnailUrl, isLocal, localPath)
+      INSERT OR IGNORE INTO songs (id, title, artist, album, duration, thumbnailUrl, isLocal, localPath)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `);
-        return stmt.run(song.id, song.title, song.artist, song.album, song.duration, song.thumbnailUrl, song.isLocal ? 1 : 0, song.localPath);
+        const result = stmt.run(song.id, song.title, song.artist, song.album, song.duration, song.thumbnailUrl, song.isLocal ? 1 : 0, song.localPath || '');
+        // If song already exists, update only the basic info (not liked/playCount/etc)
+        if (result.changes === 0) {
+            db.prepare(`
+        UPDATE songs SET title = ?, artist = ?, album = ?, duration = ?, thumbnailUrl = ?
+        WHERE id = ? AND isLocal = 0
+      `).run(song.title, song.artist, song.album, song.duration, song.thumbnailUrl, song.id);
+        }
+        return result;
     });
     electron_1.ipcMain.handle('db:getPlaylists', async () => {
         const db = (0, database_1.getDatabase)();
-        return db.prepare('SELECT * FROM playlists ORDER BY name').all();
+        // Include song count for each playlist
+        return db.prepare(`
+      SELECT p.*, COUNT(ps.songId) as songCount 
+      FROM playlists p
+      LEFT JOIN playlist_songs ps ON p.id = ps.playlistId
+      GROUP BY p.id
+      ORDER BY p.name
+    `).all();
     });
     electron_1.ipcMain.handle('db:createPlaylist', async (_, name) => {
         const db = (0, database_1.getDatabase)();
@@ -257,6 +273,10 @@ function registerIpcHandlers() {
     });
     electron_1.ipcMain.handle('db:addToPlaylist', async (_, playlistId, songId) => {
         const db = (0, database_1.getDatabase)();
+        // Check if song already in playlist
+        const existing = db.prepare('SELECT 1 FROM playlist_songs WHERE playlistId = ? AND songId = ?').get(playlistId, songId);
+        if (existing)
+            return; // Already in playlist
         const position = db.prepare('SELECT COUNT(*) as count FROM playlist_songs WHERE playlistId = ?').get(playlistId);
         db.prepare('INSERT INTO playlist_songs (playlistId, songId, position) VALUES (?, ?, ?)').run(playlistId, songId, position.count);
     });
