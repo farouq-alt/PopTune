@@ -11,10 +11,12 @@ const database_1 = require("./database");
 const youtube_1 = require("./services/youtube");
 const localMusic_1 = require("./services/localMusic");
 const lyrics_1 = require("./services/lyrics");
+const auth_1 = require("./services/auth");
 let mainWindow = null;
 let youtubeService;
 let localMusicService;
 let lyricsService;
+let authService;
 let proxyServer = null;
 // Store for stream data
 const streamUrls = new Map();
@@ -144,7 +146,9 @@ function createWindow() {
 electron_1.app.whenReady().then(async () => {
     startProxyServer();
     await (0, database_1.initDatabase)();
+    authService = new auth_1.AuthService();
     youtubeService = new youtube_1.YouTubeService();
+    youtubeService.setAuthService(authService);
     localMusicService = new localMusic_1.LocalMusicService();
     lyricsService = new lyrics_1.LyricsService();
     await youtubeService.init();
@@ -320,5 +324,53 @@ function registerIpcHandlers() {
         const db = (0, database_1.getDatabase)();
         db.prepare('DELETE FROM playlist_songs WHERE songId = ?').run(songId);
         db.prepare('DELETE FROM songs WHERE id = ?').run(songId);
+    });
+    // Auth handlers
+    electron_1.ipcMain.handle('auth:isLoggedIn', () => {
+        return authService.isLoggedIn();
+    });
+    electron_1.ipcMain.handle('auth:getAccountInfo', () => {
+        const authData = authService.getAuthData();
+        if (!authData)
+            return null;
+        return {
+            name: authData.accountName,
+            email: authData.accountEmail,
+            channelHandle: authData.accountChannelHandle,
+        };
+    });
+    electron_1.ipcMain.handle('auth:login', async () => {
+        if (!mainWindow)
+            return null;
+        const authData = await authService.openLoginWindow(mainWindow);
+        if (authData) {
+            // Fetch and update account info
+            const accountInfo = await youtubeService.getAccountInfo();
+            if (accountInfo) {
+                await authService.updateAccountInfo(accountInfo.name, accountInfo.email, accountInfo.channelHandle);
+                return accountInfo;
+            }
+        }
+        return null;
+    });
+    electron_1.ipcMain.handle('auth:logout', () => {
+        authService.logout();
+        return true;
+    });
+    // YouTube Music Library (authenticated)
+    electron_1.ipcMain.handle('youtube:getLibraryPlaylists', async () => {
+        if (!authService.isLoggedIn())
+            return [];
+        return youtubeService.getLibraryPlaylists();
+    });
+    electron_1.ipcMain.handle('youtube:getYTMusicPlaylistSongs', async (_, playlistId) => {
+        if (!authService.isLoggedIn())
+            return [];
+        return youtubeService.getPlaylistSongs(playlistId);
+    });
+    electron_1.ipcMain.handle('youtube:getLikedSongs', async () => {
+        if (!authService.isLoggedIn())
+            return [];
+        return youtubeService.getLikedSongs();
     });
 }

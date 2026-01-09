@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
 import Home from './pages/Home'
@@ -5,11 +6,20 @@ import Search from './pages/Search'
 import Library from './pages/Library'
 import Playlists from './pages/Playlists'
 import PlaylistDetail from './pages/PlaylistDetail'
+import YTPlaylistDetail from './pages/YTPlaylistDetail'
 import Album from './pages/Album'
 import Artist from './pages/Artist'
 import Settings from './pages/Settings'
+import { useAppStore } from './store/appStore'
 
 export default function App() {
+  const { checkAuthStatus } = useAppStore()
+
+  useEffect(() => {
+    // Check auth status on app startup
+    checkAuthStatus()
+  }, [checkAuthStatus])
+
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
@@ -18,6 +28,7 @@ export default function App() {
         <Route path="library" element={<Library />} />
         <Route path="playlists" element={<Playlists />} />
         <Route path="playlist/:id" element={<PlaylistDetail />} />
+        <Route path="ytplaylist/:id" element={<YTPlaylistDetail />} />
         <Route path="album/:id" element={<Album />} />
         <Route path="artist/:id" element={<Artist />} />
         <Route path="settings" element={<Settings />} />

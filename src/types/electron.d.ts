@@ -41,10 +41,17 @@ export interface Playlist {
   title?: string
   thumbnailUrl?: string
   author?: string
-  songCount?: number
+  songCount?: number | string
   songs?: Song[]
   createdAt?: number
   isLocal?: boolean
+  isYouTubeMusic?: boolean
+}
+
+export interface AccountInfo {
+  name: string
+  email: string
+  channelHandle: string
 }
 
 export interface SearchResults {
@@ -69,6 +76,12 @@ export interface ElectronAPI {
   minimize: () => void
   maximize: () => void
   close: () => void
+  auth: {
+    isLoggedIn: () => Promise<boolean>
+    getAccountInfo: () => Promise<AccountInfo | null>
+    login: () => Promise<AccountInfo | null>
+    logout: () => Promise<boolean>
+  }
   youtube: {
     search: (query: string) => Promise<SearchResults>
     getHome: () => Promise<HomeSection[]>
@@ -76,6 +89,10 @@ export interface ElectronAPI {
     getAlbum: (albumId: string) => Promise<Album>
     getArtist: (artistId: string) => Promise<Artist>
     getPlaylist: (playlistId: string) => Promise<Playlist>
+    getLibraryPlaylists: () => Promise<Playlist[]>
+    getYTMusicPlaylistSongs: (playlistId: string) => Promise<Song[]>
+    getLikedSongs: () => Promise<Song[]>
+  }
   }
   local: {
     scanFolder: () => Promise<Song[]>

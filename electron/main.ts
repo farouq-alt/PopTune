@@ -6,11 +6,13 @@ import { initDatabase, getDatabase } from './database'
 import { YouTubeService } from './services/youtube'
 import { LocalMusicService } from './services/localMusic'
 import { LyricsService } from './services/lyrics'
+import { AuthService } from './services/auth'
 
 let mainWindow: BrowserWindow | null = null
 let youtubeService: YouTubeService
 let localMusicService: LocalMusicService
 let lyricsService: LyricsService
+let authService: AuthService
 let proxyServer: http.Server | null = null
 
 // Store for stream data
@@ -160,7 +162,9 @@ function createWindow() {
 app.whenReady().then(async () => {
   startProxyServer()
   await initDatabase()
+  authService = new AuthService()
   youtubeService = new YouTubeService()
+  youtubeService.setAuthService(authService)
   localMusicService = new LocalMusicService()
   lyricsService = new LyricsService()
   
@@ -367,5 +371,60 @@ function registerIpcHandlers() {
     const db = getDatabase()
     db.prepare('DELETE FROM playlist_songs WHERE songId = ?').run(songId)
     db.prepare('DELETE FROM songs WHERE id = ?').run(songId)
+  })
+
+  // Auth handlers
+  ipcMain.handle('auth:isLoggedIn', () => {
+    return authService.isLoggedIn()
+  })
+
+  ipcMain.handle('auth:getAccountInfo', () => {
+    const authData = authService.getAuthData()
+    if (!authData) return null
+    return {
+      name: authData.accountName,
+      email: authData.accountEmail,
+      channelHandle: authData.accountChannelHandle,
+    }
+  })
+
+  ipcMain.handle('auth:login', async () => {
+    if (!mainWindow) return null
+    
+    const authData = await authService.openLoginWindow(mainWindow)
+    if (authData) {
+      // Fetch and update account info
+      const accountInfo = await youtubeService.getAccountInfo()
+      if (accountInfo) {
+        await authService.updateAccountInfo(
+          accountInfo.name,
+          accountInfo.email,
+          accountInfo.channelHandle
+        )
+        return accountInfo
+      }
+    }
+    return null
+  })
+
+  ipcMain.handle('auth:logout', () => {
+    authService.logout()
+    return true
+  })
+
+  // YouTube Music Library (authenticated)
+  ipcMain.handle('youtube:getLibraryPlaylists', async () => {
+    if (!authService.isLoggedIn()) return []
+    return youtubeService.getLibraryPlaylists()
+  })
+
+  ipcMain.handle('youtube:getYTMusicPlaylistSongs', async (_, playlistId: string) => {
+    if (!authService.isLoggedIn()) return []
+    return youtubeService.getPlaylistSongs(playlistId)
+  })
+
+  ipcMain.handle('youtube:getLikedSongs', async () => {
+    if (!authService.isLoggedIn()) return []
+    return youtubeService.getLikedSongs()
   })
 }

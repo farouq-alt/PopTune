@@ -1,12 +1,80 @@
 import { useState } from 'react'
-import { FiFolder, FiTrash2, FiInfo } from 'react-icons/fi'
+import { FiFolder, FiTrash2, FiInfo, FiUser, FiLogIn, FiLogOut } from 'react-icons/fi'
+import { useAppStore } from '../store/appStore'
 
 export default function Settings() {
   const [audioQuality, setAudioQuality] = useState('high')
+  const [isLoggingIn, setIsLoggingIn] = useState(false)
+  const { isLoggedIn, accountInfo, login, logout } = useAppStore()
+
+  const handleLogin = async () => {
+    setIsLoggingIn(true)
+    try {
+      await login()
+    } finally {
+      setIsLoggingIn(false)
+    }
+  }
+
+  const handleLogout = async () => {
+    await logout()
+  }
 
   return (
     <div className="max-w-2xl space-y-8 animate-fadeIn">
       <h1 className="text-3xl font-bold">Settings</h1>
+
+      {/* Account Settings */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold">YouTube Music Account</h2>
+        
+        <div className="bg-surface-800 rounded-lg p-4 space-y-4">
+          {isLoggedIn && accountInfo ? (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center">
+                  <FiUser className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="font-medium">{accountInfo.name}</p>
+                  <p className="text-sm text-surface-400">{accountInfo.email || accountInfo.channelHandle}</p>
+                </div>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 bg-surface-700 hover:bg-surface-600 rounded-lg transition-colors text-red-400"
+              >
+                <FiLogOut className="w-4 h-4" />
+                <span>Logout</span>
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Sign in to YouTube Music</p>
+                <p className="text-sm text-surface-400">Access your playlists and liked songs</p>
+              </div>
+              <button
+                onClick={handleLogin}
+                disabled={isLoggingIn}
+                className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 rounded-lg transition-colors disabled:opacity-50"
+              >
+                <FiLogIn className="w-4 h-4" />
+                <span>{isLoggingIn ? 'Signing in...' : 'Sign In'}</span>
+              </button>
+            </div>
+          )}
+          
+          {isLoggedIn && (
+            <div className="border-t border-surface-700 pt-4">
+              <p className="text-sm text-surface-400">
+                Your YouTube Music playlists will appear in the Playlists section.
+                Synced from your Google account.
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Audio Settings */}
       <section className="space-y-4">
@@ -67,7 +135,7 @@ export default function Settings() {
               <FiInfo className="w-6 h-6" />
             </div>
             <div>
-              <p className="font-medium">Tuner</p>
+              <p className="font-medium">PopTune</p>
               <p className="text-sm text-surface-400">Version 1.0.0</p>
             </div>
           </div>

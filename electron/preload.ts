@@ -8,6 +8,14 @@ const api = {
   maximize: () => ipcRenderer.send('window:maximize'),
   close: () => ipcRenderer.send('window:close'),
 
+  // Auth
+  auth: {
+    isLoggedIn: () => ipcRenderer.invoke('auth:isLoggedIn'),
+    getAccountInfo: () => ipcRenderer.invoke('auth:getAccountInfo'),
+    login: () => ipcRenderer.invoke('auth:login'),
+    logout: () => ipcRenderer.invoke('auth:logout'),
+  },
+
   // YouTube Music
   youtube: {
     search: (query: string) => ipcRenderer.invoke('youtube:search', query),
@@ -16,6 +24,10 @@ const api = {
     getAlbum: (albumId: string) => ipcRenderer.invoke('youtube:getAlbum', albumId),
     getArtist: (artistId: string) => ipcRenderer.invoke('youtube:getArtist', artistId),
     getPlaylist: (playlistId: string) => ipcRenderer.invoke('youtube:getPlaylist', playlistId),
+    // Authenticated endpoints
+    getLibraryPlaylists: () => ipcRenderer.invoke('youtube:getLibraryPlaylists'),
+    getYTMusicPlaylistSongs: (playlistId: string) => ipcRenderer.invoke('youtube:getYTMusicPlaylistSongs', playlistId),
+    getLikedSongs: () => ipcRenderer.invoke('youtube:getLikedSongs'),
   },
 
   // Local music
