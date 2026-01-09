@@ -64,6 +64,8 @@ export default function SongList({
     })
     await window.electronAPI.db.addToPlaylist(targetPlaylistId, song.id)
     setOpenAddMenuId(null)
+    // Refresh library to update playlist song counts in sidebar and playlists page
+    await loadLibrary()
   }
 
   const handleCreatePlaylistAndAdd = async (song: Song) => {
